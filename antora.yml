@@ -1,5 +1,5 @@
-name: rhods-model
-title: Creating Machine Learning Models with Red Hat OpenShift Data Science
+name: rhods-pipelines
+title: Automation using Data Science Pipelines
 version: 1.33
 nav:
 - modules/ROOT/nav.adoc

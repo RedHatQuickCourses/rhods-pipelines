@@ -1,4 +1,4 @@
-= Creating Machine Learning Models with Red Hat OpenShift Data Science
+= Automation using Data Science Pipelines
 :navtitle: Home
 
 == Introduction
