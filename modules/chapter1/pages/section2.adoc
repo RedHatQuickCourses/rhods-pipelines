@@ -1,7 +1,5 @@
 = Section 1
 
-This is _Section 1_ of _Chapter 1_ in the *hello* quick course....
-
 == Introduction to Data Science Pipelines
 
 A data science pipeline is like a recipe for turning raw data into useful insights. Just like when you cook, you follow a set of steps to prepare a meal, in data science, you follow a series of steps to analyze data and extract valuable information. Here's a simple breakdown of what a data science pipeline involves:
@@ -37,7 +35,7 @@ ML Pipleines are a basically an execution graph of tasks, commonly known as a _D
 A DAG is a directed graph with no cycles aka no direct loops
 ====
 
-== Data Science Pipelines in RHODS
+== Data Science Pipelines in OpenShift AI
 
 OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines
 
@@ -64,10 +62,11 @@ As pipelines are executed multiple ephemeral pods will be created and terminated
 
 [NOTE]
 ====
-DS Pipeline in RHODS are managed by the 'data-science-pipelines-operator-controller-manager' operator in the redhat-ods-applications namespace. The CRD is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_
+DS Pipeline in OpenShift AI are managed by the 'data-science-pipelines-operator-controller-manager' operator in the redhat-ods-applications namespace. The CRD is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_
 ====
 
 .DataScience Pipeline pods
+****
 [source,cmd]
 ----
  ~/oc get pods
@@ -77,12 +76,12 @@ ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Runnin
 ds-pipeline-scheduledworkflow-pipelines-definition-7f5c645hcg4g   1/1     Running   0          9m48s
 mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Running   0          9m49s
 ----
-
+****
 
 == Creating a Data Science Pipeline with KFP
 
 === Prerequisites 
-
+****
 * Python Setup
 [source,cmd]
 ----
@@ -94,26 +93,27 @@ pip install kfp-tekton==1.7.2
 
 Follow these instructions to setup a local Minio instance
 https://ai-on-openshift.io/tools-and-applications/minio/minio/
-
+****
 
 === Creating a Pipeline Server
 
 To execute pipelines a _Pipeline server_ needs to be created but before that can happen an S3 Storage bucket needs to be created. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
-
+****
 image::creating-data-connection.png[]
-
+****
 Once the data connection is created then the pipeline server can be created
-
+****
 image::pre-creating-pipeline-server.png[]
-
+****
+****
 image::pipeline-server-created.png[]
-
+****
 === Building and deploying a Pipeline
 
 The following is a simplistic example of a KFP pipeline. The original is at 
 https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py and the example has downloaded it to a file named _coin-toss.py_
 
-
+****
 .Python Pipeline Example
 [source,python]
 ----
@@ -185,6 +185,7 @@ if __name__ == '__main__':
     from kfp_tekton.compiler import TektonCompiler
     TektonCompiler().compile(flipcoin_pipeline, __file__.replace('.py', '.yaml'))
 ----
+****
 
 To compile it into a Tekton resource definition just run the following in a terminal
 [source,python]
@@ -193,7 +194,7 @@ python3 coin-toss.py
 ----
 
 It will generate a Tekton *_Pipeline Run_* , similar to this snippet
-
+****
 [source,yaml]
 ----
 apiVersion: tekton.dev/v1beta1
@@ -220,33 +221,135 @@ metadata:
     sidecar.istio.io/inject: "false"
     tekton.dev/template: ''
 ----
+****
 
 The resulting yaml file _(coin-toss.yaml)_ can then be uploaded throught the UI
-
+****
 image::import-pipeline.png[]
-
+****
+****
 image::pipeline-imported.png[]
+****
+Once imported the structure of the _DAG_ will be shown. Each step in the pipeline will be run as a container on OpenShift.
 
-Once imported the structure of the _DAG_ will be shown
-
+****
 image::pipeline-run-view.png[]
+****
 
 To execute the pipeline, click on _Create Run_ in the menu and fill out the _Name_ and _Description_.
 If the pipeline has _Input Parameters_ or a you need to schedule a recurring run then that can be configured further down. Once ready clink _Create_ and the pipeline will be scheduled.
 
+****
 image::creating-pipeline-run.png[]
+****
 
 The pipeline will execute and the outputs will be stored into the configured S3 bucket.
 As the pipeline executes the view will be updated to show the steps being executed. It's possible to click on the graph nodes to reveal information of the steps
 
+****
 image::post-pipeline-run.png[]
+****
 
 Once the pipeline has completed it is possible to access the output and pipeline artifacts (if used) in the Minio Storage UI
 
+****
 image::object-store-after-run.png[]
+****
+
+== Advanced Example
+
+In this section we're going to demonstrate how Data Science Pipelines work in a real world scenario. 
+
+****
+In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it's deployed in. On a regular schedule it uploads battery events via a data gateway and those batter events are used to train a model which is then retrieved by the device and used. 
 
 
+image::openshift-ai-dsp-edge.png[]
+****
 
+The entire pipeline is here link:sample-pipeline-full.py[Pipeline]
 
+We're not going to go through all of it but focus on the key aspects of it. 
 
+The actual pipeline is defined by the following function
 
+****
+[source,python]
+include::sample-pipeline-full.py[lines=450..454]
+****
+
+The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.
+
+The function *_edgetest_pipeline_* is the implementation of the pipeline.
+
+=== Pipeline Parameters
+The pipeline has four parameters
+
+* _file_obj_ and _src_bucket_ refer to S3 bucket details and can be ignored.
+* _VIN_ is the edge device identifier and has a default value of 412356
+* _epoch_count_ is the number of training epochs to be used
+
+In the _Create Run_ UI these parameters are available so that users can override the values as they need
+
+****
+image::pipeline-parameters.png[]
+****
+
+=== Pipeline Steps
+The file contains the following python functions which roughly correspond to the steps in the diagram above
+
+* load_trigger_data()
+* prep_data_train_model()
+* model_upload_notify()
+* model_inference()
+
+These functions are mapped into individual containers by using the _create_component_from_func_ function. You can specify the container _base_image_ to use as well as the package to be installed into the container.
+
+****
+[source,python]
+include::sample-pipeline-full.py[lines=433..443]
+****
+
+The python functions can be used in multiple containers; in the example the _prep_data_train_model_ function is wrapper in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
+
+The pipeline execution _graph_ is created using the following code
+
+****
+[source,python]
+include::sample-pipeline-full.py[lines=471]
+
+[source,python]
+include::sample-pipeline-full.py[lines=477]
+
+[source,python]
+include::sample-pipeline-full.py[lines=482]
+
+[source,python]
+include::sample-pipeline-full.py[lines=492]
+
+[source,python]
+include::sample-pipeline-full.py[lines=495]
+
+****
+
+The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. The following diagram shows the order of execution.
+
+****
+image::pipeline-graph.png[]
+****
+
+Also visable in the OpenShift AI user interface
+
+****
+image::oai-pipeline-graph.png[]
+****
+
+=== Pipeline Parameter Passing
+As each step of our pipeline is an independent container, passing values between these steps requires a persistent store to be used between steps. This is where the associated S3 bucket that we configured earlier comes into play.
+
+In our pipeline there is a number of data values passed between the steps. For example :
+
+* The output of the _trigger_data_ step is passed into the input of the _prep_train_data_op_ step.
+* The _upload_model_op_ uses the output of the _trigger_data_ and one of the *_named outputs_* of the _prep_train_data_ step. 
+
+==== Difference 
