@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Section 1 :: Automation using Data Science Pipelines</title>
+    <link rel="prev" href="section1.html">
+    <link rel="next" href="section3.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Automation using Data Science Pipelines</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/rhods-pipelines/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhods-pipelines" data-version="1.33">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Automation using Data Science Pipelines</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Chapter 1</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="section1.html">Section 1</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="section2.html">Section 1</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="section3.html">Section 3</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../chapter2/index.html">Chapter 2</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chapter2/section1.html">Section 1</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../chapter3/index.html">Chapter 3</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chapter3/section1.html">Section 1</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../chapter3/section2.html">Section 2</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix A</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Automation using Data Science Pipelines</span>
+    <span class="version">1.33</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Automation using Data Science Pipelines</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.33</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Automation using Data Science Pipelines</a></li>
+    <li><a href="index.html">Chapter 1</a></li>
+    <li><a href="section2.html">Section 1</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Section 1</h1>
+<div class="sect1">
+<h2 id="_introduction_to_data_science_pipelines"><a class="anchor" href="#_introduction_to_data_science_pipelines"></a>Introduction to Data Science Pipelines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A data science pipeline is like a recipe for turning raw data into useful insights. Just like when you cook, you follow a set of steps to prepare a meal, in data science, you follow a series of steps to analyze data and extract valuable information. Here&#8217;s a simple breakdown of what a data science pipeline involves:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Data Collection</strong>: This is where you gather all the data you need for your analysis. Think of it like buying the ingredients for a meal.</p>
+</li>
+<li>
+<p><strong>Data Cleaning</strong>: Raw data is often messy, like chopping and cleaning vegetables. You need to remove errors, missing values, and any irrelevant information to make the data usable.</p>
+</li>
+<li>
+<p><strong>Data Exploration</strong>: Here, you get to know your data better. It&#8217;s like tasting your ingredients to understand their flavors. You create charts, graphs, and summary statistics to discover patterns and relationships in the data.</p>
+</li>
+<li>
+<p><strong>Feature Engineering</strong>: Just as a chef combines and prepares ingredients in a specific way to create a dish, in data science, you manipulate and transform the data to create new features or variables that can be more informative for your analysis.</p>
+</li>
+<li>
+<p><strong>Model Building</strong>: This is where the magic happens. You choose a statistical or machine learning model to make predictions or gain insights from your data. It&#8217;s like following a recipe to cook your meal.</p>
+</li>
+<li>
+<p><strong>Model Training</strong>: You "train" your model by showing it examples from your data, just as you might train a chef on how to prepare a specific dish.</p>
+</li>
+<li>
+<p><strong>Model Evaluation</strong>: You taste your dish and assess its quality. Similarly, you evaluate your model&#8217;s performance using various metrics to ensure it&#8217;s doing what you want it to do.</p>
+</li>
+<li>
+<p><strong>Model Deployment</strong>: If your dish is delicious, you serve it to others. In data science, if your model works well, you deploy it so that it can be used to make predictions on new, unseen data.</p>
+</li>
+<li>
+<p><strong>Monitoring and Maintenance</strong>: Just as a chef may need to adjust the recipe over time to maintain the quality of the dish, data science models may need updates and monitoring to ensure they remain accurate and relevant.</p>
+</li>
+<li>
+<p><strong>Reporting and Communication</strong>: Finally, you share your findings and insights, much like serving your meal and explaining how it was prepared to your guests.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>So, a data science pipeline is like a step-by-step guide that takes raw data, processes it, uses it to build models, and then communicates the results to help make informed decisions or predictions. It&#8217;s a structured approach to turning data into valuable knowledge.</p>
+</div>
+<div class="paragraph">
+<p>In more technical terms A <strong>pipeline</strong> is a description of an ML workflow, including all of the components in the workflow and how they combine in the form of a graph. The pipeline includes the definition of the inputs (parameters) required to run the pipeline and the inputs and outputs of each component.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>ML Pipleines are a basically an execution graph of tasks, commonly known as a <em>DAG</em> (Directed Acyclic Graph).
+A DAG is a directed graph with no cycles aka no direct loops</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipelines_in_openshift_ai"><a class="anchor" href="#_data_science_pipelines_in_openshift_ai"></a>Data Science Pipelines in OpenShift AI</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines</p>
+</div>
+<div class="paragraph">
+<p>The first mechanism is the Elyra Jupyter notebook addon which provides a visual editor for creating pipelines via orchestration of Jupyter notebooks.</p>
+</div>
+<div class="paragraph">
+<p>The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are python scripts built using the KFPV1 python SDK. Once built the python pipeline is submitted to the DSP runtime to be scheduled for execution.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There is work in progress to migrate DSP to Kubeflow Pipeline V2. At the time of writing this is still a work in progress and we won&#8217;t cover it here.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In OpenShift AI we use the <strong><em>Tekton</em></strong> runtime to execute pipelines. With this there is an additional step to be performed the python script needs to be compiled into a Tekton definition before being submitting to the runtime</p>
+</div>
+<div class="paragraph">
+<p>In OpenShift AI the Data Science Pipeline runtime consists of the following components</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A Data Science Pipeline Server container a number of resources</p>
+</li>
+<li>
+<p>A MariaDB for storing pipeline definitions and results</p>
+</li>
+<li>
+<p>A Pipeline scheduler for scheduling pipeline runs</p>
+</li>
+<li>
+<p>A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As pipelines are executed multiple ephemeral pods will be created and terminated depending on the execution steps of the pipelines</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>DS Pipeline in OpenShift AI are managed by the 'data-science-pipelines-operator-controller-manager' operator in the redhat-ods-applications namespace. The CRD is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">DataScience Pipeline pods</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-cmd hljs" data-lang="cmd"> ~/oc get pods
+NAME                                                              READY   STATUS    RESTARTS   AGE
+ds-pipeline-persistenceagent-pipelines-definition-6d6676d58vzss   1/1     Running   0          9m49s
+ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Running   0          9m49s
+ds-pipeline-scheduledworkflow-pipelines-definition-7f5c645hcg4g   1/1     Running   0          9m48s
+mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Running   0          9m49s</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_data_science_pipeline_with_kfp"><a class="anchor" href="#_creating_a_data_science_pipeline_with_kfp"></a>Creating a Data Science Pipeline with KFP</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="sidebarblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Python Setup</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>pip install kfp==1.8
+pip install kfp-tekton==1.7.2</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>S3 Storage</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Follow these instructions to setup a local Minio instance
+<a href="https://ai-on-openshift.io/tools-and-applications/minio/minio/" class="bare">https://ai-on-openshift.io/tools-and-applications/minio/minio/</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_a_pipeline_server"><a class="anchor" href="#_creating_a_pipeline_server"></a>Creating a Pipeline Server</h3>
+<div class="paragraph">
+<p>To execute pipelines a <em>Pipeline server</em> needs to be created but before that can happen an S3 Storage bucket needs to be created. This is used to store the run artifacts and outputs of any pipeline run on the associated server.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="creating-data-connection.png" alt="creating data connection">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the data connection is created then the pipeline server can be created</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="pre-creating-pipeline-server.png" alt="pre creating pipeline server">
+</div>
+</div>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="pipeline-server-created.png" alt="pipeline server created">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_and_deploying_a_pipeline"><a class="anchor" href="#_building_and_deploying_a_pipeline"></a>Building and deploying a Pipeline</h3>
+<div class="paragraph">
+<p>The following is a simplistic example of a KFP pipeline. The original is at
+<a href="https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py" class="bare">https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py</a> and the example has downloaded it to a file named <em>coin-toss.py</em></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">Python Pipeline Example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Copyright 2020 kubeflow.org
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from kfp import dsl
+from kfp import components
+
+def random_num(low:int, high:int) -&gt; int:
+    """Generate a random number between low and high."""
+    import random
+    result = random.randint(low, high)
+    print(result)
+    return result
+
+def flip_coin() -&gt; str:
+    """Flip a coin and output heads or tails randomly."""
+    import random
+    result = 'heads' if random.randint(0, 1) == 0 else 'tails'
+    print(result)
+    return result
+
+def print_msg(msg: str):
+    """Print a message."""
+    print(msg)
+
+
+flip_coin_op = components.create_component_from_func(
+    flip_coin, base_image='python:alpine3.6')
+print_op = components.create_component_from_func(
+    print_msg, base_image='python:alpine3.6')
+random_num_op = components.create_component_from_func(
+    random_num, base_image='python:alpine3.6')
+
+@dsl.pipeline(
+    name='conditional-execution-pipeline',
+    description='Shows how to use dsl.Condition().'
+)
+def flipcoin_pipeline():
+    flip = flip_coin_op()
+    with dsl.Condition(flip.output == 'heads'):
+        random_num_head = random_num_op(0, 9)
+        with dsl.Condition(random_num_head.output &gt; 5):
+            print_op('heads and %s &gt; 5!' % random_num_head.output)
+        with dsl.Condition(random_num_head.output &lt;= 5):
+            print_op('heads and %s &lt;= 5!' % random_num_head.output)
+
+    with dsl.Condition(flip.output == 'tails'):
+        random_num_tail = random_num_op(10, 19)
+        with dsl.Condition(random_num_tail.output &gt; 15):
+            print_op('tails and %s &gt; 15!' % random_num_tail.output)
+        with dsl.Condition(random_num_tail.output &lt;= 15):
+            print_op('tails and %s &lt;= 15!' % random_num_tail.output)
+
+
+if __name__ == '__main__':
+    from kfp_tekton.compiler import TektonCompiler
+    TektonCompiler().compile(flipcoin_pipeline, __file__.replace('.py', '.yaml'))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To compile it into a Tekton resource definition just run the following in a terminal</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">python3 coin-toss.py</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It will generate a Tekton <strong><em>Pipeline Run</em></strong> , similar to this snippet</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: conditional-execution-pipeline
+  annotations:
+    tekton.dev/output_artifacts: '{"flip-coin": [{"key": "artifacts/$PIPELINERUN/flip-coin/Output.tgz",
+      "name": "flip-coin-Output", "path": "/tmp/outputs/Output/data"}], "random-num":
+      [{"key": "artifacts/$PIPELINERUN/random-num/Output.tgz", "name": "random-num-Output",
+      "path": "/tmp/outputs/Output/data"}], "random-num-2": [{"key": "artifacts/$PIPELINERUN/random-num-2/Output.tgz",
+      "name": "random-num-2-Output", "path": "/tmp/outputs/Output/data"}]}'
+    tekton.dev/input_artifacts: '{"print-msg": [{"name": "random-num-Output", "parent_task":
+      "random-num"}], "print-msg-2": [{"name": "random-num-Output", "parent_task":
+      "random-num"}], "print-msg-3": [{"name": "random-num-2-Output", "parent_task":
+      "random-num-2"}], "print-msg-4": [{"name": "random-num-2-Output", "parent_task":
+      "random-num-2"}]}'
+    tekton.dev/artifact_bucket: mlpipeline
+    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
+    tekton.dev/artifact_endpoint_scheme: http://
+    tekton.dev/artifact_items: '{"flip-coin": [["Output", "$(results.Output.path)"]],
+      "print-msg": [], "print-msg-2": [], "print-msg-3": [], "print-msg-4": [], "random-num":
+      [["Output", "$(results.Output.path)"]], "random-num-2": [["Output", "$(results.Output.path)"]]}'
+    sidecar.istio.io/inject: "false"
+    tekton.dev/template: ''</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The resulting yaml file <em>(coin-toss.yaml)</em> can then be uploaded throught the UI</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="import-pipeline.png" alt="import pipeline">
+</div>
+</div>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="pipeline-imported.png" alt="pipeline imported">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once imported the structure of the <em>DAG</em> will be shown. Each step in the pipeline will be run as a container on OpenShift.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="pipeline-run-view.png" alt="pipeline run view">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To execute the pipeline, click on <em>Create Run</em> in the menu and fill out the <em>Name</em> and <em>Description</em>.
+If the pipeline has <em>Input Parameters</em> or a you need to schedule a recurring run then that can be configured further down. Once ready clink <em>Create</em> and the pipeline will be scheduled.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="creating-pipeline-run.png" alt="creating pipeline run">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The pipeline will execute and the outputs will be stored into the configured S3 bucket.
+As the pipeline executes the view will be updated to show the steps being executed. It&#8217;s possible to click on the graph nodes to reveal information of the steps</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="post-pipeline-run.png" alt="post pipeline run">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the pipeline has completed it is possible to access the output and pipeline artifacts (if used) in the Minio Storage UI</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="object-store-after-run.png" alt="object store after run">
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_advanced_example"><a class="anchor" href="#_advanced_example"></a>Advanced Example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section we&#8217;re going to demonstrate how Data Science Pipelines work in a real world scenario.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p>In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it&#8217;s deployed in. On a regular schedule it uploads battery events via a data gateway and those batter events are used to train a model which is then retrieved by the device and used.</p>
+</div>
+<div class="imageblock unresolved">
+<div class="content">
+<img src="openshift-ai-dsp-edge.png" alt="openshift ai dsp edge">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The entire pipeline is here <a href="sample-pipeline-full.py">Pipeline</a></p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
+</div>
+<div class="paragraph">
+<p>The actual pipeline is defined by the following function</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.</p>
+</div>
+<div class="paragraph">
+<p>The function <strong><em>edgetest_pipeline</em></strong> is the implementation of the pipeline.</p>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_parameters"><a class="anchor" href="#_pipeline_parameters"></a>Pipeline Parameters</h3>
+<div class="paragraph">
+<p>The pipeline has four parameters</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>file_obj</em> and <em>src_bucket</em> refer to S3 bucket details and can be ignored.</p>
+</li>
+<li>
+<p><em>VIN</em> is the edge device identifier and has a default value of 412356</p>
+</li>
+<li>
+<p><em>epoch_count</em> is the number of training epochs to be used</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the <em>Create Run</em> UI these parameters are available so that users can override the values as they need</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="pipeline-parameters.png" alt="pipeline parameters">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_steps"><a class="anchor" href="#_pipeline_steps"></a>Pipeline Steps</h3>
+<div class="paragraph">
+<p>The file contains the following python functions which roughly correspond to the steps in the diagram above</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>load_trigger_data()</p>
+</li>
+<li>
+<p>prep_data_train_model()</p>
+</li>
+<li>
+<p>model_upload_notify()</p>
+</li>
+<li>
+<p>model_inference()</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These functions are mapped into individual containers by using the <em>create_component_from_func</em> function. You can specify the container <em>base_image</em> to use as well as the package to be installed into the container.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The python functions can be used in multiple containers; in the example the <em>prep_data_train_model</em> function is wrapper in the <em>prep_data_train_op</em> and the <em>prep_inference_data_op</em> containers.</p>
+</div>
+<div class="paragraph">
+<p>The pipeline execution <em>graph</em> is created using the following code</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The execution order of the graph is top down but also can be controlled by using the <strong><em>.after()</em></strong> operator. The following diagram shows the order of execution.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="pipeline-graph.png" alt="pipeline graph">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Also visable in the OpenShift AI user interface</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock unresolved">
+<div class="content">
+<img src="oai-pipeline-graph.png" alt="oai pipeline graph">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_parameter_passing"><a class="anchor" href="#_pipeline_parameter_passing"></a>Pipeline Parameter Passing</h3>
+<div class="paragraph">
+<p>As each step of our pipeline is an independent container, passing values between these steps requires a persistent store to be used between steps. This is where the associated S3 bucket that we configured earlier comes into play.</p>
+</div>
+<div class="paragraph">
+<p>In our pipeline there is a number of data values passed between the steps. For example :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The output of the <em>trigger_data</em> step is passed into the input of the <em>prep_train_data_op</em> step.</p>
+</li>
+<li>
+<p>The <em>upload_model_op</em> uses the output of the <em>trigger_data</em> and one of the <strong><em>named outputs</em></strong> of the <em>prep_train_data</em> step.</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_difference"><a class="anchor" href="#_difference"></a>Difference</h4>
+
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="section1.html">Section 1</a></span>
+  <span class="next"><a href="section3.html">Section 3</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
