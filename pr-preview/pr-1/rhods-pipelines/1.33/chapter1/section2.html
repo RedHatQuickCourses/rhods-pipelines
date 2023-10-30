@@ -193,7 +193,7 @@
 <td class="content">
 <div class="paragraph">
 <p>ML Pipleines are a basically an execution graph of tasks, commonly known as a <em>DAG</em> (Directed Acyclic Graph).
-A DAG is a directed graph with no cycles aka no direct loops</p>
+A DAG is a directed graph with no cycles aka no direct loops.</p>
 </div>
 </td>
 </tr>
@@ -205,13 +205,13 @@ A DAG is a directed graph with no cycles aka no direct loops</p>
 <h2 id="_data_science_pipelines_in_openshift_ai"><a class="anchor" href="#_data_science_pipelines_in_openshift_ai"></a>Data Science Pipelines in OpenShift AI</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines</p>
+<p>OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines.</p>
 </div>
 <div class="paragraph">
 <p>The first mechanism is the Elyra Jupyter notebook addon which provides a visual editor for creating pipelines via orchestration of Jupyter notebooks.</p>
 </div>
 <div class="paragraph">
-<p>The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are python scripts built using the KFPV1 python SDK. Once built the python pipeline is submitted to the DSP runtime to be scheduled for execution.</p>
+<p>The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are built using python scripts using the KFPV1 python SDK. Once built, the python pipeline is submitted to the DSP runtime to be scheduled for execution.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -231,18 +231,18 @@ A DAG is a directed graph with no cycles aka no direct loops</p>
 <p>In OpenShift AI we use the <strong><em>Tekton</em></strong> runtime to execute pipelines. With this there is an additional step to be performed the python script needs to be compiled into a Tekton definition before being submitting to the runtime</p>
 </div>
 <div class="paragraph">
-<p>In OpenShift AI the Data Science Pipeline runtime consists of the following components</p>
+<p>In OpenShift AI the Data Science Pipeline runtime consists of the following components:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>A Data Science Pipeline Server container a number of resources</p>
+<p>A Data Science Pipeline Server container.</p>
 </li>
 <li>
-<p>A MariaDB for storing pipeline definitions and results</p>
+<p>A MariaDB for storing pipeline definitions and results.</p>
 </li>
 <li>
-<p>A Pipeline scheduler for scheduling pipeline runs</p>
+<p>A Pipeline scheduler for scheduling pipeline runs.</p>
 </li>
 <li>
 <p>A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.</p>
@@ -250,7 +250,7 @@ A DAG is a directed graph with no cycles aka no direct loops</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>As pipelines are executed multiple ephemeral pods will be created and terminated depending on the execution steps of the pipelines</p>
+<p>Steps in the pipeline are executed as ephemeral pods (one per step).</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -260,7 +260,7 @@ A DAG is a directed graph with no cycles aka no direct loops</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>DS Pipeline in OpenShift AI are managed by the 'data-science-pipelines-operator-controller-manager' operator in the redhat-ods-applications namespace. The CRD is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em></p>
+<p>DS Pipeline in OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CRD is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em></p>
 </div>
 </td>
 </tr>
@@ -271,7 +271,7 @@ A DAG is a directed graph with no cycles aka no direct loops</p>
 <div class="title">DataScience Pipeline pods</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-cmd hljs" data-lang="cmd"> ~/oc get pods
+<pre class="highlightjs highlight"><code class="language-cmd hljs" data-lang="cmd"> ~/oc get pods -n redhat-ods-applications
 NAME                                                              READY   STATUS    RESTARTS   AGE
 ds-pipeline-persistenceagent-pipelines-definition-6d6676d58vzss   1/1     Running   0          9m49s
 ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Running   0          9m49s
@@ -284,7 +284,7 @@ mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Runnin
 </div>
 </div>
 <div class="sect1">
-<h2 id="_creating_a_data_science_pipeline_with_kfp"><a class="anchor" href="#_creating_a_data_science_pipeline_with_kfp"></a>Creating a Data Science Pipeline with KFP</h2>
+<h2 id="_creating_a_data_science_pipeline_with_the_kfp_sdk"><a class="anchor" href="#_creating_a_data_science_pipeline_with_the_kfp_sdk"></a>Creating a Data Science Pipeline with the KFP SDK</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
@@ -320,13 +320,13 @@ pip install kfp-tekton==1.7.2</pre>
 <div class="sect2">
 <h3 id="_creating_a_pipeline_server"><a class="anchor" href="#_creating_a_pipeline_server"></a>Creating a Pipeline Server</h3>
 <div class="paragraph">
-<p>To execute pipelines a <em>Pipeline server</em> needs to be created but before that can happen an S3 Storage bucket needs to be created. This is used to store the run artifacts and outputs of any pipeline run on the associated server.</p>
+<p>To execute pipelines a <em>Pipeline server</em> needs to be created but before that can happen an S3 Storage bucket needs to be configured. This is used to store the run artifacts and outputs of any pipeline run on the associated server.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="creating-data-connection.png" alt="creating data connection">
+<img src="_images/creating-data-connection.png" alt="creating data connection">
 </div>
 </div>
 </div>
@@ -336,18 +336,18 @@ pip install kfp-tekton==1.7.2</pre>
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="pre-creating-pipeline-server.png" alt="pre creating pipeline server">
+<img src="_images/pre-creating-pipeline-server.png" alt="pre creating pipeline server">
 </div>
 </div>
 </div>
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="pipeline-server-created.png" alt="pipeline server created">
+<img src="_images/pipeline-server-created.png" alt="pipeline server created">
 </div>
 </div>
 </div>
@@ -482,18 +482,18 @@ metadata:
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="import-pipeline.png" alt="import pipeline">
+<img src="_images/import-pipeline.png" alt="import pipeline">
 </div>
 </div>
 </div>
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="pipeline-imported.png" alt="pipeline imported">
+<img src="_images/pipeline-imported.png" alt="pipeline imported">
 </div>
 </div>
 </div>
@@ -503,9 +503,9 @@ metadata:
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="pipeline-run-view.png" alt="pipeline run view">
+<img src="_images/pipeline-run-view.png" alt="pipeline run view">
 </div>
 </div>
 </div>
@@ -516,9 +516,9 @@ If the pipeline has <em>Input Parameters</em> or a you need to schedule a recurr
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="creating-pipeline-run.png" alt="creating pipeline run">
+<img src="_images/creating-pipeline-run.png" alt="creating pipeline run">
 </div>
 </div>
 </div>
@@ -529,9 +529,9 @@ As the pipeline executes the view will be updated to show the steps being execut
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="post-pipeline-run.png" alt="post pipeline run">
+<img src="_images/post-pipeline-run.png" alt="post pipeline run">
 </div>
 </div>
 </div>
@@ -541,9 +541,9 @@ As the pipeline executes the view will be updated to show the steps being execut
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="object-store-after-run.png" alt="object store after run">
+<img src="_images/object-store-after-run.png" alt="object store after run">
 </div>
 </div>
 </div>
@@ -562,15 +562,15 @@ As the pipeline executes the view will be updated to show the steps being execut
 <div class="paragraph">
 <p>In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it&#8217;s deployed in. On a regular schedule it uploads battery events via a data gateway and those batter events are used to train a model which is then retrieved by the device and used.</p>
 </div>
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="openshift-ai-dsp-edge.png" alt="openshift ai dsp edge">
+<img src="_images/openshift-ai-dsp-edge.png" alt="openshift ai dsp edge">
 </div>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>The entire pipeline is here <a href="sample-pipeline-full.py">Pipeline</a></p>
+<p>The entire pipeline is here <a href="_attachments/sample-pipeline-full.py" class="xref attachment">Pipeline</a></p>
 </div>
 <div class="paragraph">
 <p>We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
@@ -582,7 +582,11 @@ As the pipeline executes the view will be updated to show the steps being execut
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=270):
+    '''Download files from s3, train, inference'''
+    print("Params",file_obj, src_bucket,VIN,epoch_count)
+    vol = V1Volume(
+        name='batterydatavol',</code></pre>
 </div>
 </div>
 </div>
@@ -616,9 +620,9 @@ As the pipeline executes the view will be updated to show the steps being execut
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="pipeline-parameters.png" alt="pipeline parameters">
+<img src="_images/pipeline-parameters.png" alt="pipeline parameters">
 </div>
 </div>
 </div>
@@ -652,7 +656,17 @@ As the pipeline executes the view will be updated to show the steps being execut
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">load_trigger_data_op= components.create_component_from_func(
+    load_trigger_data, base_image='registry.access.redhat.com/ubi8/python-38')
+prep_train_data_op= components.create_component_from_func(
+    prep_data_train_model, base_image='quay.io/mickeymouse/awesomepython-30')
+upload_model_op= components.create_component_from_func(
+    model_upload_notify, base_image='registry.access.redhat.com/ubi8/python-38'
+    ,packages_to_install=['kaleido','paho-mqtt','boto3'])
+prep_inference_data_op= components.create_component_from_func(
+    prep_data_train_model, base_image='registry.access.redhat.com/ubi8/python-38')
+inference_model_op= components.create_component_from_func(
+    model_inference, base_image='registry.access.redhat.com/ubi8/python-38')</code></pre>
 </div>
 </div>
 </div>
@@ -667,27 +681,27 @@ As the pipeline executes the view will be updated to show the steps being execut
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    trigger_data = load_trigger_data_op(file_obj, src_bucket,file_destination)</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    prep_train_data = prep_train_data_op(data_path="/opt/data/pitstop/",epoch_count=epoch_count,experiment_name=trigger_data.output,run_mode=0).after(trigger_data)</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inform_result = upload_model_op(data_path="/opt/data/pitstop/",paramater_data=prep_train_data.outputs["parameter_data"],experiment_name=trigger_data.output)</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inference_prep = prep_inference_data_op(data_path="/opt/data/pitstop/",epoch_count=epoch_count,experiment_name=trigger_data.output,run_mode=2).after(inform_result)</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">Unresolved include directive in modules/chapter1/pages/section2.adoc - include::sample-pipeline-full.py[]</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inference_result = inference_model_op(data_path="/opt/data/pitstop/",paramater_data=inference_prep.outputs["parameter_data"],experiment_name=trigger_data.output,vin=VIN)</code></pre>
 </div>
 </div>
 </div>
@@ -697,9 +711,9 @@ As the pipeline executes the view will be updated to show the steps being execut
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="pipeline-graph.png" alt="pipeline graph">
+<img src="_images/pipeline-graph.png" alt="pipeline graph">
 </div>
 </div>
 </div>
@@ -709,9 +723,9 @@ As the pipeline executes the view will be updated to show the steps being execut
 </div>
 <div class="sidebarblock">
 <div class="content">
-<div class="imageblock unresolved">
+<div class="imageblock">
 <div class="content">
-<img src="oai-pipeline-graph.png" alt="oai pipeline graph">
+<img src="_images/oai-pipeline-graph.png" alt="oai pipeline graph">
 </div>
 </div>
 </div>
