@@ -32,16 +32,16 @@ In more technical terms A *pipeline* is a description of an ML workflow, includi
 [NOTE]
 ====
 ML Pipleines are a basically an execution graph of tasks, commonly known as a _DAG_ (Directed Acyclic Graph).
-A DAG is a directed graph with no cycles aka no direct loops
+A DAG is a directed graph with no cycles aka no direct loops.
 ====
 
 == Data Science Pipelines in OpenShift AI
 
-OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines
+OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines.
 
 The first mechanism is the Elyra Jupyter notebook addon which provides a visual editor for creating pipelines via orchestration of Jupyter notebooks. 
 
-The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are python scripts built using the KFPV1 python SDK. Once built the python pipeline is submitted to the DSP runtime to be scheduled for execution.
+The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are built using python scripts using the KFPV1 python SDK. Once built, the python pipeline is submitted to the DSP runtime to be scheduled for execution.
 
 [NOTE]
 ====
@@ -51,25 +51,25 @@ There is work in progress to migrate DSP to Kubeflow Pipeline V2. At the time of
 In OpenShift AI we use the *_Tekton_* runtime to execute pipelines. With this there is an additional step to be performed the python script needs to be compiled into a Tekton definition before being submitting to the runtime
 
 
-In OpenShift AI the Data Science Pipeline runtime consists of the following components
+In OpenShift AI the Data Science Pipeline runtime consists of the following components:
 
-* A Data Science Pipeline Server container a number of resources 
-* A MariaDB for storing pipeline definitions and results
-* A Pipeline scheduler for scheduling pipeline runs
+* A Data Science Pipeline Server container. 
+* A MariaDB for storing pipeline definitions and results.
+* A Pipeline scheduler for scheduling pipeline runs.
 * A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.
 
-As pipelines are executed multiple ephemeral pods will be created and terminated depending on the execution steps of the pipelines
+Steps in the pipeline are executed as ephemeral pods (one per step).
 
 [NOTE]
 ====
-DS Pipeline in OpenShift AI are managed by the 'data-science-pipelines-operator-controller-manager' operator in the redhat-ods-applications namespace. The CRD is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_
+DS Pipeline in OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CRD is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_
 ====
 
 .DataScience Pipeline pods
 ****
 [source,cmd]
 ----
- ~/oc get pods
+ ~/oc get pods -n redhat-ods-applications
 NAME                                                              READY   STATUS    RESTARTS   AGE
 ds-pipeline-persistenceagent-pipelines-definition-6d6676d58vzss   1/1     Running   0          9m49s
 ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Running   0          9m49s
@@ -78,7 +78,7 @@ mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Runnin
 ----
 ****
 
-== Creating a Data Science Pipeline with KFP
+== Creating a Data Science Pipeline with the KFP SDK
 
 === Prerequisites 
 ****
@@ -97,7 +97,7 @@ https://ai-on-openshift.io/tools-and-applications/minio/minio/
 
 === Creating a Pipeline Server
 
-To execute pipelines a _Pipeline server_ needs to be created but before that can happen an S3 Storage bucket needs to be created. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
+To execute pipelines a _Pipeline server_ needs to be created but before that can happen an S3 Storage bucket needs to be configured. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
 ****
 image::creating-data-connection.png[]
 ****
@@ -267,7 +267,7 @@ In this scenario we have a remote edge device which uses an AI model to manage t
 image::openshift-ai-dsp-edge.png[]
 ****
 
-The entire pipeline is here link:sample-pipeline-full.py[Pipeline]
+The entire pipeline is here xref:attachment$sample-pipeline-full.py[Pipeline]
 
 We're not going to go through all of it but focus on the key aspects of it. 
 
@@ -275,7 +275,7 @@ The actual pipeline is defined by the following function
 
 ****
 [source,python]
-include::sample-pipeline-full.py[lines=450..454]
+include::example$sample-pipeline-full.py[lines=450..454]
 ****
 
 The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.
@@ -307,7 +307,7 @@ These functions are mapped into individual containers by using the _create_compo
 
 ****
 [source,python]
-include::sample-pipeline-full.py[lines=433..443]
+include::example$sample-pipeline-full.py[lines=433..443]
 ****
 
 The python functions can be used in multiple containers; in the example the _prep_data_train_model_ function is wrapper in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
@@ -316,19 +316,19 @@ The pipeline execution _graph_ is created using the following code
 
 ****
 [source,python]
-include::sample-pipeline-full.py[lines=471]
+include::example$sample-pipeline-full.py[lines=471]
 
 [source,python]
-include::sample-pipeline-full.py[lines=477]
+include::example$sample-pipeline-full.py[lines=477]
 
 [source,python]
-include::sample-pipeline-full.py[lines=482]
+include::example$sample-pipeline-full.py[lines=482]
 
 [source,python]
-include::sample-pipeline-full.py[lines=492]
+include::example$sample-pipeline-full.py[lines=492]
 
 [source,python]
-include::sample-pipeline-full.py[lines=495]
+include::example$sample-pipeline-full.py[lines=495]
 
 ****
 
