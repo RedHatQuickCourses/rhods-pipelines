@@ -650,10 +650,8 @@ As the pipeline executes the view will be updated to show the steps being execut
 </ul>
 </div>
 <div class="paragraph">
-<p>These functions are mapped into individual containers by using the <em>create_component_from_func</em> function. You can specify the container <em>base_image</em> to use as well as the package to be installed into the container.</p>
+<p>These functions are mapped into individual containers by using the <em>create_component_from_func</em> function. You can specify the container <em>base_image</em> to use as well as any additional python packages to be installed into the container at execution time.</p>
 </div>
-<div class="sidebarblock">
-<div class="content">
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">load_trigger_data_op= components.create_component_from_func(
@@ -669,16 +667,12 @@ inference_model_op= components.create_component_from_func(
     model_inference, base_image='registry.access.redhat.com/ubi8/python-38')</code></pre>
 </div>
 </div>
-</div>
+<div class="paragraph">
+<p>The python functions can be used in multiple different step definitions; in the example the <em>prep_data_train_model</em> function is used in the <em>prep_data_train_op</em> and the <em>prep_inference_data_op</em> containers.</p>
 </div>
 <div class="paragraph">
-<p>The python functions can be used in multiple containers; in the example the <em>prep_data_train_model</em> function is wrapper in the <em>prep_data_train_op</em> and the <em>prep_inference_data_op</em> containers.</p>
+<p>The pipeline execution <em>graph</em> is created using the following code:</p>
 </div>
-<div class="paragraph">
-<p>The pipeline execution <em>graph</em> is created using the following code</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    trigger_data = load_trigger_data_op(file_obj, src_bucket,file_destination)</code></pre>
@@ -704,10 +698,20 @@ inference_model_op= components.create_component_from_func(
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inference_result = inference_model_op(data_path="/opt/data/pitstop/",paramater_data=inference_prep.outputs["parameter_data"],experiment_name=trigger_data.output,vin=VIN)</code></pre>
 </div>
 </div>
-</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The execution order of the graph is top down but also can be controlled by using the <strong><em>.after()</em></strong> operator.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>The execution order of the graph is top down but also can be controlled by using the <strong><em>.after()</em></strong> operator. The following diagram shows the order of execution.</p>
+<p>The following diagram shows the order of execution.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -719,7 +723,7 @@ inference_model_op= components.create_component_from_func(
 </div>
 </div>
 <div class="paragraph">
-<p>Also visable in the OpenShift AI user interface</p>
+<p>This is also visable in the OpenShift AI user interface:</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -734,24 +738,165 @@ inference_model_op= components.create_component_from_func(
 <div class="sect2">
 <h3 id="_pipeline_parameter_passing"><a class="anchor" href="#_pipeline_parameter_passing"></a>Pipeline Parameter Passing</h3>
 <div class="paragraph">
-<p>As each step of our pipeline is an independent container, passing values between these steps requires a persistent store to be used between steps. This is where the associated S3 bucket that we configured earlier comes into play.</p>
+<p>As each step of our pipeline is executed in an independent container, input parameters and output values are handled as follows</p>
 </div>
-<div class="paragraph">
-<p>In our pipeline there is a number of data values passed between the steps. For example :</p>
-</div>
+<div class="sect3">
+<h4 id="_input_parameters"><a class="anchor" href="#_input_parameters"></a>Input Parameters</h4>
 <div class="ulist">
 <ul>
 <li>
-<p>The output of the <em>trigger_data</em> step is passed into the input of the <em>prep_train_data_op</em> step.</p>
+<p>Simple parameters - booleans, numbers, strings - are passed by value into the container as command line arguments.</p>
 </li>
 <li>
-<p>The <em>upload_model_op</em> uses the output of the <em>trigger_data</em> and one of the <strong><em>named outputs</em></strong> of the <em>prep_train_data</em> step.</p>
+<p>Complex types or large amounts of data are passed via files. The value of the input parameter is the file path.</p>
 </li>
 </ul>
 </div>
+</div>
 <div class="sect3">
-<h4 id="_difference"><a class="anchor" href="#_difference"></a>Difference</h4>
-
+<h4 id="_output_parameters"><a class="anchor" href="#_output_parameters"></a>Output Parameters</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Output values are returned via files.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_passing_parameters_via_files"><a class="anchor" href="#_passing_parameters_via_files"></a>Passing Parameters via Files</h4>
+<div class="paragraph">
+<p>To pass an input parameter as a file, the function argument needs to be annotated using the <em>InputPath</em> annotation.
+For returning data from a step as a file, the function argument needs to be annotated using the <em>OutputPath</em> annotation.</p>
+</div>
+<div class="paragraph">
+<p>In both cases the actual value of the parameter is the file path and not the actual data. So the pipeline will have to read/write to the file as necessary.</p>
+</div>
+<div class="paragraph">
+<p>For example in our sample pipeline we use the <em>parameter_data</em> argument of the <em>prep_data_train_model</em> function to return multiple data values as a file, here&#8217;s the function definition with the <em>OutputPath</em> annotation</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def prep_data_train_model(data_path : str, epoch_count : int, parameter_data : OutputPath(), experiment_name : str, run_mode : int=0):</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the actual writing of the data to the file</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    data_store = [train_x, train_y, train_battery_range, train_y_soh, y_norm, test_x, test_y]</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>with open(parameter_data, "b+w") as f:
+    pickle.dump(data_store,f)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This data is then consumed in the <em>model_upload_notify</em> function, passed via the <em>paramater_data</em> with the <em>InputPath</em> annotation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def model_upload_notify(data_path:str,paramater_data:InputPath(),experiment_name:str,model_bucket:str="battery-model-bucket"):</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reading the data</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    f = open(paramater_data,"b+r")
+    data_store = pickle.load(f)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Linking the two functions together</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inform_result = upload_model_op(data_path="/opt/data/pitstop/",paramater_data=prep_train_data.outputs["parameter_data"],experiment_name=trigger_data.output)</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There are other parameter annotations available to handle specialised file types
+For example <em>InputBinaryFile</em>, <em>OutputBinaryFile</em>.</p>
+</div>
+<div class="paragraph">
+<p>The full annotation list is in the <a href="https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.components.html">KFP component documentation</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_returning_multiple_values_from_a_step"><a class="anchor" href="#_returning_multiple_values_from_a_step"></a>Returning multiple values from a step</h4>
+<div class="paragraph">
+<p>If you return a single small value from your component using the <em>return</em> statement, the output parameter is named <strong><em>output</em></strong>.
+It is however possible to return multiple small values using the python <em>collection</em> library method <em>namedtuple</em></p>
+</div>
+<div class="paragraph">
+<p>From a <a href="https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/Data%20passing%20in%20python%20components.ipynb">Kubeflow pipelines example</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def produce_two_small_outputs() -&gt; NamedTuple('Outputs', [('text', str), ('number', int)]):
+    return ("data 1", 42)
+consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_task.outputs['number'])</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>In the Tekton definition you can see the definition of the <em>input and output artifacts</em></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tekton.dev/input_artifacts: '{"model-inference": [{"name": "load-trigger-data-Output",
+  "parent_task": "load-trigger-data"}, {"name": "prep-data-train-model-2-parameter_data",
+  "parent_task": "prep-data-train-model-2"}], "model-upload-notify": [{"name":
+  "load-trigger-data-Output", "parent_task": "load-trigger-data"}, {"name": "prep-data-train-model-parameter_data",
+  "parent_task": "prep-data-train-model"}], "prep-data-train-model": [{"name":
+  "load-trigger-data-Output", "parent_task": "load-trigger-data"}], "prep-data-train-model-2":
+  [{"name": "load-trigger-data-Output", "parent_task": "load-trigger-data"}]}'</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tekton.dev/output_artifacts: '{"load-trigger-data": [{"key": "artifacts/$PIPELINERUN/load-trigger-data/Output.tgz",
+  "name": "load-trigger-data-Output", "path": "/tmp/outputs/Output/data"}], "prep-data-train-model":
+  [{"key": "artifacts/$PIPELINERUN/prep-data-train-model/parameter_data.tgz",
+  "name": "prep-data-train-model-parameter_data", "path": "/tmp/outputs/parameter_data/data"}],
+  "prep-data-train-model-2": [{"key": "artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz",
+  "name": "prep-data-train-model-2-parameter_data", "path": "/tmp/outputs/parameter_data/data"}]}'</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tekton.dev/artifact_items: '{"load-trigger-data": [["Output", "$(results.Output.path)"]],
+  "model-inference": [], "model-upload-notify": [], "prep-data-train-model": [["parameter_data",
+  "$(workspaces.prep-data-train-model.path)/artifacts/$ORIG_PR_NAME/$(context.taskRun.name)/parameter_data"]],
+  "prep-data-train-model-2": [["parameter_data", "$(workspaces.prep-data-train-model-2.path)/artifacts/$ORIG_PR_NAME/$(context.taskRun.name)/parameter_data"]]}'</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
