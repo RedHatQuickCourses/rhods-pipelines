@@ -303,18 +303,15 @@ The file contains the following python functions which roughly correspond to the
 * model_upload_notify()
 * model_inference()
 
-These functions are mapped into individual containers by using the _create_component_from_func_ function. You can specify the container _base_image_ to use as well as the package to be installed into the container.
+These functions are mapped into individual containers by using the _create_component_from_func_ function. You can specify the container _base_image_ to use as well as any additional python packages to be installed into the container at execution time.
 
-****
 [source,python]
 include::example$sample-pipeline-full.py[lines=433..443]
-****
 
-The python functions can be used in multiple containers; in the example the _prep_data_train_model_ function is wrapper in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
+The python functions can be used in multiple different step definitions; in the example the _prep_data_train_model_ function is used in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
 
-The pipeline execution _graph_ is created using the following code
+The pipeline execution _graph_ is created using the following code:
 
-****
 [source,python]
 include::example$sample-pipeline-full.py[lines=471]
 
@@ -330,26 +327,94 @@ include::example$sample-pipeline-full.py[lines=492]
 [source,python]
 include::example$sample-pipeline-full.py[lines=495]
 
-****
 
-The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. The following diagram shows the order of execution.
+IMPORTANT: The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. 
+
+The following diagram shows the order of execution.
 
 ****
 image::pipeline-graph.png[]
 ****
 
-Also visable in the OpenShift AI user interface
+This is also visable in the OpenShift AI user interface:
 
 ****
 image::oai-pipeline-graph.png[]
 ****
 
 === Pipeline Parameter Passing
-As each step of our pipeline is an independent container, passing values between these steps requires a persistent store to be used between steps. This is where the associated S3 bucket that we configured earlier comes into play.
+As each step of our pipeline is executed in an independent container, input parameters and output values are handled as follows
 
-In our pipeline there is a number of data values passed between the steps. For example :
+==== Input Parameters
 
-* The output of the _trigger_data_ step is passed into the input of the _prep_train_data_op_ step.
-* The _upload_model_op_ uses the output of the _trigger_data_ and one of the *_named outputs_* of the _prep_train_data_ step. 
+* Simple parameters - booleans, numbers, strings - are passed by value into the container as command line arguments.
+* Complex types or large amounts of data are passed via files. The value of the input parameter is the file path.
 
-==== Difference 
+==== Output Parameters
+
+* Output values are returned via files.
+
+==== Passing Parameters via Files
+To pass an input parameter as a file, the function argument needs to be annotated using the _InputPath_ annotation.
+For returning data from a step as a file, the function argument needs to be annotated using the _OutputPath_ annotation.
+
+In both cases the actual value of the parameter is the file path and not the actual data. So the pipeline will have to read/write to the file as necessary.
+
+For example in our sample pipeline we use the _parameter_data_ argument of the _prep_data_train_model_ function to return multiple data values as a file, here's the function definition with the _OutputPath_ annotation
+
+[source,python]
+include::example$sample-pipeline-full.py[lines=51]
+
+Here's the actual writing of the data to the file
+
+[source,python]
+include::example$sample-pipeline-full.py[lines=238..242]
+
+This data is then consumed in the _model_upload_notify_ function, passed via the _paramater_data_ with the _InputPath_ annotation.
+
+[source,python]
+include::example$sample-pipeline-full.py[lines=243]
+
+Reading the data
+
+[source,python]
+include::example$sample-pipeline-full.py[lines=275..276]
+
+
+Linking the two functions together 
+
+[source,python]
+include::example$sample-pipeline-full.py[lines=482]
+
+
+[TIP]
+====
+There are other parameter annotations available to handle specialised file types 
+For example _InputBinaryFile_, _OutputBinaryFile_. 
+
+The full annotation list is in the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.components.html[KFP component documentation].
+
+====
+
+==== Returning multiple values from a step 
+If you return a single small value from your component using the _return_ statement, the output parameter is named *_output_*.
+It is however possible to return multiple small values using the python _collection_ library method _namedtuple_
+
+From a https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/Data%20passing%20in%20python%20components.ipynb[Kubeflow pipelines example]
+ 
+[source,python]
+----
+def produce_two_small_outputs() -> NamedTuple('Outputs', [('text', str), ('number', int)]):
+    return ("data 1", 42)
+consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_task.outputs['number'])
+----
+
+[TIP]
+====
+In the Tekton definition you can see the definition of the _input and output artifacts_ 
+
+include::example$sample-pipeline-full.yaml[lines=12..18]
+
+include::example$sample-pipeline-full.yaml[lines=6..11]
+
+include::example$sample-pipeline-full.yaml[lines=22..25]

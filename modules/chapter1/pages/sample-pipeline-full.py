@@ -482,7 +482,7 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
     inform_result = upload_model_op(data_path="/opt/data/pitstop/",paramater_data=prep_train_data.outputs["parameter_data"],experiment_name=trigger_data.output)
     inform_result.add_pvolumes({"/opt/data/pitstop": vol})
     inform_result.add_pvolumes({"/opt/certs/": mqttcert})
-    inform_result.add_env_variable(V1EnvVar(name='mqtt_broker', value='mqtt-broker-acc1-0-svc.battery-monitoring.svc'))
+    inform_result.add_env_variable(V1EnvVar(name='mqtt_broker', value='mqtt-broker-acc1-0-svc.edge-monitoring.svc'))
     inform_result.add_env_variable(V1EnvVar(name='mqtt_port', value='1883'))
     inform_result.add_env_variable(V1EnvVar(name='mqtt_cert', value='/opt/certs/public.cert'))
     inform_result.add_env_variable(V1EnvVar(name='s3_host', value='http://rook-ceph-rgw-ceph-object-store.openshift-storage.svc:8080'))
@@ -495,7 +495,7 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
     inference_result = inference_model_op(data_path="/opt/data/pitstop/",paramater_data=inference_prep.outputs["parameter_data"],experiment_name=trigger_data.output,vin=VIN)
     inference_result.add_pvolumes({"/opt/data/pitstop": vol})
     inference_result.add_pvolumes({"/opt/certs/": mqttcert})
-    inference_result.add_env_variable(V1EnvVar(name='mqtt_broker', value='mqtt-broker-acc1-0-svc.battery-monitoring.svc'))
+    inference_result.add_env_variable(V1EnvVar(name='mqtt_broker', value='mqtt-broker-acc1-0-svc.edge-monitoring.svc'))
     inference_result.add_env_variable(V1EnvVar(name='mqtt_port', value='1883'))
     inference_result.add_env_variable(V1EnvVar(name='mqtt_cert', value='/opt/certs/public.cert'))
 
@@ -508,4 +508,4 @@ if __name__ == '__main__':
     pipeline_conf.set_timeout(4000)
     pipeline_conf.add_pipeline_annotation("tekton.dev/track_artifact", 'true')
     pipeline_conf.set_ttl_seconds_after_finished(30)
-    compiler.compile(batterytest_pipeline, __file__.replace('.py', '.yaml'),tekton_pipeline_conf=pipeline_conf)
+    compiler.compile(edgetest_pipeline, __file__.replace('.py', '.yaml'),tekton_pipeline_conf=pipeline_conf)
