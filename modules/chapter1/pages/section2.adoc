@@ -256,9 +256,19 @@ Once the pipeline has completed it is possible to access the output and pipeline
 image::object-store-after-run.png[]
 ****
 
-== Advanced Example
+=== Experiments And Runs
 
-In this section we're going to demonstrate how Data Science Pipelines work in a real world scenario. 
+An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs. A run is a _single_ execution of a pipeline whereas a recurring run is a scheduled, repeatable execution of a pipeline.
+
+A run can be configured using the DSP UI or programatically using the KFP SDK.
+
+image::dsp-runs.png[]
+
+NOTE: Experiments are part of the KFP SDK and is not currently covered in this course.
+
+== Real World Example
+
+In this section we're going to demonstrate a real world Data Science Pipelines scenario. 
 
 ****
 In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it's deployed in. On a regular schedule it uploads battery events via a data gateway and those batter events are used to train a model which is then retrieved by the device and used. 
@@ -271,11 +281,11 @@ The entire pipeline is here xref:attachment$sample-pipeline-full.py[Pipeline]
 
 We're not going to go through all of it but focus on the key aspects of it. 
 
-The actual pipeline is defined by the following function
+The actual pipeline is defined by the following function:
 
 ****
 [source,python]
-include::example$sample-pipeline-full.py[lines=450..454]
+include::example$sample-pipeline-full.py[lines=445..454]
 ****
 
 The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.
@@ -328,7 +338,13 @@ include::example$sample-pipeline-full.py[lines=492]
 include::example$sample-pipeline-full.py[lines=495]
 
 
-IMPORTANT: The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. 
+[IMPORTANT] 
+====
+The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. 
+
+There are other operators which control the flow of pipeline execution such as _Condition_ , _ExitHandler_, _ParallelFor_ .
+These are not covered as part of this course but the the 'https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py[KFP documentation]' has examples.
+====
 
 The following diagram shows the order of execution.
 
@@ -343,7 +359,7 @@ image::oai-pipeline-graph.png[]
 ****
 
 === Pipeline Parameter Passing
-As each step of our pipeline is executed in an independent container, input parameters and output values are handled as follows
+As each step of our pipeline is executed in an independent container, input parameters and output values are handled as follows.
 
 ==== Input Parameters
 
@@ -418,3 +434,11 @@ include::example$sample-pipeline-full.yaml[lines=12..18]
 include::example$sample-pipeline-full.yaml[lines=6..11]
 
 include::example$sample-pipeline-full.yaml[lines=22..25]
+====
+
+
+
+
+OCP resources
+    env vars, vol, secrets, tolerations, node selectors
+Compilers, api
