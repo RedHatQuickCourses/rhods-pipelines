@@ -508,4 +508,4 @@ if __name__ == '__main__':
     pipeline_conf.set_timeout(4000)
     pipeline_conf.add_pipeline_annotation("tekton.dev/track_artifact", 'true')
     pipeline_conf.set_ttl_seconds_after_finished(30)
-    compiler.compile(batterytest_pipeline, __file__.replace('.py', '.yaml'),tekton_pipeline_conf=pipeline_conf)
+    compiler.compile(edgetest_pipeline, __file__.replace('.py', '.yaml'),tekton_pipeline_conf=pipeline_conf)

@@ -1,41 +1,19 @@
-= Section 1
+= Section 2
 
-== Introduction to Data Science Pipelines
+== Data Science Pipelines in OpenShift AI
 
-A data science pipeline is like a recipe for turning raw data into useful insights. Just like when you cook, you follow a set of steps to prepare a meal, in data science, you follow a series of steps to analyze data and extract valuable information. Here's a simple breakdown of what a data science pipeline involves:
+== Data Science Pipeline Concepts
 
-1. **Data Collection**: This is where you gather all the data you need for your analysis. Think of it like buying the ingredients for a meal.
-
-2. **Data Cleaning**: Raw data is often messy, like chopping and cleaning vegetables. You need to remove errors, missing values, and any irrelevant information to make the data usable.
-
-3. **Data Exploration**: Here, you get to know your data better. It's like tasting your ingredients to understand their flavors. You create charts, graphs, and summary statistics to discover patterns and relationships in the data.
-
-4. **Feature Engineering**: Just as a chef combines and prepares ingredients in a specific way to create a dish, in data science, you manipulate and transform the data to create new features or variables that can be more informative for your analysis.
-
-5. **Model Building**: This is where the magic happens. You choose a statistical or machine learning model to make predictions or gain insights from your data. It's like following a recipe to cook your meal.
-
-6. **Model Training**: You "train" your model by showing it examples from your data, just as you might train a chef on how to prepare a specific dish.
-
-7. **Model Evaluation**: You taste your dish and assess its quality. Similarly, you evaluate your model's performance using various metrics to ensure it's doing what you want it to do.
-
-8. **Model Deployment**: If your dish is delicious, you serve it to others. In data science, if your model works well, you deploy it so that it can be used to make predictions on new, unseen data.
-
-9. **Monitoring and Maintenance**: Just as a chef may need to adjust the recipe over time to maintain the quality of the dish, data science models may need updates and monitoring to ensure they remain accurate and relevant.
-
-10. **Reporting and Communication**: Finally, you share your findings and insights, much like serving your meal and explaining how it was prepared to your guests.
-
-So, a data science pipeline is like a step-by-step guide that takes raw data, processes it, uses it to build models, and then communicates the results to help make informed decisions or predictions. It's a structured approach to turning data into valuable knowledge.
-
-
-In more technical terms A *pipeline* is a description of an ML workflow, including all of the components in the workflow and how they combine in the form of a graph. The pipeline includes the definition of the inputs (parameters) required to run the pipeline and the inputs and outputs of each component.
+* *Pipeline* -  is a machine learning workflow definition containing the steps and their inputs and outputs artifacts.
+* *Step* - (AKA _pipeline component_) is a self-contained bundle of code that represents an execution stage in the pipeline.
+* *Experiment* - is a logical grouping of runs where you can try different pipeline configurations.
+* *Run* - is a _single_ execution of a pipeline whereas a recurring run is a scheduled, repeatable execution of a pipeline.
 
 [NOTE]
 ====
-ML Pipleines are a basically an execution graph of tasks, commonly known as a _DAG_ (Directed Acyclic Graph).
+Pipleines are a basically an execution graph of tasks, this graph is commonly known as a _DAG_ (Directed Acyclic Graph).
 A DAG is a directed graph with no cycles aka no direct loops.
 ====
-
-== Data Science Pipelines in OpenShift AI
 
 OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines.
 
@@ -49,7 +27,6 @@ There is work in progress to migrate DSP to Kubeflow Pipeline V2. At the time of
 ====
 
 In OpenShift AI we use the *_Tekton_* runtime to execute pipelines. With this there is an additional step to be performed the python script needs to be compiled into a Tekton definition before being submitting to the runtime
-
 
 In OpenShift AI the Data Science Pipeline runtime consists of the following components:
 
@@ -66,7 +43,6 @@ DS Pipeline in OpenShift AI are managed by the `data-science-pipelines-operator-
 ====
 
 .DataScience Pipeline pods
-****
 [source,cmd]
 ----
  ~/oc get pods -n redhat-ods-applications
@@ -76,24 +52,23 @@ ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Runnin
 ds-pipeline-scheduledworkflow-pipelines-definition-7f5c645hcg4g   1/1     Running   0          9m48s
 mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Running   0          9m49s
 ----
-****
 
 == Creating a Data Science Pipeline with the KFP SDK
 
 === Prerequisites 
-****
 * Python Setup
 [source,cmd]
 ----
 pip install kfp==1.8
 pip install kfp-tekton==1.7.2
 ----
+IMPORTANT: Using the correct python module versions is critical to avoid conflicts between kfp SDK versions
 
 * S3 Storage
 
 Follow these instructions to setup a local Minio instance
 https://ai-on-openshift.io/tools-and-applications/minio/minio/
-****
+
 
 === Creating a Pipeline Server
 
@@ -258,9 +233,9 @@ image::object-store-after-run.png[]
 
 === Experiments And Runs
 
-An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs. A run is a _single_ execution of a pipeline whereas a recurring run is a scheduled, repeatable execution of a pipeline.
+An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs. 
 
-A run can be configured using the DSP UI or programatically using the KFP SDK.
+A run can be configured using the DSP UI or programatically using the _kfp SDK_.
 
 image::dsp-runs.png[]
 
@@ -425,20 +400,133 @@ def produce_two_small_outputs() -> NamedTuple('Outputs', [('text', str), ('numbe
 consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_task.outputs['number'])
 ----
 
+====
+The kfp SDK uses the following rules to define the input and output parameter names in your component’s interface:
+
+    . If the argument name ends with _path and the argument is annotated as an _kfp.components.InputPath_ or _kfp.components.OutputPath_, the parameter name is the argument name with the trailing _path removed.
+    . If the argument name ends with _file, the parameter name is the argument name with the trailing _file removed.
+    . If you return a single small value from your component using the return statement, the output parameter is named *output*.
+    . If you return several small values from your component by returning a _collections.namedtuple_, the SDK uses the tuple’s field names as the output parameter names.
+
+    . Otherwise, the SDK uses the argument name as the parameter name.
+====
+
 [TIP]
 ====
-In the Tekton definition you can see the definition of the _input and output artifacts_ 
+In the Tekton definition you can see the definition of the _input and output artifacts_ this can be useful for debugging purposes
 
 include::example$sample-pipeline-full.yaml[lines=12..18]
 
 include::example$sample-pipeline-full.yaml[lines=6..11]
 
 include::example$sample-pipeline-full.yaml[lines=22..25]
+
+You can also see the locations of data stored into the _s3_ bucket e.g. _artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz_
+====
+
+=== Execution on OpenShift
+
+To enable the _pipeline_ to run on OpenShift we need to pass it the associated _kubernetes_ resources 
+
+* _volumes_ 
+* _environment variables_
+* _node selectors, taints and tolerations_
+
+==== Volumes
+Our pipeline requires a number of volumes to be created and mounted into the executing pods. The volumes are primarily used for storage and secrets handling but can also be used for passing configuration files into the pods.
+
+Before mounting the volumes into the pods they need to be created. The following code creates two volumes, one from a pre-existing PVC and another from a pre-existing secret.
+
+include::example$sample-pipeline-full.py[lines=453..462]
+
+The volumes are mounted into the containers using the *_add_pvolumes_* method:
+
+include::example$sample-pipeline-full.py[lines=495..497]
+
+==== Environment Variables
+
+Environment variables can be added to the pod using the *_add_env_variable_* method. 
+
+include::example$sample-pipeline-full.py[lines=471..475]
+
+[NOTE]
+====
+The *_env_from_secret_* utility method also enables extracting values from secrets and mounting them as environment variables, in the example above the _AWS_ACCESS_KEY_ID_ value is extracted from the _s3-secret_ secret and added to the container defintion as the _s3_access_key_ environment variable.
+====
+
+==== Node Selectors, Taints and Tolerations
+
+Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware i.e. GPUs etc, also there may be other constraints e.g. data locality. 
+
+In our example we're using the nodes with an attached GPU to execute the step, to do this we need to:
+
+
+. Create the requisite toleration:
+
+include::example$sample-pipeline-full.py[lines=464..467]
+
+. Add the _toleration_ to the pod and add a _node selector_ constraint.
+
+include::example$sample-pipeline-full.py[lines=477..480]
+
+
+[TIP]
+====
+You could also use this approach to ensure that pods without GPU needs are *not* scheduled to nodes with GPUs.
+
+For global pipeline pod settings take a look at the *_PipelineConf_* class in the 'https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.html?highlight=add_env_variable#kfp.dsl.PipelineConf'[KFP SDK Documentation]. 
 ====
 
 
+[NOTE]
+====
+We have only covered a _subset_ of what's possible with the _kfp SDK_.
+
+It is also possible to customise significant parts of the _pod spec_ definition with:
+
+* Init and Sidecar Pods
+* Pod affinity rules
+* Annotations and labels
+* Retries and Timeouts
+* Resource requests and limits
+
+See the the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.html[KFP SDK Documentation] for more details.
+====
+
+=== Compiling to Tekton 
+
+As stated previously DSP python scripts need to be compiled into Tekton definitions for execution. 
+This can be achieved in multiple ways:
+
+. Explicity calling the "dsl-compile" command from the _kfp_ python package giving the input and output files. Then uploading the resultant yaml file to the DSP server via the UI
+. Adding the compile step to the python script and then uploading the resultant yaml file to the DSP server via the UI.
+. Adding the compile step to the python script and uploading the resulting tekton definition via an api call.
+
+In our example we've chosen the second option for no good particular reason:
+
+include::example$sample-pipeline-full.py[lines=511]
 
 
-OCP resources
-    env vars, vol, secrets, tolerations, node selectors
-Compilers, api
+The Tekton compiler also has a number of _global setting_ which are not covered here see https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py[Here] for more.
+
+
+[IMPORTANT]
+====
+We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md[kfp-tekton features] document for more advanced functionality.
+====
+
+=== Triggering a DSP pipeline
+
+In our real-world example above the entire pipeline is executed when a file is added to an _s3_ bucket. Here is the process followed:
+
+. File added to _s3_ bucket.
+. S3 triggers the send of a webhook payload to a _OCP Serverless_ function
+. The _Serverless_ function parses the payload and invokes the configured _DSP pipeline_
+
+We're not going to go through all of the code and configuration for this but here is the code to trigger the pipeline.
+
+[source,python]
+include::example$dsp_trigger.py[lines=34..51]
+
+
+The full code is xref:attachment$dsp_trigger.py[Here]
