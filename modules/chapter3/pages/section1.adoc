@@ -1,3 +1,44 @@
 = Section 1
 
 This is _Section 1_ of _Chapter 3_ in the *hello* quick course....
+
+== AI Pipelines
+
+Building an AI pipeline for a model is hard, breaking down and modularizing a pipeline is harder. A typical machine/deep learning pipeline begins as a series of preprocessing steps followed by experimentation/optimization and finally deployment. Each of these steps represents a challenge in the model development lifecycle.
+
+== Elyra
+
+Elyra provides a Pipeline Visual Editor for building AI pipelines from notebooks, Python scripts and R scripts, simplifying the conversion of multiple notebooks or scripts files into batch jobs or workflows.
+
+Elyra extends the Jupyter Notebook UI to allow for execution of a notebook as a batch job in local or remote cloud environments. This feature leverages the AI pipelines feature and requires either a Kubeflow Pipelines or Apache Airflow deployment via a runtime configuration.
+
+Elyra supports two types of components: generic components and custom components. A pipeline that utilizes only generic components is called a generic pipeline, whereas a pipeline that utilizes generic components and/or custom components is referred to as runtime-specific pipeline.
+
+The Elyra Visual Pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Apache Airflow DAG code on the fly, eliminating the need for any coding.
+
+== Creating a Data Science Pipeline with Elyra
+
+Pipelines are created in Elyra with the Visual Pipeline Editor by:
+
+Adding Python scripts or notebooks
+Configuring their execution properties
+Connecting the files to define dependencies
+
+== Creating a runtime configuration
+
+In Elyra, runtime configurations store metadata that describes the target environment where pipelines are executed. A runtime configuration for Apache Airflow includes:
+
+Connectivity information for the Airflow web server
+Details about the GitHub repository where DAGs are stored
+Connectivity information for the cloud storage service, which Elyra uses to store pipeline-run specific artifacts
+
+== Predict weather 
+
+This notebook pipeline downloads a free NOAA weather time series data set archive from the Data Asset Exchange, extracts, cleanses and analyzes the data file. The data file is subsequently used to predict the weather.
+
+This pipeline illustrates the following concepts:
+
+Execute notebooks sequentially. Notebook Part 1 - Data Cleaning runs after notebook load_data completed successfully.
+Execute notebooks in parallel. Notebooks Part 2 - Data Analysis and Part 3 - Time Series Forecasting run in parallel after notebook Part 1 - Data Cleaning completed successfully.
+Pass input parameters to a notebook. The generic load_data notebook requires an environment variable to be defined that identifies the public dataset download URL.
+Share data between notebooks. Notebook Part 1 - Data Cleaning generates a data file jfk_weather_cleaned.csv, which is consumed in notebook Part 2 - Data Analysis and Part 3 - Time Series Forecasting.
