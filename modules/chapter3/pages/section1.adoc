@@ -1,16 +1,16 @@
 = Section 1
 
-This is _Section 1_ of _Chapter 3_ in the *hello* quick course....
-
 == AI Pipelines
 
-Building an AI pipeline for a model is hard, breaking down and modularizing a pipeline is harder. A typical machine/deep learning pipeline begins as a series of preprocessing steps followed by experimentation/optimization and finally deployment. Each of these steps represents a challenge in the model development lifecycle.
+Constructing an AI pipeline for a model presents significant challenges, yet segmenting and modularizing this pipeline is even more complex. A standard machine or deep learning pipeline usually starts with a sequence of preprocessing activities, then progresses through a phase of experimentation and optimization and finally does the deployment. Each stage poses distinct obstacles throughout the model development process.
 
 == Elyra
 
-Elyra provides a Pipeline Visual Editor for building AI pipelines from notebooks, Python scripts and R scripts, simplifying the conversion of multiple notebooks or scripts files into batch jobs or workflows.
+Elyra provides a Pipeline Visual Editor for building AI pipelines from Jupyter notebooks, Python scripts and R scripts, simplifying the conversion of multiple notebooks or scripts files into batch jobs or workflows.
 
 Elyra extends the Jupyter Notebook UI to allow for execution of a notebook as a batch job in local or remote cloud environments. This feature leverages the AI pipelines feature and requires either a Kubeflow Pipelines or Apache Airflow deployment via a runtime configuration.
+
+image::elyra_jupyter.png[Jupyter with elyra]
 
 Elyra supports two types of components: generic components and custom components. A pipeline that utilizes only generic components is called a generic pipeline, whereas a pipeline that utilizes generic components and/or custom components is referred to as runtime-specific pipeline.
 
@@ -20,25 +20,49 @@ The Elyra Visual Pipeline editor lets you assemble pipelines by dragging and dro
 
 Pipelines are created in Elyra with the Visual Pipeline Editor by:
 
-Adding Python scripts or notebooks
-Configuring their execution properties
-Connecting the files to define dependencies
+* Launch JupyterLab with the Elyra extension installed.
+* Create a new pipeline by clicking on the Elyra pipeline editor icon.
+* Add each node to the pipeline by dragging and dropping notebooks or scripts from the file browser onto the pipeline editor canvas.
+* Connect the nodes to define the flow of execution.
+* Configure each node by double-clicking on it and setting the appropriate runtime image and file dependencies.
+* Once the pipeline is complete, you can run it locally or submit it to run on Kubeflow Pipelines or Apache Airflow.
 
 == Creating a runtime configuration
 
-In Elyra, runtime configurations store metadata that describes the target environment where pipelines are executed. A runtime configuration for Apache Airflow includes:
+A runtime configuration provides Elyra access to external resources, such as Kubeflow Pipelines or Apache Airflow for scalable pipeline execution.You can manage runtime configurations using the JupyterLab UI or the Elyra CLI.
 
-Connectivity information for the Airflow web server
-Details about the GitHub repository where DAGs are stored
-Connectivity information for the cloud storage service, which Elyra uses to store pipeline-run specific artifacts
+To create a runtime configuration:
 
-== Predict weather 
+* Open the Runtimes panel.
+* Click + to add a new runtime configuration and choose the desired runtime configuration type, e.g. Kubeflow Pipelines or Apache Airflow.
+* Provide a runtime configuration display name, an optional description, and tag the configuration to make it more easily discoverable.
+image::Create_runtime_configuration.png
+* Enter the Kubeflow Pipelines or Apache Airflow deployment information. Refer to section Kubeflow Pipelines configuration settings (https://elyra.readthedocs.io/en/latest/user_guide/runtime-conf.html#kubeflow-pipelines-configuration-settings) or Apache Airflow configuration settings(https://elyra.readthedocs.io/en/latest/user_guide/runtime-conf.html#apache-airflow-configuration-settings) for details.
+* Enter the Cloud Storage connectivity information. Refer to section Cloud Storage settings for details.
+* Save the runtime configuration. The new entry is displayed in the list.
+* Expand the entry and verify that you can access the Kubeflow Pipelines or Apache Airflow GUI and the Cloud Storage GUI using the displayed links.
 
-This notebook pipeline downloads a free NOAA weather time series data set archive from the Data Asset Exchange, extracts, cleanses and analyzes the data file. The data file is subsequently used to predict the weather.
+== Pipeline to Predict weather
+
+=== Prerequisites
+* This pipeline requires Elyra v1.2 or later.
+* Jupyter notebook with Elyra extension installed
+* Kubeflow runtime configuration, runtime image 
+
+This notebook pipeline uses a weather time series data set extracts, cleanses and analyzes the data file. The data file is subsequently used to predict the weather.
+
+image::weather_pipeline.png[Weather Pipeline]
 
 This pipeline illustrates the following concepts:
 
-Execute notebooks sequentially. Notebook Part 1 - Data Cleaning runs after notebook load_data completed successfully.
-Execute notebooks in parallel. Notebooks Part 2 - Data Analysis and Part 3 - Time Series Forecasting run in parallel after notebook Part 1 - Data Cleaning completed successfully.
-Pass input parameters to a notebook. The generic load_data notebook requires an environment variable to be defined that identifies the public dataset download URL.
-Share data between notebooks. Notebook Part 1 - Data Cleaning generates a data file jfk_weather_cleaned.csv, which is consumed in notebook Part 2 - Data Analysis and Part 3 - Time Series Forecasting.
+* Execute notebooks sequentially. Notebook Part 1 - Data Cleaning runs after notebook load_data completed successfully.
+* Execute notebooks in parallel. Notebooks Part 2 - Data Analysis and Part 3 - Time Series Forecasting run in parallel after notebook Part 1 - Data Cleaning completed successfully.
+* Pass input parameters to a notebook. The generic load_data notebook requires an environment variable to be defined that identifies the public dataset download URL.
+* Share data between notebooks. Notebook Part 1 - Data Cleaning generates a data file jfk_weather_cleaned.csv, which is consumed in notebook Part 2 - Data Analysis and Part 3 - Time Series Forecasting.
+
+The pipeline, dataset, each of these python scripts can be found under /modules/pages.
+
+Run the pipeline using the run pipeline button on top of the pipeline editor notebook
+image::run_pipeline.png[Run Pipeline]
+
+
