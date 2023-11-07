@@ -4,7 +4,7 @@
 
 == Data Science Pipeline Concepts
 
-* *Pipeline* -  is a machine learning workflow definition containing the steps and their inputs and outputs artifacts.
+* *Pipeline* -  is a workflow definition containing the steps and their input and output artifacts.
 * *Step* - (AKA _pipeline component_) is a self-contained bundle of code that represents an execution stage in the pipeline.
 * *Experiment* - is a logical grouping of runs where you can try different pipeline configurations.
 * *Run* - is a _single_ execution of a pipeline whereas a recurring run is a scheduled, repeatable execution of a pipeline.
