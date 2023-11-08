@@ -212,7 +212,7 @@ image::pipeline-run-view.png[]
 ****
 
 To execute the pipeline, click on _Create Run_ in the menu and fill out the _Name_ and _Description_.
-If the pipeline has _Input Parameters_ or a you need to schedule a recurring run then that can be configured further down. Once ready clink _Create_ and the pipeline will be scheduled.
+If the pipeline has _Input Parameters_ or you need to schedule a recurring run, then that can be configured further down. Once ready, click _Create_ to submit the pipeline for scheduling.
 
 ****
 image::creating-pipeline-run.png[]
