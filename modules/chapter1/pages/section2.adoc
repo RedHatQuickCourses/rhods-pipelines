@@ -12,7 +12,7 @@
 [NOTE]
 ====
 A pipeline is an execution graph of tasks, commonly known as a _DAG_ (Directed Acyclic Graph).
-A DAG is a directed graph with no cycles aka no direct loops.
+A DAG is a directed graph without any cycles, i.e. direct loops.
 ====
 
 OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines.
