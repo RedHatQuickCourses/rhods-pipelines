@@ -15,18 +15,18 @@ A pipeline is an execution graph of tasks, commonly known as a _DAG_ (Directed A
 A DAG is a directed graph without any cycles, i.e. direct loops.
 ====
 
-OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines.
+OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
 
-The first mechanism is the Elyra Jupyter notebook addon which provides a visual editor for creating pipelines via orchestration of Jupyter notebooks. 
+The first mechanism is the _Elyra Pipelines_ JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts. 
 
-The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are built using python scripts using the KFPV1 python SDK. Once built, the python pipeline is submitted to the DSP runtime to be scheduled for execution.
+The second mechanism and the one discussed here is based on the Kubeflow Pipelines SDK. With the SDK, pipelines are built using Python scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.
 
 [NOTE]
 ====
-There is work in progress to migrate DSP to Kubeflow Pipeline V2. At the time of writing this is still a work in progress and we won't cover it here.
+There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.
 ====
 
-In OpenShift AI we use the *_Tekton_* runtime to execute pipelines. With this there is an additional step to be performed the python script needs to be compiled into a Tekton definition before being submitting to the runtime
+In OpenShift AI we use the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
 
 In OpenShift AI the Data Science Pipeline runtime consists of the following components:
 
@@ -62,7 +62,7 @@ mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Runnin
 pip install kfp==1.8
 pip install kfp-tekton==1.7.2
 ----
-IMPORTANT: Using the correct python module versions is critical to avoid conflicts between kfp SDK versions
+IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
 
 * S3 Storage
 
@@ -72,7 +72,7 @@ https://ai-on-openshift.io/tools-and-applications/minio/minio/
 
 === Creating a Pipeline Server
 
-To execute pipelines a _Pipeline server_ needs to be created but before that can happen an S3 Storage bucket needs to be configured. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
+To execute pipelines a _Pipeline server_ needs to be created, which in turn depends on the creation of an S3 Storage bucket. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
 ****
 image::creating-data-connection.png[]
 ****
@@ -219,13 +219,13 @@ image::creating-pipeline-run.png[]
 ****
 
 The pipeline will execute and the outputs will be stored into the configured S3 bucket.
-As the pipeline executes the view will be updated to show the steps being executed. It's possible to click on the graph nodes to reveal information of the steps
+As the pipeline executes the view will be updated to show the steps being executed. It's possible to click on the graph nodes to reveal information of the steps.
 
 ****
 image::post-pipeline-run.png[]
 ****
 
-Once the pipeline has completed it is possible to access the output and pipeline artifacts (if used) in the Minio Storage UI
+Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio Storage UI.
 
 ****
 image::object-store-after-run.png[]
@@ -235,18 +235,18 @@ image::object-store-after-run.png[]
 
 An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs. 
 
-A run can be configured using the DSP UI or programatically using the _kfp SDK_.
+A run can be configured using the DSP UI or programatically using the _KFP SDK_.
 
 image::dsp-runs.png[]
 
-NOTE: Experiments are part of the KFP SDK and is not currently covered in this course.
+NOTE: Experiments are part of the KFP SDK and are not currently covered in this course.
 
 == Real World Example
 
 In this section we're going to demonstrate a real world Data Science Pipelines scenario. 
 
 ****
-In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it's deployed in. On a regular schedule it uploads battery events via a data gateway and those batter events are used to train a model which is then retrieved by the device and used. 
+In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it's deployed in. On a regular schedule it uploads battery events via a data gateway, and those battery events are used to train a model which is then retrieved by the device and used. 
 
 
 image::openshift-ai-dsp-edge.png[]
@@ -268,32 +268,32 @@ The '@dsl.pipeline' parameters provide the name and description if you were uplo
 The function *_edgetest_pipeline_* is the implementation of the pipeline.
 
 === Pipeline Parameters
-The pipeline has four parameters
+The pipeline has four parameters:
 
 * _file_obj_ and _src_bucket_ refer to S3 bucket details and can be ignored.
-* _VIN_ is the edge device identifier and has a default value of 412356
-* _epoch_count_ is the number of training epochs to be used
+* _VIN_ is the edge device identifier and has a default value of 412356.
+* _epoch_count_ is the number of training epochs to be used.
 
-In the _Create Run_ UI these parameters are available so that users can override the values as they need
+In the _Create Run_ UI these parameters are available so that users can override the values as they need.
 
 ****
 image::pipeline-parameters.png[]
 ****
 
 === Pipeline Steps
-The file contains the following python functions which roughly correspond to the steps in the diagram above
+The file contains the following Python functions, which roughly correspond to the steps in the diagram above
 
 * load_trigger_data()
 * prep_data_train_model()
 * model_upload_notify()
 * model_inference()
 
-These functions are mapped into individual containers by using the _create_component_from_func_ function. You can specify the container _base_image_ to use as well as any additional python packages to be installed into the container at execution time.
+These functions are mapped into individual containers by using the _create_component_from_func_ function. You can specify the container _base_image_ to use as well as any additional Python packages to be installed into the container at execution time.
 
 [source,python]
 include::example$sample-pipeline-full.py[lines=433..443]
 
-The python functions can be used in multiple different step definitions; in the example the _prep_data_train_model_ function is used in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
+The Python functions can be used in multiple different step definitions; in the example the _prep_data_train_model_ function is used in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
 
 The pipeline execution _graph_ is created using the following code:
 
@@ -318,7 +318,7 @@ include::example$sample-pipeline-full.py[lines=495]
 The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. 
 
 There are other operators which control the flow of pipeline execution such as _Condition_ , _ExitHandler_, _ParallelFor_ .
-These are not covered as part of this course but the the 'https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py[KFP documentation]' has examples.
+These are not covered as part of this course but the https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py[KFP documentation] has examples.
 ====
 
 The following diagram shows the order of execution.
@@ -327,7 +327,7 @@ The following diagram shows the order of execution.
 image::pipeline-graph.png[]
 ****
 
-This is also visable in the OpenShift AI user interface:
+This is also visible in the OpenShift AI user interface:
 
 ****
 image::oai-pipeline-graph.png[]
@@ -351,7 +351,7 @@ For returning data from a step as a file, the function argument needs to be anno
 
 In both cases the actual value of the parameter is the file path and not the actual data. So the pipeline will have to read/write to the file as necessary.
 
-For example in our sample pipeline we use the _parameter_data_ argument of the _prep_data_train_model_ function to return multiple data values as a file, here's the function definition with the _OutputPath_ annotation
+For example, in our sample pipeline we use the _parameter_data_ argument of the _prep_data_train_model_ function to return multiple data values as a file. Here's the function definition with the _OutputPath_ annotation
 
 [source,python]
 include::example$sample-pipeline-full.py[lines=51]
@@ -381,7 +381,7 @@ include::example$sample-pipeline-full.py[lines=482]
 [TIP]
 ====
 There are other parameter annotations available to handle specialised file types 
-For example _InputBinaryFile_, _OutputBinaryFile_. 
+such as _InputBinaryFile_, _OutputBinaryFile_. 
 
 The full annotation list is in the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.components.html[KFP component documentation].
 
@@ -389,7 +389,7 @@ The full annotation list is in the https://kubeflow-pipelines.readthedocs.io/en/
 
 ==== Returning multiple values from a step 
 If you return a single small value from your component using the _return_ statement, the output parameter is named *_output_*.
-It is however possible to return multiple small values using the python _collection_ library method _namedtuple_
+It is, however, possible to return multiple small values using the Python _collection_ library method _namedtuple_.
 
 From a https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/Data%20passing%20in%20python%20components.ipynb[Kubeflow pipelines example]
  
@@ -401,7 +401,7 @@ consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_ta
 ----
 
 ====
-The kfp SDK uses the following rules to define the input and output parameter names in your component’s interface:
+The KFP SDK uses the following rules to define the input and output parameter names in your component’s interface:
 
     . If the argument name ends with _path and the argument is annotated as an _kfp.components.InputPath_ or _kfp.components.OutputPath_, the parameter name is the argument name with the trailing _path removed.
     . If the argument name ends with _file, the parameter name is the argument name with the trailing _file removed.
@@ -413,7 +413,7 @@ The kfp SDK uses the following rules to define the input and output parameter na
 
 [TIP]
 ====
-In the Tekton definition you can see the definition of the _input and output artifacts_ this can be useful for debugging purposes
+In the Tekton definition you can see the definition of the _input and output artifacts_. This can be useful for debugging purposes.
 
 include::example$sample-pipeline-full.yaml[lines=12..18]
 
@@ -421,7 +421,7 @@ include::example$sample-pipeline-full.yaml[lines=6..11]
 
 include::example$sample-pipeline-full.yaml[lines=22..25]
 
-You can also see the locations of data stored into the _s3_ bucket e.g. _artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz_
+You can also see the locations of data stored into the S3 bucket e.g. _artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz_
 ====
 
 === Execution on OpenShift
@@ -451,14 +451,14 @@ include::example$sample-pipeline-full.py[lines=471..475]
 
 [NOTE]
 ====
-The *_env_from_secret_* utility method also enables extracting values from secrets and mounting them as environment variables, in the example above the _AWS_ACCESS_KEY_ID_ value is extracted from the _s3-secret_ secret and added to the container defintion as the _s3_access_key_ environment variable.
+The *_env_from_secret_* utility method also enables extracting values from secrets and mounting them as environment variables. In the example above the _AWS_ACCESS_KEY_ID_ value is extracted from the _s3-secret_ secret and added to the container defintion as the _s3_access_key_ environment variable.
 ====
 
 ==== Node Selectors, Taints and Tolerations
 
-Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware i.e. GPUs etc, also there may be other constraints e.g. data locality. 
+Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware such as GPUs; or there may be other constraints such as data locality. 
 
-In our example we're using the nodes with an attached GPU to execute the step, to do this we need to:
+In our example we're using the nodes with an attached GPU to execute the step. To do this we need to:
 
 
 . Create the requisite toleration:
@@ -480,7 +480,7 @@ For global pipeline pod settings take a look at the *_PipelineConf_* class in th
 
 [NOTE]
 ====
-We have only covered a _subset_ of what's possible with the _kfp SDK_.
+We have only covered a _subset_ of what's possible with the _KFP SDK_.
 
 It is also possible to customise significant parts of the _pod spec_ definition with:
 
@@ -495,19 +495,19 @@ See the the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.h
 
 === Compiling to Tekton 
 
-As stated previously DSP python scripts need to be compiled into Tekton definitions for execution. 
+As stated previously, DSP Python scripts need to be compiled into Tekton definitions for execution. 
 This can be achieved in multiple ways:
 
-. Explicity calling the "dsl-compile" command from the _kfp_ python package giving the input and output files. Then uploading the resultant yaml file to the DSP server via the UI
-. Adding the compile step to the python script and then uploading the resultant yaml file to the DSP server via the UI.
-. Adding the compile step to the python script and uploading the resulting tekton definition via an api call.
+. Explicity calling the "dsl-compile" command from the _kfp_ Python package giving the input and output files, then uploading the resultant yaml file to the DSP server via the UI.
+. Adding the compile step to the Python script and then uploading the resultant yaml file to the DSP server via the UI.
+. Adding the compile step to the Python script and uploading the resulting Tekton definition via an api call.
 
-In our example we've chosen the second option for no good particular reason:
+In our example we've chosen the second option:
 
 include::example$sample-pipeline-full.py[lines=511]
 
 
-The Tekton compiler also has a number of _global setting_ which are not covered here see https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py[Here] for more.
+The Tekton compiler also has a number of _global settings_, which are not covered here, see https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py[here] for more details.
 
 
 [IMPORTANT]
@@ -517,16 +517,16 @@ We have only covered a subset of the functionality avaiable in DSP as it pertain
 
 === Triggering a DSP pipeline
 
-In our real-world example above the entire pipeline is executed when a file is added to an _s3_ bucket. Here is the process followed:
+In our real-world example above the entire pipeline is executed when a file is added to an S3 bucket. Here is the process followed:
 
-. File added to _s3_ bucket.
-. S3 triggers the send of a webhook payload to a _OCP Serverless_ function
-. The _Serverless_ function parses the payload and invokes the configured _DSP pipeline_
+. File added to S3 bucket.
+. S3 triggers the send of a webhook payload to an _OCP Serverless_ function.
+. The _Serverless_ function parses the payload and invokes the configured _DSP pipeline_.
 
-We're not going to go through all of the code and configuration for this but here is the code to trigger the pipeline.
+We're not going to go through the code and configuration for this, but here is the code to trigger the pipeline.
 
 [source,python]
 include::example$dsp_trigger.py[lines=34..51]
 
 
-The full code is xref:attachment$dsp_trigger.py[Here]
+The full code is xref:attachment$dsp_trigger.py[here].
