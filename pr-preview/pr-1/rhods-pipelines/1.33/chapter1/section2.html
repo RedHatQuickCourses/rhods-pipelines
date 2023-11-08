@@ -179,13 +179,13 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 </table>
 </div>
 <div class="paragraph">
-<p>OpenShift AI offers two out of the box mechanisms to build Data Science Pipelines.</p>
+<p>OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.</p>
 </div>
 <div class="paragraph">
-<p>The first mechanism is the Elyra Jupyter notebook addon which provides a visual editor for creating pipelines via orchestration of Jupyter notebooks.</p>
+<p>The first mechanism is the <em>Elyra Pipelines</em> JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts.</p>
 </div>
 <div class="paragraph">
-<p>The second mechanism and the one discussed here is using Data Science Pipelines (DSP) based on the upstream KubeflowPipelines V1. With DSP, pipelines are built using python scripts using the KFPV1 python SDK. Once built, the python pipeline is submitted to the DSP runtime to be scheduled for execution.</p>
+<p>The second mechanism and the one discussed here is based on the Kubeflow Pipelines SDK. With the SDK, pipelines are built using Python scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -195,14 +195,14 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>There is work in progress to migrate DSP to Kubeflow Pipeline V2. At the time of writing this is still a work in progress and we won&#8217;t cover it here.</p>
+<p>There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>In OpenShift AI we use the <strong><em>Tekton</em></strong> runtime to execute pipelines. With this there is an additional step to be performed the python script needs to be compiled into a Tekton definition before being submitting to the runtime</p>
+<p>In OpenShift AI we use the <strong><em>Tekton</em></strong> runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.</p>
 </div>
 <div class="paragraph">
 <p>In OpenShift AI the Data Science Pipeline runtime consists of the following components:</p>
@@ -278,7 +278,7 @@ pip install kfp-tekton==1.7.2</pre>
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-Using the correct python module versions is critical to avoid conflicts between kfp SDK versions
+Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
 </td>
 </tr>
 </table>
@@ -298,7 +298,7 @@ Using the correct python module versions is critical to avoid conflicts between 
 <div class="sect2">
 <h3 id="_creating_a_pipeline_server"><a class="anchor" href="#_creating_a_pipeline_server"></a>Creating a Pipeline Server</h3>
 <div class="paragraph">
-<p>To execute pipelines a <em>Pipeline server</em> needs to be created but before that can happen an S3 Storage bucket needs to be configured. This is used to store the run artifacts and outputs of any pipeline run on the associated server.</p>
+<p>To execute pipelines a <em>Pipeline server</em> needs to be created, which in turn depends on the creation of an S3 Storage bucket. This is used to store the run artifacts and outputs of any pipeline run on the associated server.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -503,7 +503,7 @@ If the pipeline has <em>Input Parameters</em> or you need to schedule a recurrin
 </div>
 <div class="paragraph">
 <p>The pipeline will execute and the outputs will be stored into the configured S3 bucket.
-As the pipeline executes the view will be updated to show the steps being executed. It&#8217;s possible to click on the graph nodes to reveal information of the steps</p>
+As the pipeline executes the view will be updated to show the steps being executed. It&#8217;s possible to click on the graph nodes to reveal information of the steps.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -515,7 +515,7 @@ As the pipeline executes the view will be updated to show the steps being execut
 </div>
 </div>
 <div class="paragraph">
-<p>Once the pipeline has completed it is possible to access the output and pipeline artifacts (if used) in the Minio Storage UI</p>
+<p>Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio Storage UI.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -533,7 +533,7 @@ As the pipeline executes the view will be updated to show the steps being execut
 <p>An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs.</p>
 </div>
 <div class="paragraph">
-<p>A run can be configured using the DSP UI or programatically using the <em>kfp SDK</em>.</p>
+<p>A run can be configured using the DSP UI or programatically using the <em>KFP SDK</em>.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -547,7 +547,7 @@ As the pipeline executes the view will be updated to show the steps being execut
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Experiments are part of the KFP SDK and is not currently covered in this course.
+Experiments are part of the KFP SDK and are not currently covered in this course.
 </td>
 </tr>
 </table>
@@ -564,7 +564,7 @@ Experiments are part of the KFP SDK and is not currently covered in this course.
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph">
-<p>In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it&#8217;s deployed in. On a regular schedule it uploads battery events via a data gateway and those batter events are used to train a model which is then retrieved by the device and used.</p>
+<p>In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it&#8217;s deployed in. On a regular schedule it uploads battery events via a data gateway, and those battery events are used to train a model which is then retrieved by the device and used.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -608,7 +608,7 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
 <div class="sect2">
 <h3 id="_pipeline_parameters"><a class="anchor" href="#_pipeline_parameters"></a>Pipeline Parameters</h3>
 <div class="paragraph">
-<p>The pipeline has four parameters</p>
+<p>The pipeline has four parameters:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -616,15 +616,15 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
 <p><em>file_obj</em> and <em>src_bucket</em> refer to S3 bucket details and can be ignored.</p>
 </li>
 <li>
-<p><em>VIN</em> is the edge device identifier and has a default value of 412356</p>
+<p><em>VIN</em> is the edge device identifier and has a default value of 412356.</p>
 </li>
 <li>
-<p><em>epoch_count</em> is the number of training epochs to be used</p>
+<p><em>epoch_count</em> is the number of training epochs to be used.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>In the <em>Create Run</em> UI these parameters are available so that users can override the values as they need</p>
+<p>In the <em>Create Run</em> UI these parameters are available so that users can override the values as they need.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -639,7 +639,7 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
 <div class="sect2">
 <h3 id="_pipeline_steps"><a class="anchor" href="#_pipeline_steps"></a>Pipeline Steps</h3>
 <div class="paragraph">
-<p>The file contains the following python functions which roughly correspond to the steps in the diagram above</p>
+<p>The file contains the following Python functions, which roughly correspond to the steps in the diagram above</p>
 </div>
 <div class="ulist">
 <ul>
@@ -658,7 +658,7 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
 </ul>
 </div>
 <div class="paragraph">
-<p>These functions are mapped into individual containers by using the <em>create_component_from_func</em> function. You can specify the container <em>base_image</em> to use as well as any additional python packages to be installed into the container at execution time.</p>
+<p>These functions are mapped into individual containers by using the <em>create_component_from_func</em> function. You can specify the container <em>base_image</em> to use as well as any additional Python packages to be installed into the container at execution time.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -676,7 +676,7 @@ inference_model_op= components.create_component_from_func(
 </div>
 </div>
 <div class="paragraph">
-<p>The python functions can be used in multiple different step definitions; in the example the <em>prep_data_train_model</em> function is used in the <em>prep_data_train_op</em> and the <em>prep_inference_data_op</em> containers.</p>
+<p>The Python functions can be used in multiple different step definitions; in the example the <em>prep_data_train_model</em> function is used in the <em>prep_data_train_op</em> and the <em>prep_inference_data_op</em> containers.</p>
 </div>
 <div class="paragraph">
 <p>The pipeline execution <em>graph</em> is created using the following code:</p>
@@ -718,7 +718,7 @@ inference_model_op= components.create_component_from_func(
 </div>
 <div class="paragraph">
 <p>There are other operators which control the flow of pipeline execution such as <em>Condition</em> , <em>ExitHandler</em>, <em>ParallelFor</em> .
-These are not covered as part of this course but the the '<a href="https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py">KFP documentation</a>' has examples.</p>
+These are not covered as part of this course but the <a href="https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py">KFP documentation</a> has examples.</p>
 </div>
 </td>
 </tr>
@@ -737,7 +737,7 @@ These are not covered as part of this course but the the '<a href="https://githu
 </div>
 </div>
 <div class="paragraph">
-<p>This is also visable in the OpenShift AI user interface:</p>
+<p>This is also visible in the OpenShift AI user interface:</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -787,7 +787,7 @@ For returning data from a step as a file, the function argument needs to be anno
 <p>In both cases the actual value of the parameter is the file path and not the actual data. So the pipeline will have to read/write to the file as necessary.</p>
 </div>
 <div class="paragraph">
-<p>For example in our sample pipeline we use the <em>parameter_data</em> argument of the <em>prep_data_train_model</em> function to return multiple data values as a file, here&#8217;s the function definition with the <em>OutputPath</em> annotation</p>
+<p>For example, in our sample pipeline we use the <em>parameter_data</em> argument of the <em>prep_data_train_model</em> function to return multiple data values as a file. Here&#8217;s the function definition with the <em>OutputPath</em> annotation</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -842,7 +842,7 @@ For returning data from a step as a file, the function argument needs to be anno
 <td class="content">
 <div class="paragraph">
 <p>There are other parameter annotations available to handle specialised file types
-For example <em>InputBinaryFile</em>, <em>OutputBinaryFile</em>.</p>
+such as <em>InputBinaryFile</em>, <em>OutputBinaryFile</em>.</p>
 </div>
 <div class="paragraph">
 <p>The full annotation list is in the <a href="https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.components.html">KFP component documentation</a>.</p>
@@ -856,7 +856,7 @@ For example <em>InputBinaryFile</em>, <em>OutputBinaryFile</em>.</p>
 <h4 id="_returning_multiple_values_from_a_step"><a class="anchor" href="#_returning_multiple_values_from_a_step"></a>Returning multiple values from a step</h4>
 <div class="paragraph">
 <p>If you return a single small value from your component using the <em>return</em> statement, the output parameter is named <strong><em>output</em></strong>.
-It is however possible to return multiple small values using the python <em>collection</em> library method <em>namedtuple</em></p>
+It is, however, possible to return multiple small values using the Python <em>collection</em> library method <em>namedtuple</em>.</p>
 </div>
 <div class="paragraph">
 <p>From a <a href="https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/Data%20passing%20in%20python%20components.ipynb">Kubeflow pipelines example</a></p>
@@ -871,7 +871,7 @@ consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_ta
 <div class="exampleblock">
 <div class="content">
 <div class="paragraph">
-<p>The kfp SDK uses the following rules to define the input and output parameter names in your component’s interface:</p>
+<p>The KFP SDK uses the following rules to define the input and output parameter names in your component’s interface:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -902,7 +902,7 @@ consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_ta
 </td>
 <td class="content">
 <div class="paragraph">
-<p>In the Tekton definition you can see the definition of the <em>input and output artifacts</em> this can be useful for debugging purposes</p>
+<p>In the Tekton definition you can see the definition of the <em>input and output artifacts</em>. This can be useful for debugging purposes.</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -934,7 +934,7 @@ consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_ta
 </div>
 </div>
 <div class="paragraph">
-<p>You can also see the locations of data stored into the <em>s3</em> bucket e.g. <em>artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz</em></p>
+<p>You can also see the locations of data stored into the S3 bucket e.g. <em>artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz</em></p>
 </div>
 </td>
 </tr>
@@ -1015,7 +1015,7 @@ trigger_data.add_env_variable(env_from_secret('s3_secret_access_key', 's3-secret
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The <strong><em>env_from_secret</em></strong> utility method also enables extracting values from secrets and mounting them as environment variables, in the example above the <em>AWS_ACCESS_KEY_ID</em> value is extracted from the <em>s3-secret</em> secret and added to the container defintion as the <em>s3_access_key</em> environment variable.</p>
+<p>The <strong><em>env_from_secret</em></strong> utility method also enables extracting values from secrets and mounting them as environment variables. In the example above the <em>AWS_ACCESS_KEY_ID</em> value is extracted from the <em>s3-secret</em> secret and added to the container defintion as the <em>s3_access_key</em> environment variable.</p>
 </div>
 </td>
 </tr>
@@ -1025,10 +1025,10 @@ trigger_data.add_env_variable(env_from_secret('s3_secret_access_key', 's3-secret
 <div class="sect3">
 <h4 id="_node_selectors_taints_and_tolerations"><a class="anchor" href="#_node_selectors_taints_and_tolerations"></a>Node Selectors, Taints and Tolerations</h4>
 <div class="paragraph">
-<p>Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware i.e. GPUs etc, also there may be other constraints e.g. data locality.</p>
+<p>Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware such as GPUs; or there may be other constraints such as data locality.</p>
 </div>
 <div class="paragraph">
-<p>In our example we&#8217;re using the nodes with an attached GPU to execute the step, to do this we need to:</p>
+<p>In our example we&#8217;re using the nodes with an attached GPU to execute the step. To do this we need to:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1081,7 +1081,7 @@ prep_train_data.add_toleration(gpu_toleration)</pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>We have only covered a <em>subset</em> of what&#8217;s possible with the <em>kfp SDK</em>.</p>
+<p>We have only covered a <em>subset</em> of what&#8217;s possible with the <em>KFP SDK</em>.</p>
 </div>
 <div class="paragraph">
 <p>It is also possible to customise significant parts of the <em>pod spec</em> definition with:</p>
@@ -1117,24 +1117,24 @@ prep_train_data.add_toleration(gpu_toleration)</pre>
 <div class="sect2">
 <h3 id="_compiling_to_tekton"><a class="anchor" href="#_compiling_to_tekton"></a>Compiling to Tekton</h3>
 <div class="paragraph">
-<p>As stated previously DSP python scripts need to be compiled into Tekton definitions for execution.
+<p>As stated previously, DSP Python scripts need to be compiled into Tekton definitions for execution.
 This can be achieved in multiple ways:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Explicity calling the "dsl-compile" command from the <em>kfp</em> python package giving the input and output files. Then uploading the resultant yaml file to the DSP server via the UI</p>
+<p>Explicity calling the "dsl-compile" command from the <em>kfp</em> Python package giving the input and output files, then uploading the resultant yaml file to the DSP server via the UI.</p>
 </li>
 <li>
-<p>Adding the compile step to the python script and then uploading the resultant yaml file to the DSP server via the UI.</p>
+<p>Adding the compile step to the Python script and then uploading the resultant yaml file to the DSP server via the UI.</p>
 </li>
 <li>
-<p>Adding the compile step to the python script and uploading the resulting tekton definition via an api call.</p>
+<p>Adding the compile step to the Python script and uploading the resulting Tekton definition via an api call.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>In our example we&#8217;ve chosen the second option for no good particular reason:</p>
+<p>In our example we&#8217;ve chosen the second option:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -1142,7 +1142,7 @@ This can be achieved in multiple ways:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The Tekton compiler also has a number of <em>global setting</em> which are not covered here see <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py">Here</a> for more.</p>
+<p>The Tekton compiler also has a number of <em>global settings</em>, which are not covered here, see <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py">here</a> for more details.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -1162,23 +1162,23 @@ This can be achieved in multiple ways:</p>
 <div class="sect2">
 <h3 id="_triggering_a_dsp_pipeline"><a class="anchor" href="#_triggering_a_dsp_pipeline"></a>Triggering a DSP pipeline</h3>
 <div class="paragraph">
-<p>In our real-world example above the entire pipeline is executed when a file is added to an <em>s3</em> bucket. Here is the process followed:</p>
+<p>In our real-world example above the entire pipeline is executed when a file is added to an S3 bucket. Here is the process followed:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>File added to <em>s3</em> bucket.</p>
+<p>File added to S3 bucket.</p>
 </li>
 <li>
-<p>S3 triggers the send of a webhook payload to a <em>OCP Serverless</em> function</p>
+<p>S3 triggers the send of a webhook payload to an <em>OCP Serverless</em> function.</p>
 </li>
 <li>
-<p>The <em>Serverless</em> function parses the payload and invokes the configured <em>DSP pipeline</em></p>
+<p>The <em>Serverless</em> function parses the payload and invokes the configured <em>DSP pipeline</em>.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>We&#8217;re not going to go through all of the code and configuration for this but here is the code to trigger the pipeline.</p>
+<p>We&#8217;re not going to go through the code and configuration for this, but here is the code to trigger the pipeline.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1203,7 +1203,7 @@ This can be achieved in multiple ways:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The full code is <a href="_attachments/dsp_trigger.py" class="xref attachment">Here</a></p>
+<p>The full code is <a href="_attachments/dsp_trigger.py" class="xref attachment">here</a>.</p>
 </div>
 </div>
 </div>
