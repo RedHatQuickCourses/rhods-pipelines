@@ -1,3 +1,67 @@
 = Section 1
 
-This is _Section 1_ of _Chapter 2_ in the *hello* quick course....
+== AI Pipelines
+
+Constructing an AI pipeline for a model presents significant challenges, yet segmenting and modularizing this pipeline is even more complex. A standard machine or deep learning pipeline usually starts with a sequence of preprocessing activities, then progresses through a phase of experimentation, model training and optimization, and finally does the deployment. Each stage poses distinct obstacles throughout the model development process.
+
+== Elyra
+
+Elyra provides a Pipeline Visual Editor for building AI pipelines from Jupyter notebooks, Python scripts and R scripts, simplifying the conversion of multiple notebooks or scripts files into batch jobs or workflows. A pipleine in ELyra consists nodes that are connected with each other to define execution dependencies.
+
+Elyra extends the Jupyter Notebook UI to allow for execution of a notebook as a batch job in local or remote cloud environments. This feature leverages the AI pipelines feature and requires either a Kubeflow Pipelines or Apache Airflow deployment via a runtime configuration.
+
+image::elyra_jupyter.png[Jupyter with elyra]
+
+Elyra supports two types of components: generic components and custom components. 
+Generic components::
+Elyra includes three generic components that allow for the processing of Jupyter notebooks, Python scripts, and R scripts. These components are called generic because they can be included in pipelines for any supported runtime type: local/JupyterLab, Kubeflow Pipelines, and Apache Airflow. Components are exposed in the pipeline editor via the palette.
+Custom components::
+Custom components are commonly only implemented for one runtime type, such as Kubeflow Pipelines or Apache Airflow. There are many custom components available on the web that you can include in pipelines, but you can also create your own. Custom componenets are not included with Elyra and must therefore be managed separately. Custom componenets also use the runtime specific mechanisms to exchange data and other components, like Xcoms for Apache Airflow, whereas generic pipelines use s3-compatible storage.
+
+A pipeline that utilizes only generic components is called a generic pipeline, whereas a pipeline that utilizes generic components and/or custom components is referred to as runtime-specific pipeline.
+
+The Elyra Visual Pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Apache Airflow DAG code on the fly, eliminating the need for any coding.
+
+== Creating a Data Science Pipeline with Elyra
+
+In order to create Elyra pipelines with the Visual Pipeline Editor:
+
+* Launch JupyterLab with the Elyra extension installed.
+* Create a new pipeline by clicking on the Elyra pipeline editor icon.
+* Add each node to the pipeline by dragging and dropping notebooks or scripts from the file browser onto the pipeline editor canvas.
+* Connect the nodes to define the flow of execution.
+* Configure each node by right-clicking on it, clicking 'Open Properties', and setting the appropriate runtime image and file dependencies.
+* You can also inject environment variables, secrets, and define output files.
+* Once the pipeline is complete, you can submit it to the Data Science Pipelines engine.
+
+== Creating a runtime configuration
+
+A runtime configuration provides Elyra access to external resources, such as Kubeflow Pipelines or Apache Airflow for scalable pipeline execution. You can manage runtime configurations using the JupyterLab UI or the Elyra CLI. The runtime configuration is included and is pre-configured for submitting pipelines to Data Science Pipleines. More information about all the available runtime configuration creation and management for Elyra can be found at: (https://elyra.readthedocs.io/en/latest/user_guide/runtime-conf.html#kubeflow-pipelines-configuration-settings) 
+
+
+== Excerise: Elyra pipeline to Predict weather
+
+=== Prerequisites
+* This pipeline requires Elyra v1.2 or later.
+* Jupyter notebook with Elyra extension installed.
+* Kubeflow runtime configuration, runtime image 
+
+
+This notebook pipeline uses a weather time series data set extracts, cleanses and analyzes the data file. The data file is subsequently used to predict the weather.
+
+image::weather_pipeline.png[Weather Pipeline]
+
+This pipeline illustrates the following concepts:
+
+* Execute notebooks sequentially. Notebook Part 1 - Data Cleaning runs after notebook load_data completed successfully.
+* Execute notebooks in parallel. Notebooks Part 2 - Data Analysis and Part 3 - Time Series Forecasting run in parallel after notebook Part 1 - Data Cleaning completed successfully.
+* Pass input parameters to a notebook. The generic load_data notebook requires an environment variable to be defined that identifies the public dataset download URL.
+* Share data between notebooks. Notebook Part 1 - Data Cleaning generates a data file jfk_weather_cleaned.csv, which is consumed in notebook Part 2 - Data Analysis and Part 3 - Time Series Forecasting.
+
+=== Implementation Steps:
+
+* Open the rhods-qc-apps/5.datascience-pipelines/chapter2/lab/Part1 - Data Cleaning.ipynb, rhods-qc-apps/5.datascience-pipelines/chapter2/lab/Part2 - Data Analysis.ipynb, rhods-qc-apps/5.datascience-pipelines/chapter2/lab/Part3 - Time Series Forecasting.ipynb files.
+* Run the pipeline using the run pipeline button on top of the pipeline editor notebook
+image::run_pipeline.png[Run Pipeline]
+
+
