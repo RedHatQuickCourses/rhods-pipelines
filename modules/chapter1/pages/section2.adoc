@@ -1,3 +1,186 @@
-= Section 2
+= Elyra Pipelines
 
-This is _Section 2_ of _Chapter 1_ in the *hello* quick course....
+Elyra provides a visual pipeline editor for building pipelines from Python and R scripts as well as Jupyter notebooks, simplifying the conversion of multiple files into batch jobs or workflows. A pipeline in Elyra consists of nodes that are connected with each other to define execution dependencies.
+
+image::elyra_jupyter.png[Jupyter with elyra]
+
+Elyra's visual pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Tekton YAML definition on the fly and submitting it to the Data Science Pipelines backend.
+
+== Creating a Data Science Pipeline with Elyra
+
+In order to create Elyra pipelines with the visual pipeline editor:
+
+* Launch JupyterLab with the Elyra extension installed.
+* Create a new pipeline by clicking on the Elyra `Pipeline Editor` icon.
+* Add each node to the pipeline by dragging and dropping notebooks or scripts from the file browser onto the pipeline editor canvas.
+* Connect the nodes to define the flow of execution.
+* Configure each node by right-clicking on it, clicking 'Open Properties', and setting the appropriate runtime image and file dependencies.
+* You can also inject environment variables, secrets, and define output files.
+* Once the pipeline is complete, you can submit it to the Data Science Pipelines engine.
+
+== Elyra runtime configuration
+
+A runtime configuration provides Elyra access to the Data Science Pipelines backend for scalable pipeline execution. You can manage runtime configurations using the JupyterLab UI or the Elyra CLI. The runtime configuration is included and is pre-configured for submitting pipelines to Data Science Pipelines. Refer to the https://elyra.readthedocs.io/en/latest/user_guide/runtime-conf.html#kubeflow-pipelines-configuration-settings[Elyra documentation] for more information about Elyra and the available runtime configuration options.
+
+== Exercise: offline scoring for fraud detection
+
+=== Setup
+
+Let's walk through an example of creating and running an Elyra pipeline for fraud detection. We'll first set up the prerequisites to get started with Elyra and Data Science Pipelines.
+
+[NOTE]
+====
+Data Science Pipelines has two major dependencies: OpenShift Pipelines and S3 object storage. The setup of OpenShift Pipelines and Minio for S3 has already been covered earlier in this course, so we won't discuss it here.
+====
+
+==== Set up Data Science Pipelines
+
+Data Science Pipelines relies on a backend S3 object storage for persisting artifacts, logs, and outputs that are associated with individual pipeline runs.
+
+[NOTE]
+====
+Any S3-compliant storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as a particularly lightweight S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where data resilience and desaster recovery are important concerns.
+====
+
+Create a new data science project called `fraud-detection`. Enter the project.
+
+Under `Pipelines`, select `Create a pipeline server`.
+
+image::create_pipeline_server.png[]
+
+Under `Object storage connection`, select `Create new data connection`.
+
+* Enter the following details:
+* Name: `fraud-detection-pipelines`
+* Access key: `minio`
+* Secret key: `minio123`
+* Endpoint: `http://minio-service.minio.svc:9000`
+* Bucket: `fraud-detection-pipelines`
+
+image::configure_pipeline_server.png[]
+
+Hit `Configure`.
+
+==== Prepare the bucket
+
+Log into the Minio console.
+
+Create a new S3 bucket named `fraud-detection` in Minio.
+
+Download the `model-latest.onnx` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection[model artefact repository] and upload it to the S3 bucket.
+
+Download the `live-data.csv` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-data-v0.1/data/fraud-detection[data set repository] and upload it to the S3 bucket.
+
+image::fraud-detection-bucket.png[]
+
+==== Import the custom workbench image
+
+Return to the RHOAI dashboard.
+
+Under `Settings` select `Notebook images`.
+
+Select `Import new image`.
+
+Enter the following details:
+
+* Repository: `quay.io/mmurakam/workbenches:fraud-detection-v1.0.1`
+* Name: `Fraud detection workbench`
+* Optionally a description.
+
+image::import-workbench-image.png[]
+
+Hit `Import`.
+
+==== Set up the workbench
+
+In the fraud-detection data science project, create a new data workbench and enter the following details:
+
+* Name: `fraud-detection-workbench`
+* Notebook image: `Fraud detection workbench`
+* Container size: `Small`
+* Create a new persistent storage with name `fraud-detection` and size 5 GB.
+* Use a data connection -> Create new data connection, enter the connection parameters for consuming the `fraud-detection` bucket.
+
+image::create-workbench.png[]
+
+Hit `Create workbench`.
+
+Once the workbench is up and running, access it.
+
+=== Working with Elyra
+
+==== The code
+
+Within the workbench, clone the course git repository:
+```
+https://github.com/RedHatQuickCourses/rhods-qc-apps.git
+```
+Within the cloned repository, navigate to the `5.pipelines/elyra` folder. The folder contains all the code that is needed for running offline scoring with a given model. In particular, it contains the Python modules:
+
+* `data_ingestion.py` for downloading a dataset from an S3 bucket,
+* `preprocessing.py` for preprocessing the downloaded dataset,
+* `model_loading.py` for downloading a model artefact from an S3 bucket,
+* `scoring.py` for running the classification on the preprocessed data using the downloaded model,
+* `results_upload.py` for uploading the classification results to an S3 bucket.
+
+[NOTE]
+====
+In Elyra, each pipeline step is implemented by a separate file such as Python modules in our example. In line with software development best practices, pipelines are best implemented in a modular fashion, i.e. across several components. This way, generic pipeline tasks like data ingestion can be re-used in many different pipelines addressing different use cases.
+====
+
+Explore these Python modules to get an understanding of the workflow. A few points of note:
+
+Three tasks (data ingestion, model loading, results upload) access the S3 backend. Instead of hardcoding the connection parameters into the pipeline code, these parameters are instead read from the environment at runtime:
+```
+s3_endpoint_url = environ.get('AWS_S3_ENDPOINT')
+s3_access_key = environ.get('AWS_ACCESS_KEY_ID')
+s3_secret_key = environ.get('AWS_SECRET_ACCESS_KEY')
+s3_bucket_name = environ.get('AWS_S3_BUCKET')
+```
+This approach is in line with best practices of handling credentials and allows us to control which S3 buckets are consumed in a given runtime context without changing the code. Importantly, these parameters are stored in a data connection, which is mounted into workbenches and pipeline pods to expose their values to the pipeline tasks.
+
+Three tasks (preprocessing, scoring, results upload) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artefact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
+
+==== Running the code interactively
+
+The Python modules cover the offline scoring tasks end-to-end, so we can run the code in the workbench to perform all needed tasks interactively.
+
+For this, open the `offline-scoring.ipynb` Jupyter notebook. This notebook references each of the Python modules, so once you execute the notebook cells, you're executing the individual tasks implemented in the modules. This is a great way to develop, test, and debug the code that the pipeline will execute.
+
+[NOTE]
+====
+It's not recommended to rely on workbenches and Jupyter notebooks for production use cases. Implement your pipeline code in native Python modules and test it interactively in a notebook session. Applying the code in production requires stability, auditability, and reproducibility, which workbenches and Jupyter notebooks are not designed for.
+====
+
+==== Building the pipeline
+
+Let's now use Elyra to package the code into a pipeline and submit it to the Data Science Pipelines backend in order to:
+
+* rely on the pipeline scheduler to manage the pipeline execution without having to depend on my workbench session,
+* keep track of the pipeline execution along with the previous executions,
+* be able to control resource usage of individual pipeline tasks in a fine-grained manner.
+
+Within the workbench, open the launcher by clicking on the blue plus button.
+
+image::launcher.png[]
+
+Click on the `Pipeline Editor` tile in the launcher menu. This opens up Elyra's visual pipeline editor. Use the visual pipeline editor to drag-and-drop files from the file browser onto the canvas area. These files then define the individual tasks of your pipeline.
+
+The pipeline should start by ingesting the dataset that we want to classify, so drag the `data_ingestion.py` module onto the empty canvas.
+
+image::pipeline-1.png[]
+
+Next, the ingested data should be preprocessed, so drag the `preprocessing.py` module onto the canvas, right next to the `data_ingestion.py` module.
+
+image::pipeline-2.png[]
+
+We have now defined two tasks of the pipeline, but order of processing is not defined yet. In order to instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the `Output Port` (right black dot of the task icon) of the `data_ingestion` task with the `Input Port` (left black dot of the task icon) of the `preprocessing` task by drawing a line between these ports (click, hold & draw, release).
+
+image::pipeline-3.png[]
+
+You should now see the two nodes connected through a solid line. We have now defined a simple pipeline with two tasks, which are executed sequentially, first data ingestion and then preprocessing.
+
+[NOTE]
+====
+DAGs and so...
+====
