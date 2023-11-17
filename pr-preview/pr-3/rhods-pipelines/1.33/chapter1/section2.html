@@ -280,11 +280,11 @@ Using the correct Python module versions is critical to avoid conflicts between 
 </ul>
 </div>
 <div class="paragraph">
-<p>You can use any <em>S3</em> compatible storage service such as <em>Red Hat OpenShift Data Foundation</em> or <em>AWS S3</em>.
+<p>You can use any S3 compatible storage service such as <em>Red Hat OpenShift Data Foundation</em> or <em>AWS S3</em>.
 For the purpose of this enablement we will be using <em>Minio</em>.</p>
 </div>
 <div class="paragraph">
-<p>Follow <a href="https://ai-on-openshift.io/tools-and-applications/minio/minio/">These</a> instructions to setup a local Minio instance on your OpenShift cluster.</p>
+<p>Follow <a href="https://ai-on-openshift.io/tools-and-applications/minio/minio/">these instructions</a> to setup a local Minio instance on your OpenShift cluster.</p>
 </div>
 </div>
 <div class="sect2">
@@ -566,7 +566,7 @@ Experiments are part of the KFP SDK and are not currently covered in this course
 </div>
 </div>
 <div class="paragraph">
-<p>The entire pipeline is here <a href="_attachments/sample-pipeline-full.py" class="xref attachment">Sample Pipeline</a></p>
+<p>The entire pipeline is <a href="_attachments/sample-pipeline-full.py" class="xref attachment">here</a>.</p>
 </div>
 <div class="paragraph">
 <p>We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
@@ -1254,7 +1254,7 @@ This can be achieved in multiple ways:</p>
 <p><em>Small Data</em> is considered anything that can be passed as a <em>command line argument</em> for example <em>Strings</em>, <em>URLS</em>, <em>Numbers</em>. The overall size should not exceed a few <em>kilobytes</em>.</p>
 </li>
 <li>
-<p>Unsurprisingly everything else is considered <em>Big Data</em> and should be passed as files.</p>
+<p>Unsurprisingly, everything else is considered <em>Big Data</em> and should be passed as files.</p>
 </li>
 </ol>
 </div>
@@ -1291,14 +1291,14 @@ This can be achieved in multiple ways:</p>
 <div class="sect2">
 <h3 id="_tekton_workspaces"><a class="anchor" href="#_tekton_workspaces"></a>Tekton Workspaces</h3>
 <div class="paragraph">
-<p>This uses the out of the box approach in Tekton to store and pass data between stages of a <em>Tekton Pipeline</em>.
-Tekton will create a <strong>Workspace</strong> to share large data files among tasks that run in the same pipeline. These <em>Workspaces</em> will be backed by dynamically created storage volumes which will be removed once the pipeline has completed.</p>
+<p>This uses the native Tekton mechanism for storing and passing data between stages of a <em>Tekton Pipeline</em>.
+Tekton creates a <strong>Workspace</strong> to share large data files among tasks that run in the same pipeline. These <em>Workspaces</em> are backed by dynamically created storage volumes which are removed once the pipeline has completed.</p>
 </div>
 <div class="paragraph">
 <p>By default the storage is set to <strong><em>ReadWriteMany</em></strong>, the size is set to <strong><em>2Gi</em></strong> and uses the storage class called <strong><em>kfp-csi-s3</em></strong>.</p>
 </div>
 <div class="paragraph">
-<p>However this can be changed to suit the target environment needs by settting the following <strong><em>Environment Variables</em></strong></p>
+<p>However, this can be changed to suit the target environment needs by setting the following <strong><em>Environment Variables</em></strong>:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1314,21 +1314,20 @@ Tekton will create a <strong>Workspace</strong> to share large data files among 
 </ol>
 </div>
 <div class="paragraph">
-<p>And example of this in the <em>Sample Pipeline</em> is shown below</p>
+<p>An example of this in the <em>Sample Pipeline</em> is shown below:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == '__main__':
-    os.environ.setdefault("DEFAULT_STORAGE_CLASS","managed-csi")
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    os.environ.setdefault("DEFAULT_STORAGE_CLASS","managed-csi")
     os.environ.setdefault("DEFAULT_ACCESSMODES","ReadWriteOnce")
     os.environ.setdefault("DEFAULT_STORAGE_SIZE","10Gi")</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_volume_based_data_passing_method"><a class="anchor" href="#_volume_based_data_passing_method"></a>Volume based data passing method</h3>
+<h3 id="_volume_based_data_passing_method"><a class="anchor" href="#_volume_based_data_passing_method"></a>Volume-based data passing method</h3>
 <div class="paragraph">
-<p>This approach uses a pre-created OpenShift storage volume ,aka <em>(PVC)</em>, to pass data between the pipeline steps.
+<p>This approach uses a pre-created OpenShift storage volume (aka <em>PVC</em>) to pass data between the pipeline steps.
 An example of this is in the <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/tests/compiler/testdata/artifact_passing_using_volume.py">KFP compiler tests</a> which we will discuss here.</p>
 </div>
 <div class="paragraph">
@@ -1370,14 +1369,14 @@ from kfp.dsl import data_passing_methods</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The <strong><em>data-volume PVC claim</em></strong> needs to exist on the OpenShift cluster before running the pipeline, if not then the <em>pipeline execution pod</em> will fail to deploy and the run will terminate.</p>
+<p>The <strong><em>data-volume PVC claim</em></strong> needs to exist in the OpenShift namespace while running the pipeline, else the <em>pipeline execution pod</em> fails to deploy and the run terminates.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>To pass big data using cloud provider volumes, it&#8217;s recommended to use the <strong><em>volume_based_data_passing_method</em></strong>.</p>
+<p>To pass big data using cloud provider volumes, it&#8217;s recommended to use the <strong><em>volume-based data passing method</em></strong>.</p>
 </div>
 </div>
 </div>
@@ -1386,7 +1385,7 @@ from kfp.dsl import data_passing_methods</code></pre>
 <h2 id="_data_science_pipeline_hands_on_example"><a class="anchor" href="#_data_science_pipeline_hands_on_example"></a>Data Science Pipeline - Hands On Example</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>We&#8217;re now going to deploy and run an example DSP pipeline. The use case is offline scoring for <em>Fraud Detection</em>.</p>
+<p>We&#8217;re now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.</p>
 </div>
 <div class="sect2">
 <h3 id="_setup"><a class="anchor" href="#_setup"></a>Setup</h3>
@@ -1425,7 +1424,7 @@ from kfp.dsl import data_passing_methods</code></pre>
 <div class="ulist checklist">
 <ul class="checklist">
 <li>
-<p><input type="checkbox" data-item-complete="0"> Uncompress the <strong><em>.gz</em></strong> files using the _gzip -d _ command.</p>
+<p><input type="checkbox" data-item-complete="0"> Uncompress the <strong><em>.gz</em></strong> files using the <code>gzip -d</code> command.</p>
 </li>
 <li>
 <p><input type="checkbox" data-item-complete="0"> Upload the files to S3 <em>fraud_detection_bucket</em> via the <em>Minio</em> UI.</p>
@@ -1533,7 +1532,7 @@ Example PVC definitions are here, download and customise as necessary this <a hr
 </div>
 </div>
 <div class="paragraph">
-<p>If the pipeline run was executed without issue you should see something similar to below:</p>
+<p>If the pipeline run was executed without any issues, you should see something similar to below:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1544,7 +1543,7 @@ Example PVC definitions are here, download and customise as necessary this <a hr
 <div class="sect2">
 <h3 id="_handling_pipeline_errors"><a class="anchor" href="#_handling_pipeline_errors"></a>Handling Pipeline Errors</h3>
 <div class="paragraph">
-<p>In the case that the pipeline failed the UI will be show something similar to the following:</p>
+<p>In case the pipeline fails, the UI shows something similar to the following:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1552,8 +1551,8 @@ Example PVC definitions are here, download and customise as necessary this <a hr
 </div>
 </div>
 <div class="paragraph">
-<p>Clicking on the <strong><em>failed</em></strong> node in the Graph and then clicking on the <em>Details</em> tab will present the status of the execution step.
-When the mouse is placed over the <strong><em>Status</em></strong> field the command to retrieve the detailed logs of the execution step is displayed.</p>
+<p>Clicking on the <strong><em>failed</em></strong> node in the graph and then clicking on the <em>Details</em> tab presents the status of the execution step.
+When the mouse is placed over the <strong><em>Status</em></strong> field, the command to retrieve the detailed logs of the execution step is displayed.</p>
 </div>
 <div class="imageblock">
 <div class="content">
