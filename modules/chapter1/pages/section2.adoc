@@ -55,10 +55,10 @@ IMPORTANT: Using the correct Python module versions is critical to avoid conflic
 
 * S3 Storage
 
-You can use any _S3_ compatible storage service such as _Red Hat OpenShift Data Foundation_ or _AWS S3_.
+You can use any S3 compatible storage service such as _Red Hat OpenShift Data Foundation_ or _AWS S3_.
 For the purpose of this enablement we will be using _Minio_.
 
-Follow https://ai-on-openshift.io/tools-and-applications/minio/minio/[These] instructions to setup a local Minio instance on your OpenShift cluster.
+Follow https://ai-on-openshift.io/tools-and-applications/minio/minio/[these instructions] to setup a local Minio instance on your OpenShift cluster.
 
 
 
@@ -244,7 +244,7 @@ In this scenario we have a remote edge device which uses an AI model to manage t
 image::openshift-ai-dsp-edge.png[]
 ****
 
-The entire pipeline is here xref:attachment$sample-pipeline-full.py[Sample Pipeline]
+The entire pipeline is xref:attachment$sample-pipeline-full.py[here].
 
 We're not going to go through all of it but focus on the key aspects of it. 
 
@@ -557,7 +557,7 @@ DSP have two sizes of data, conviently named *_Small Data_* and *_Big Data_*.
 
 . _Small Data_ is considered anything that can be passed as a _command line argument_ for example _Strings_, _URLS_, _Numbers_. The overall size should not exceed a few _kilobytes_.
 
-. Unsurprisingly everything else is considered _Big Data_ and should be passed as files.
+. Unsurprisingly, everything else is considered _Big Data_ and should be passed as files.
 
 === Handling large data sets
 
@@ -573,24 +573,24 @@ The Data Science Projects *_Data Connection_* storage is used to store _Output A
 
 === Tekton Workspaces
 
-This uses the out of the box approach in Tekton to store and pass data between stages of a _Tekton Pipeline_.
-Tekton will create a *Workspace* to share large data files among tasks that run in the same pipeline. These _Workspaces_ will be backed by dynamically created storage volumes which will be removed once the pipeline has completed.
+This uses the native Tekton mechanism for storing and passing data between stages of a _Tekton Pipeline_.
+Tekton creates a *Workspace* to share large data files among tasks that run in the same pipeline. These _Workspaces_ are backed by dynamically created storage volumes which are removed once the pipeline has completed.
 
 By default the storage is set to *_ReadWriteMany_*, the size is set to *_2Gi_* and uses the storage class called *_kfp-csi-s3_*. 
 
-However this can be changed to suit the target environment needs by settting the following *_Environment Variables_*
+However, this can be changed to suit the target environment needs by setting the following *_Environment Variables_*:
 
 . _DEFAULT_ACCESSMODES_
 . _DEFAULT_STORAGE_SIZE_
 . _DEFAULT_STORAGE_CLASS_
 
-And example of this in the _Sample Pipeline_ is shown below  
+An example of this in the _Sample Pipeline_ is shown below:  
 
 [source,python]
-include::example$sample-pipeline-full.py[lines=502..505]
+include::example$sample-pipeline-full.py[lines=503..505]
 
-=== Volume based data passing method
-This approach uses a pre-created OpenShift storage volume ,aka _(PVC)_, to pass data between the pipeline steps.
+=== Volume-based data passing method
+This approach uses a pre-created OpenShift storage volume (aka _PVC_) to pass data between the pipeline steps.
 An example of this is in the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/tests/compiler/testdata/artifact_passing_using_volume.py[KFP compiler tests] which we will discuss here.
 
 First create the volume to be used and assign it to a variable:
@@ -607,14 +607,14 @@ include::example$artifact_passing_using_volume.py[lines=91..93]
 
 [IMPORTANT]
 ====
-The *_data-volume PVC claim_* needs to exist on the OpenShift cluster before running the pipeline, if not then the _pipeline execution pod_ will fail to deploy and the run will terminate.
+The *_data-volume PVC claim_* needs to exist in the OpenShift namespace while running the pipeline, else the _pipeline execution pod_ fails to deploy and the run terminates.
 ====
 
-To pass big data using cloud provider volumes, it's recommended to use the *_volume_based_data_passing_method_*.
+To pass big data using cloud provider volumes, it's recommended to use the *_volume-based data passing method_*.
 
 == Data Science Pipeline - Hands On Example
 
-We're now going to deploy and run an example DSP pipeline. The use case is offline scoring for _Fraud Detection_.
+We're now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.
 
 === Setup
 
@@ -631,7 +631,7 @@ image::create-s3-fraud-bucket.png[]
 ** [ ] xref:attachment$training-data.csv.gz[Model Training Data]
 
 [%interactive]
-* [ ] Uncompress the *_.gz_* files using the _gzip -d _ command. 
+* [ ] Uncompress the *_.gz_* files using the `+gzip -d+` command. 
 * [ ] Upload the files to S3 _fraud_detection_bucket_ via the _Minio_ UI.
 
 ====
@@ -676,18 +676,18 @@ The Pipeline will be submitted to the server and a run _Triggered_.
 
 image::pipeline-run-triggered.png[]
 
-If the pipeline run was executed without issue you should see something similar to below:
+If the pipeline run was executed without any issues, you should see something similar to below:
 
 image::pipeline-finish.png[]
 
 === Handling Pipeline Errors
 
-In the case that the pipeline failed the UI will be show something similar to the following:
+In case the pipeline fails, the UI shows something similar to the following:
 
 image::pipeline-failure.png[]
 
-Clicking on the *_failed_* node in the Graph and then clicking on the _Details_ tab will present the status of the execution step. 
-When the mouse is placed over the *_Status_* field the command to retrieve the detailed logs of the execution step is displayed.
+Clicking on the *_failed_* node in the graph and then clicking on the _Details_ tab presents the status of the execution step. 
+When the mouse is placed over the *_Status_* field, the command to retrieve the detailed logs of the execution step is displayed.
 
 image::pipeline-error-details.png[]
 

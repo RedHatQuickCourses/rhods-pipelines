@@ -9,4 +9,3 @@ spec:
     requests:
       storage: 5Gi
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: lvms-vg1
