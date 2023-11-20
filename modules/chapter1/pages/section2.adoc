@@ -326,6 +326,39 @@ Elyra is now converting your pipeline definition into a Tekton YAML representati
 
 image::pipeline-submit.png[]
 
-To monitor the pipeline execution, you can click on the `Run Details` link, which takes you to the pipeline run view within the OpenShift AI dashboard.
+To monitor the pipeline's execution, you can click on the `Run Details` link, which takes you to the pipeline run view within the RHOAI dashboard. Here you can track in real-time how each pipeline task is processed and whether it fails or resolves successfully.
 
 image::pipeline-run.png[]
+
+To confirm that the pipeline has indeed produced fraud detection scoring results, view the content of the `fraud-detection` bucket. You should now see a new CSV file containing the predicted result of each transaction within the used dataset.
+
+image::fraud-detection-bucket-2.png[]
+
+If you head back to the `Runs` overview in the RHOAI dashboard, you can see the history of all ongoing and previous pipeline executions and compare their run durations and status.
+
+image::pipeline-runs.png[]
+
+In the `Scheduled` tab you're able to schedule runs of the offline scoring pipeline according to a predefined schedule such as daily or according to a Cron statement.
+
+image::pipeline-scheduled.png[]
+
+==== Tracking the pipeline artifacts
+
+Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Data Science Pipelines use to store the pipeline artifacts.
+
+View the contents of the `fraud-detection-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
+
+* `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
+* `artifacts`: A folder used by Data Science Pipelines to store the metadata of each pipeline task for each pipeline run.
+* One folder for each pipeline run with name `[pipeline-name]-[timestamp]`. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.
+
+[NOTE]
+====
+If you need to troubleshoot a pipeline, the log files within the Elyra bucket are the best place to check any code-related issues. Other places are the Tekton run and pod events logs, which reveal integration or infrastructure-related problems.
+====
+
+image::pipelines-bucket.png[]
+
+image::pipeline-artifacts.png[]
+
+Now that we have seen how to work with Data Science Pipelines through Elyra, let's take a closer look at the Kubeflow Pipelines SDK.
