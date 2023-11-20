@@ -2,8 +2,6 @@
 
 Elyra provides a visual pipeline editor for building pipelines from Python and R scripts as well as Jupyter notebooks, simplifying the conversion of multiple files into batch jobs or workflows. A pipeline in Elyra consists of nodes that are connected with each other to define execution dependencies.
 
-image::elyra_jupyter.png[Jupyter with elyra]
-
 Elyra's visual pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Tekton YAML definition on the fly and submitting it to the Data Science Pipelines backend.
 
 == Creating a Data Science Pipeline with Elyra
