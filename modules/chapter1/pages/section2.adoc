@@ -39,19 +39,8 @@ Steps in the pipeline are executed as ephemeral pods (one per step).
 
 [NOTE]
 ====
-DS Pipeline in OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CRD is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_
+DS Pipelines in OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CR is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_. Pipeline _runs_ are instances of _tekton.dev/v1 PipelineRun_.
 ====
-
-.DataScience Pipeline pods
-[source,cmd]
-----
- ~/oc get pods -n redhat-ods-applications
-NAME                                                              READY   STATUS    RESTARTS   AGE
-ds-pipeline-persistenceagent-pipelines-definition-6d6676d58vzss   1/1     Running   0          9m49s
-ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Running   0          9m49s
-ds-pipeline-scheduledworkflow-pipelines-definition-7f5c645hcg4g   1/1     Running   0          9m48s
-mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Running   0          9m49s
-----
 
 == Creating a Data Science Pipeline with the KFP SDK
 
@@ -59,15 +48,18 @@ mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Runnin
 * Python Setup
 [source,cmd]
 ----
-pip install kfp==1.8
-pip install kfp-tekton==1.7.2
+pip install kfp==1.8.22
+pip install kfp-tekton==1.8.0
 ----
 IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
 
 * S3 Storage
 
-Follow these instructions to setup a local Minio instance
-https://ai-on-openshift.io/tools-and-applications/minio/minio/
+You can use any S3 compatible storage service such as _Red Hat OpenShift Data Foundation_ or _AWS S3_.
+For the purpose of this enablement we will be using _Minio_.
+
+Follow https://ai-on-openshift.io/tools-and-applications/minio/minio/[these instructions] to setup a local Minio instance on your OpenShift cluster.
+
 
 
 === Creating a Pipeline Server
@@ -252,7 +244,7 @@ In this scenario we have a remote edge device which uses an AI model to manage t
 image::openshift-ai-dsp-edge.png[]
 ****
 
-The entire pipeline is here xref:attachment$sample-pipeline-full.py[Pipeline]
+The entire pipeline is xref:attachment$sample-pipeline-full.py[here].
 
 We're not going to go through all of it but focus on the key aspects of it. 
 
@@ -512,10 +504,33 @@ The Tekton compiler also has a number of _global settings_, which are not covere
 
 [IMPORTANT]
 ====
-We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md[kfp-tekton features] document for more advanced functionality.
+We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md[kfp-tekton features] document for more advanced functionality. The https://github.com/kubeflow/kfp-tekton/blob/master/guides/advanced_user_guide.md[KFP Tekton Advanced User Guide] also has more information.
 ====
 
-=== Triggering a DSP pipeline
+=== Pipeline Execution
+
+==== Submitting a Pipeline and Triggering a run
+
+The following code demonstrates how to submit and trigger a pipeline run from a _OpenShift AI WorkBench_.
+
+[source, python]
+if __name__ == '__main__':  
+    kubeflow_endpoint = 'http://ds-pipeline-pipelines-definition:8888'
+    sa_token_file_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    with open(sa_token_file_path, 'r') as token_file:
+        bearer_token = token_file.read()
+    print(f'Connecting to Data Science Pipelines: {kubeflow_endpoint}')
+    client = TektonClient(
+        host=kubeflow_endpoint,
+        existing_token=bearer_token
+    )
+    result = client.create_run_from_pipeline_func(
+        offline_scoring_pipeline,
+        arguments={},
+        experiment_name='offline-scoring-kfp'
+    )
+
+==== Externally Triggering a DSP pipeline run
 
 In our real-world example above the entire pipeline is executed when a file is added to an S3 bucket. Here is the process followed:
 
@@ -530,3 +545,153 @@ include::example$dsp_trigger.py[lines=34..51]
 
 
 The full code is xref:attachment$dsp_trigger.py[here].
+
+[NOTE]
+====
+The _pipeline_ needs to have already been submitted to the DSP runtime.
+====
+
+
+== Data Handling in Data Science Pipelines
+DSP have two sizes of data, conviently named *_Small Data_* and *_Big Data_*.
+
+. _Small Data_ is considered anything that can be passed as a _command line argument_ for example _Strings_, _URLS_, _Numbers_. The overall size should not exceed a few _kilobytes_.
+
+. Unsurprisingly, everything else is considered _Big Data_ and should be passed as files.
+
+=== Handling large data sets
+
+DSP support two methods by which to pass large data sets aka _Big Data_ between pipeline steps:
+
+. *_Tekton Workspaces_*.
+. *_Volume based data passing method_*.
+
+[NOTE]
+====
+The Data Science Projects *_Data Connection_* S3 storage is used to store _Output Artifacts_ and _Parameters_ of the stages of a pipeline. It is not intended to be used to pass large amounts of data between pipeline steps.
+====
+
+=== Tekton Workspaces
+
+This uses the native Tekton mechanism for storing and passing data between stages of a _Tekton Pipeline_.
+Tekton creates a *Workspace* to share large data files among tasks that run in the same pipeline. These _Workspaces_ are backed by dynamically created storage volumes which are removed once the pipeline has completed.
+
+By default the storage is set to *_ReadWriteMany_*, the size is set to *_2Gi_* and uses the storage class called *_kfp-csi-s3_*. 
+
+However, this can be changed to suit the target environment needs by setting the following *_Environment Variables_*:
+
+. _DEFAULT_ACCESSMODES_
+. _DEFAULT_STORAGE_SIZE_
+. _DEFAULT_STORAGE_CLASS_
+
+An example of this in the _Sample Pipeline_ is shown below:  
+
+[source,python]
+include::example$sample-pipeline-full.py[lines=503..505]
+
+=== Volume-based data passing method
+This approach uses a pre-created OpenShift storage volume (aka _PVC_) to pass data between the pipeline steps.
+An example of this is in the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/tests/compiler/testdata/artifact_passing_using_volume.py[KFP compiler tests] which we will discuss here.
+
+First create the volume to be used and assign it to a variable:
+[source,python]
+include::example$artifact_passing_using_volume.py[lines=78..79]
+
+[source,python]
+include::example$artifact_passing_using_volume.py[lines=81..88]
+
+Then add definition to the _pipeline configuration_:
+[source,python]
+include::example$artifact_passing_using_volume.py[lines=91..93]
+
+
+[IMPORTANT]
+====
+The *_data-volume PVC claim_* needs to exist in the OpenShift namespace while running the pipeline, else the _pipeline execution pod_ fails to deploy and the run terminates.
+====
+
+To pass big data using cloud provider volumes, it's recommended to use the *_volume-based data passing method_*.
+
+== Data Science Pipeline - Hands On Example
+
+We're now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.
+
+=== Setup
+
+[%interactive]
+* [ ] Using the Minio UI, create a new S3 Bucket named _fraud_detection_bucket_.
+
+image::create-s3-fraud-bucket.png[]
+
+[%interactive]
+* [ ] Download the following artifacts:
+
+** [ ] xref:attachment$offline_scoring_kfp_pipeline.py[ONNX Model]
+** [ ] xref:attachment$live-data.csv.gz[Live Transaction Data]
+
+[%interactive]
+* [ ] Uncompress the *_.gz_* files using the `+gzip -d+` command. 
+* [ ] Upload the files to S3 _fraud_detection_bucket_ via the _Minio_ UI.
+
+====
+image::fraud-upload-files.png[]
+====
+====
+image::fraud-files-uploaded.png[]
+====
+
+[%interactive]
+* [ ] Create the *_aws-connection-fraud-detection_* _secret_ containing the _S3_ bucket name, endpoint and credentials.
+
+[source,bash]
+--
+oc create secret generic aws-connection-fraud-detection --from-literal=AWS_ACCESS_KEY_ID=minio --from-literal=AWS_DEFAULT_REGION=rhods-enablement-emea --from-literal=AWS_S3_BUCKET=fraud-detection-bucket --from-literal=AWS_S3_ENDPOINT=https://minio-api... --from-literal=AWS_SECRET_ACCESS_KEY=minio123
+--
+
+[%interactive]
+* [ ] Create two OpenShift Persistent Volumes with the following names:
+** *offline-scoring-model-volume*
+** *offline-scoring-data-volume*
+
+TIP: Example PVC definitions are here, download and customise as necessary this xref:attachment$offline-scoring-data-pvc.yaml[Data Volume definition] & xref:attachment$offline-scoring-model-pvc.yaml[Model Volume definition]
+
+
+=== Execute Pipeline
+
+Download and customise as necessary this xref:attachment$offline_scoring_kfp_pipeline.py[Example Pipeline definition]
+
+[%interactive]
+* [ ] Create a _Workbench_ with the name _fraud-onnx_
+
+image::fraud-onnx-workbench.png[]
+
+[%interactive]
+* [ ] Download the xref:attachment$offline_scoring_kfp_pipeline.py[Offline Scoring Pipeline] and load it into your _workbench_.
+* [ ] Click 'Restart Kernel and Run All Cells'.
+
+image::start-pipeline.png[]
+
+The Pipeline will be submitted to the server and a run _Triggered_.
+
+image::pipeline-run-triggered.png[]
+
+If the pipeline run was executed without any issues, you should see something similar to below:
+
+image::pipeline-finish.png[]
+
+=== Handling Pipeline Errors
+
+In case the pipeline fails, the UI shows something similar to the following:
+
+image::pipeline-failure.png[]
+
+Clicking on the *_failed_* node in the graph and then clicking on the _Details_ tab presents the status of the execution step. 
+When the mouse is placed over the *_Status_* field, the command to retrieve the detailed logs of the execution step is displayed.
+
+image::pipeline-error-details.png[]
+
+The step logs can then be viewed using the command provided.
+
+image::pipeline-pod-error.png[]
+
+
