@@ -568,7 +568,7 @@ DSP support two methods by which to pass large data sets aka _Big Data_ between 
 
 [NOTE]
 ====
-The Data Science Projects *_Data Connection_* storage is used to store _Output Artifacts_ and _Parameters_ of a pipeline. It is not used to pass large amounts of data between pipeline steps
+The Data Science Projects *_Data Connection_* S3 storage is used to store _Output Artifacts_ and _Parameters_ of the stages of a pipeline. It is not intended to be used to pass large amounts of data between pipeline steps.
 ====
 
 === Tekton Workspaces
@@ -628,7 +628,6 @@ image::create-s3-fraud-bucket.png[]
 
 ** [ ] xref:attachment$offline_scoring_kfp_pipeline.py[ONNX Model]
 ** [ ] xref:attachment$live-data.csv.gz[Live Transaction Data]
-** [ ] xref:attachment$training-data.csv.gz[Model Training Data]
 
 [%interactive]
 * [ ] Uncompress the *_.gz_* files using the `+gzip -d+` command. 
@@ -659,7 +658,7 @@ TIP: Example PVC definitions are here, download and customise as necessary this 
 
 === Execute Pipeline
 
-Download and customise as necessary this xref:attachment$offline_scoring_kfp_pipeline.py[Example Volume definition]
+Download and customise as necessary this xref:attachment$offline_scoring_kfp_pipeline.py[Example Pipeline definition]
 
 [%interactive]
 * [ ] Create a _Workbench_ with the name _fraud-onnx_
