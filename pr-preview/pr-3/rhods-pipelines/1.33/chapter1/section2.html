@@ -1281,7 +1281,7 @@ This can be achieved in multiple ways:</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The Data Science Projects <strong><em>Data Connection</em></strong> storage is used to store <em>Output Artifacts</em> and <em>Parameters</em> of a pipeline. It is not used to pass large amounts of data between pipeline steps</p>
+<p>The Data Science Projects <strong><em>Data Connection</em></strong> S3 storage is used to store <em>Output Artifacts</em> and <em>Parameters</em> of the stages of a pipeline. It is not intended to be used to pass large amounts of data between pipeline steps.</p>
 </div>
 </td>
 </tr>
@@ -1413,9 +1413,6 @@ from kfp.dsl import data_passing_methods</code></pre>
 <li>
 <p><i class="fa fa-square-o"></i> <a href="_attachments/live-data.csv.gz" class="xref attachment">Live Transaction Data</a></p>
 </li>
-<li>
-<p><i class="fa fa-square-o"></i> <a href="_attachments/training-data.csv.gz" class="xref attachment">Model Training Data</a></p>
-</li>
 </ul>
 </div>
 </li>
@@ -1494,7 +1491,7 @@ Example PVC definitions are here, download and customise as necessary this <a hr
 <div class="sect2">
 <h3 id="_execute_pipeline"><a class="anchor" href="#_execute_pipeline"></a>Execute Pipeline</h3>
 <div class="paragraph">
-<p>Download and customise as necessary this <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Example Volume definition</a></p>
+<p>Download and customise as necessary this <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Example Pipeline definition</a></p>
 </div>
 <div class="ulist checklist">
 <ul class="checklist">
