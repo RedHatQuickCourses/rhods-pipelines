@@ -234,22 +234,11 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>DS Pipeline in OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CRD is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em></p>
+<p>DS Pipelines in OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CR is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em>. Pipeline <em>runs</em> are instances of <em>tekton.dev/v1 PipelineRun</em>.</p>
 </div>
 </td>
 </tr>
 </table>
-</div>
-<div class="listingblock">
-<div class="title">DataScience Pipeline pods</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-cmd hljs" data-lang="cmd"> ~/oc get pods -n redhat-ods-applications
-NAME                                                              READY   STATUS    RESTARTS   AGE
-ds-pipeline-persistenceagent-pipelines-definition-6d6676d58vzss   1/1     Running   0          9m49s
-ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Running   0          9m49s
-ds-pipeline-scheduledworkflow-pipelines-definition-7f5c645hcg4g   1/1     Running   0          9m48s
-mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Running   0          9m49s</code></pre>
-</div>
 </div>
 </div>
 </div>
@@ -267,8 +256,8 @@ mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Runnin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>pip install kfp==1.8
-pip install kfp-tekton==1.7.2</pre>
+<pre>pip install kfp==1.8.22
+pip install kfp-tekton==1.8.0</pre>
 </div>
 </div>
 <div class="admonitionblock important">
@@ -291,8 +280,11 @@ Using the correct Python module versions is critical to avoid conflicts between 
 </ul>
 </div>
 <div class="paragraph">
-<p>Follow these instructions to setup a local Minio instance
-<a href="https://ai-on-openshift.io/tools-and-applications/minio/minio/" class="bare">https://ai-on-openshift.io/tools-and-applications/minio/minio/</a></p>
+<p>You can use any S3 compatible storage service such as <em>Red Hat OpenShift Data Foundation</em> or <em>AWS S3</em>.
+For the purpose of this enablement we will be using <em>Minio</em>.</p>
+</div>
+<div class="paragraph">
+<p>Follow <a href="https://ai-on-openshift.io/tools-and-applications/minio/minio/">these instructions</a> to setup a local Minio instance on your OpenShift cluster.</p>
 </div>
 </div>
 <div class="sect2">
@@ -574,7 +566,7 @@ Experiments are part of the KFP SDK and are not currently covered in this course
 </div>
 </div>
 <div class="paragraph">
-<p>The entire pipeline is here <a href="_attachments/sample-pipeline-full.py" class="xref attachment">Pipeline</a></p>
+<p>The entire pipeline is <a href="_attachments/sample-pipeline-full.py" class="xref attachment">here</a>.</p>
 </div>
 <div class="paragraph">
 <p>We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
@@ -1152,7 +1144,7 @@ This can be achieved in multiple ways:</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md">kfp-tekton features</a> document for more advanced functionality.</p>
+<p>We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md">kfp-tekton features</a> document for more advanced functionality. The <a href="https://github.com/kubeflow/kfp-tekton/blob/master/guides/advanced_user_guide.md">KFP Tekton Advanced User Guide</a> also has more information.</p>
 </div>
 </td>
 </tr>
@@ -1160,7 +1152,34 @@ This can be achieved in multiple ways:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_triggering_a_dsp_pipeline"><a class="anchor" href="#_triggering_a_dsp_pipeline"></a>Triggering a DSP pipeline</h3>
+<h3 id="_pipeline_execution"><a class="anchor" href="#_pipeline_execution"></a>Pipeline Execution</h3>
+<div class="sect3">
+<h4 id="_submitting_a_pipeline_and_triggering_a_run"><a class="anchor" href="#_submitting_a_pipeline_and_triggering_a_run"></a>Submitting a Pipeline and Triggering a run</h4>
+<div class="paragraph">
+<p>The following code demonstrates how to submit and trigger a pipeline run from a <em>OpenShift AI WorkBench</em>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == '__main__':
+    kubeflow_endpoint = 'http://ds-pipeline-pipelines-definition:8888'
+    sa_token_file_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    with open(sa_token_file_path, 'r') as token_file:
+        bearer_token = token_file.read()
+    print(f'Connecting to Data Science Pipelines: {kubeflow_endpoint}')
+    client = TektonClient(
+        host=kubeflow_endpoint,
+        existing_token=bearer_token
+    )
+    result = client.create_run_from_pipeline_func(
+        offline_scoring_pipeline,
+        arguments={},
+        experiment_name='offline-scoring-kfp'
+    )</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_externally_triggering_a_dsp_pipeline_run"><a class="anchor" href="#_externally_triggering_a_dsp_pipeline_run"></a>Externally Triggering a DSP pipeline run</h4>
 <div class="paragraph">
 <p>In our real-world example above the entire pipeline is executed when a file is added to an S3 bucket. Here is the process followed:</p>
 </div>
@@ -1204,6 +1223,346 @@ This can be achieved in multiple ways:</p>
 </div>
 <div class="paragraph">
 <p>The full code is <a href="_attachments/dsp_trigger.py" class="xref attachment">here</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The <em>pipeline</em> needs to have already been submitted to the DSP runtime.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_handling_in_data_science_pipelines"><a class="anchor" href="#_data_handling_in_data_science_pipelines"></a>Data Handling in Data Science Pipelines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>DSP have two sizes of data, conviently named <strong><em>Small Data</em></strong> and <strong><em>Big Data</em></strong>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><em>Small Data</em> is considered anything that can be passed as a <em>command line argument</em> for example <em>Strings</em>, <em>URLS</em>, <em>Numbers</em>. The overall size should not exceed a few <em>kilobytes</em>.</p>
+</li>
+<li>
+<p>Unsurprisingly, everything else is considered <em>Big Data</em> and should be passed as files.</p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_handling_large_data_sets"><a class="anchor" href="#_handling_large_data_sets"></a>Handling large data sets</h3>
+<div class="paragraph">
+<p>DSP support two methods by which to pass large data sets aka <em>Big Data</em> between pipeline steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><em>Tekton Workspaces</em></strong>.</p>
+</li>
+<li>
+<p><strong><em>Volume based data passing method</em></strong>.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Data Science Projects <strong><em>Data Connection</em></strong> S3 storage is used to store <em>Output Artifacts</em> and <em>Parameters</em> of the stages of a pipeline. It is not intended to be used to pass large amounts of data between pipeline steps.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tekton_workspaces"><a class="anchor" href="#_tekton_workspaces"></a>Tekton Workspaces</h3>
+<div class="paragraph">
+<p>This uses the native Tekton mechanism for storing and passing data between stages of a <em>Tekton Pipeline</em>.
+Tekton creates a <strong>Workspace</strong> to share large data files among tasks that run in the same pipeline. These <em>Workspaces</em> are backed by dynamically created storage volumes which are removed once the pipeline has completed.</p>
+</div>
+<div class="paragraph">
+<p>By default the storage is set to <strong><em>ReadWriteMany</em></strong>, the size is set to <strong><em>2Gi</em></strong> and uses the storage class called <strong><em>kfp-csi-s3</em></strong>.</p>
+</div>
+<div class="paragraph">
+<p>However, this can be changed to suit the target environment needs by setting the following <strong><em>Environment Variables</em></strong>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><em>DEFAULT_ACCESSMODES</em></p>
+</li>
+<li>
+<p><em>DEFAULT_STORAGE_SIZE</em></p>
+</li>
+<li>
+<p><em>DEFAULT_STORAGE_CLASS</em></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>An example of this in the <em>Sample Pipeline</em> is shown below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    os.environ.setdefault("DEFAULT_STORAGE_CLASS","managed-csi")
+    os.environ.setdefault("DEFAULT_ACCESSMODES","ReadWriteOnce")
+    os.environ.setdefault("DEFAULT_STORAGE_SIZE","10Gi")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_volume_based_data_passing_method"><a class="anchor" href="#_volume_based_data_passing_method"></a>Volume-based data passing method</h3>
+<div class="paragraph">
+<p>This approach uses a pre-created OpenShift storage volume (aka <em>PVC</em>) to pass data between the pipeline steps.
+An example of this is in the <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/tests/compiler/testdata/artifact_passing_using_volume.py">KFP compiler tests</a> which we will discuss here.</p>
+</div>
+<div class="paragraph">
+<p>First create the volume to be used and assign it to a variable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from kubernetes.client.models import V1Volume, V1PersistentVolumeClaimVolumeSource
+from kfp.dsl import data_passing_methods</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">volume_based_data_passing_method = data_passing_methods.KubernetesVolume(
+    volume=V1Volume(
+        name='data',
+        persistent_volume_claim=V1PersistentVolumeClaimVolumeSource(
+            claim_name='data-volume',),
+    ),
+    path_prefix='artifact_data/',
+)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then add definition to the <em>pipeline configuration</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == '__main__':
+    pipeline_conf = kfp.dsl.PipelineConf()
+    pipeline_conf.data_passing_method = volume_based_data_passing_method</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The <strong><em>data-volume PVC claim</em></strong> needs to exist in the OpenShift namespace while running the pipeline, else the <em>pipeline execution pod</em> fails to deploy and the run terminates.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To pass big data using cloud provider volumes, it&#8217;s recommended to use the <strong><em>volume-based data passing method</em></strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipeline_hands_on_example"><a class="anchor" href="#_data_science_pipeline_hands_on_example"></a>Data Science Pipeline - Hands On Example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We&#8217;re now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.</p>
+</div>
+<div class="sect2">
+<h3 id="_setup"><a class="anchor" href="#_setup"></a>Setup</h3>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Using the Minio UI, create a new S3 Bucket named <em>fraud_detection_bucket</em>.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-s3-fraud-bucket.png" alt="create s3 fraud bucket">
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Download the following artifacts:</p>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><i class="fa fa-square-o"></i> <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">ONNX Model</a></p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <a href="_attachments/live-data.csv.gz" class="xref attachment">Live Transaction Data</a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Uncompress the <strong><em>.gz</em></strong> files using the <code>gzip -d</code> command.</p>
+</li>
+<li>
+<p><input type="checkbox" data-item-complete="0"> Upload the files to S3 <em>fraud_detection_bucket</em> via the <em>Minio</em> UI.</p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/fraud-upload-files.png" alt="fraud upload files">
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/fraud-files-uploaded.png" alt="fraud files uploaded">
+</div>
+</div>
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Create the <strong><em>aws-connection-fraud-detection</em></strong> <em>secret</em> containing the <em>S3</em> bucket name, endpoint and credentials.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic aws-connection-fraud-detection --from-literal=AWS_ACCESS_KEY_ID=minio --from-literal=AWS_DEFAULT_REGION=rhods-enablement-emea --from-literal=AWS_S3_BUCKET=fraud-detection-bucket --from-literal=AWS_S3_ENDPOINT=https://minio-api... --from-literal=AWS_SECRET_ACCESS_KEY=minio123</code></pre>
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Create two OpenShift Persistent Volumes with the following names:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>offline-scoring-model-volume</strong></p>
+</li>
+<li>
+<p><strong>offline-scoring-data-volume</strong></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Example PVC definitions are here, download and customise as necessary this <a href="_attachments/offline-scoring-data-pvc.yaml" class="xref attachment">Data Volume definition</a> &amp; <a href="_attachments/offline-scoring-model-pvc.yaml" class="xref attachment">Model Volume definition</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_execute_pipeline"><a class="anchor" href="#_execute_pipeline"></a>Execute Pipeline</h3>
+<div class="paragraph">
+<p>Download and customise as necessary this <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Example Pipeline definition</a></p>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Create a <em>Workbench</em> with the name <em>fraud-onnx</em></p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/fraud-onnx-workbench.png" alt="fraud onnx workbench">
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Download the <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Offline Scoring Pipeline</a> and load it into your <em>workbench</em>.</p>
+</li>
+<li>
+<p><input type="checkbox" data-item-complete="0"> Click 'Restart Kernel and Run All Cells'.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/start-pipeline.png" alt="start pipeline">
+</div>
+</div>
+<div class="paragraph">
+<p>The Pipeline will be submitted to the server and a run <em>Triggered</em>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-run-triggered.png" alt="pipeline run triggered">
+</div>
+</div>
+<div class="paragraph">
+<p>If the pipeline run was executed without any issues, you should see something similar to below:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-finish.png" alt="pipeline finish">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_handling_pipeline_errors"><a class="anchor" href="#_handling_pipeline_errors"></a>Handling Pipeline Errors</h3>
+<div class="paragraph">
+<p>In case the pipeline fails, the UI shows something similar to the following:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-failure.png" alt="pipeline failure">
+</div>
+</div>
+<div class="paragraph">
+<p>Clicking on the <strong><em>failed</em></strong> node in the graph and then clicking on the <em>Details</em> tab presents the status of the execution step.
+When the mouse is placed over the <strong><em>Status</em></strong> field, the command to retrieve the detailed logs of the execution step is displayed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-error-details.png" alt="pipeline error details">
+</div>
+</div>
+<div class="paragraph">
+<p>The step logs can then be viewed using the command provided.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-pod-error.png" alt="pipeline pod error">
+</div>
 </div>
 </div>
 </div>
