@@ -105,7 +105,17 @@ image::create-workbench.png[]
 
 Hit `Create workbench`.
 
-Once the workbench is up and running, access it.
+==== Set up pipeline storage
+
+We'll now create a persistent volume that the pipeline will use to persist and exchange data across tasks.
+
+Select `Add cluster storage`. Give it the name `offline-scoring-data-volume` and set `Persistent storage size` to 5 GB.
+
+Hit `Add storage`.
+
+image::pipeline-storage.png[]
+
+Finally, once the fraud detection workbench is up and running, access it.
 
 === Working with Elyra
 
@@ -174,7 +184,7 @@ Next, the ingested data should be preprocessed, so drag the `preprocessing.py` m
 
 image::pipeline-2.png[]
 
-We have now defined two tasks of the pipeline, but order of processing is not defined yet. In order to instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the `Output Port` (right black dot of the task icon) of the `data_ingestion` task with the `Input Port` (left black dot of the task icon) of the `preprocessing` task by drawing a line between these ports (click, hold & draw, release).
+We have now defined two tasks of the pipeline, but the order of processing is not defined yet. To instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the `Output Port` (right black dot of the task icon) of the `data_ingestion` task with the `Input Port` (left black dot of the task icon) of the `preprocessing` task by drawing a line between these ports (click, hold & draw, release).
 
 image::pipeline-3.png[]
 
@@ -182,5 +192,140 @@ You should now see the two nodes connected through a solid line. We have now def
 
 [NOTE]
 ====
-DAGs and so...
+By visually defining pipeline tasks and connections, we can define _graphs_ spanning many nodes and interconnections. Elyra and Data Science Pipelines support the creation and execution of arbitrary _directed acyclic graphs_ (DAGs), i.e. graphs with a sequential order of nodes and without loops.
 ====
+
+Now add the `scoring.py` and `results_upload.py` modules to the pipeline and connect them to form a straight 4-step pipeline.
+
+image::pipeline-4.png[]
+
+It looks like we have captured the end-to-end process of offline scoring from data ingestion to scoring and results upload, but there is one step missing. A closer look at the `scoring.py` module reveals that it requires not only the preprocessed data from the previous `preprocessing.py` step but also the model file, which is created by the `model_loading.py` module. So we have to ensure that model loading is executed before scoring. However, since model loading does not depend on data ingestion and preprocessing, we can have these tasks executed in parallel. To do this, add the `model_loading.py` onto the canvas and connect its `Output Port` with the `Input Port` of `scoring.py`.
+
+image:pipeline-5.png[]
+
+We have now created the final graph representation of the offline scoring pipeline using the five available modules. With this we have fully defined the full pipeline code and its order of execution. 
+
+==== Configuring the pipeline
+
+Before we can submit our pipeline, we have to configure the pipeline to specify:
+
+* the set of dependencies for each step, i.e. the corresponding runtime images,
+* how data is passed between the steps,
+* how the S3 credentials are exposed as environment variables during runtime,
+* and, optionally, the available compute resources per step.
+
+Corresponding to our custom workbench image, there is a custom pipeline runtime image containing the same libraries, which we will use throughout the pipeline tasks.
+
+[NOTE]
+====
+For every custom workbench image, we recommend building a corresponding pipeline runtime image to ensure consistency between interactive and pipeline-based code execution.
+====
+
+Before we can use a custom runtime image in our pipeline, we have to add it to the Elyra runtime image library. To do this, open the `Runtime Images` menu from the left toolbar.
+
+Select `Create new runtime image` via the plus sign in the top portion of the menu.
+
+image::runtime-images.png[]
+
+Fill out the required values:
+
+* display name: `fraud detection runtime`
+* image name: `quay.io/mmurakam/runtimes:fraud-detection-v0.2.0`
+
+image::runtime-image-2.png[]
+
+Hit `Save & Close`.
+
+Let's now set this runtime image in our pipeline. To do this, open the pipeline settings in the Elyra pipeline editor via `Open Panel` in the top right corner of the editor.
+
+image::pipeline-config-1.png[]
+
+You can now see the `PIPELINE PROPERTIES` tab of the settings menu. Here you can configure the default settings that are applied on all pipeline tasks.
+
+Scroll down to `Generic Node Defaults` and click on the drop down menu of `Runtime Image`. Select the `fraud detection runtime` that we just defined.
+
+We can use the `Kubernetes Secrets` setting to expose our data connection parameters to the pipeline tasks as environment variables. For each of the data connection parameters, add an entry to `Kubernetes Secrets` with the following values:
+
+* `Environment Variable`: the parameter name,
+* `Secret Name`: `aws-connection-fraud-detection` (the name of the Kubernetes secret belonging to the data connection),
+* `Secret Key`: the parameter name.
+
+Ensure there is an entry for each of the parameters:
+
+* `AWS_ACCESS_KEY_ID`
+* `AWS_SECRET_ACCESS_KEY`
+* `AWS_S3_ENDPOINT`
+* `AWS_S3_BUCKET`
+
+image::pipeline-config-3.png[]
+
+[NOTE]
+====
+The AWS default region is another parameter in the data connection, which is used for AWS S3-based connections. In case of self-managed S3 backends such as Minio or OpenShift Data Foundation, this parameter can be safely ignored.
+====
+
+[NOTE]
+====
+For simplicity, we have just defined a single runtime image and set of environment variables that are reused in each pipeline task. To optimize pipeline task behavior and control access to credentials, we recommend configuring these settings on a node basis.
+====
+
+Let's now set up data passing between the pipeline steps, in particular the model artifact and the dataset.
+
+Click on the `model_loading.py` node. If you're still in the configuration menu, you should now see the `NODE PROPERTIES` tab. If not, right-click on the node and select `Open Properties`.
+
+image::pipeline-config-4.png[]
+
+You can now view and edit the node-specific settings for the selected node. Under `Runtime Image` and `Kubernetes Secret`, you can see that the global pipeline settings are used by default. 
+
+In the `Outputs` section, you can declare one or more _output files_. These output files are created by this pipeline task and are made available to all subsequent tasks.
+
+[NOTE]
+====
+By default, all files within a containerized task are removed after its execution, so declaring files explicitly as output files is one way to ensure that they can be reused in downstream tasks.
+====
+
+`Add` the file `model.onnx` as an output file. This ensures that the downloaded model artifact is available to the `scoring.py` task.
+
+image::pipeline-config-5.png[]
+
+Let's now enable passing the dataset and results between the pipeline tasks. For this, open the node properties of the `data_ingestion.py` node. Instead of declaring the downloaded data file as an output file, we'll pass it through a mounted volume.
+
+[NOTE]
+====
+Output files are uploaded by Elyra to the corresponding S3 bucket of the respective pipeline run. This is useful for tracking the intermediate results and artifacts produced within the pipeline.
+
+If a task generates a large number of volume of data that need to be passed, network traffic and storage capacity for the intermediate results may become an issue. In this case, it is recommended to pass the data through mounted volumes, which prevents sending these files to the S3 backend.
+====
+
+Scroll down to `Data Volumes` and select `Add`.
+
+In the `Mount Path` field enter `/data`, which is where our pipeline tasks are storing and reading the data and results files. 
+
+In the `Persistent Volume Claim Name` field enter `offline-scoring-data-volume`, which refers to the cluster storage that we created earlier for this pipeline.
+
+image::pipeline-config-6.png[]
+
+Add this data volume entry to the nodes `preprocessing.py`, `scoring.py`, and `results_upload.py`.
+
+[NOTE]
+====
+We could have declared the data volume as a global pipeline property for simplicity. However, this would have prevented parallel execution of model loading and data ingestion/preprocessing since data volumes can only be used by single tasks by default.
+====
+
+Finally, rename the pipeline file to `offline-scoring.pipeline` and hit `Save Pipeline` in the top toolbar.
+
+image::pipeline-config-7.png[]
+
+==== Running the pipeline
+
+We have now fully created and configured the pipeline, so let's now see it in action!
+
+In the visual editor, click on the Play icon (`Run Pipeline`). Leave the default values and hit `OK`.
+
+Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.
+
+image::pipeline-submit.png[]
+
+To monitor the pipeline execution, you can click on the `Run Details` link, which takes you to the pipeline run view within the OpenShift AI dashboard.
+
+image::pipeline-run.png[]
