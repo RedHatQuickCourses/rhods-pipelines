@@ -76,7 +76,7 @@ image::../images/elyra-pipeline-job-started.png[Details of a started Elyra pipel
 * *OpenShift Pipelines (based on Tekton)* - It executes each step in the pipeline as an individual container and ensures that each container gets allocated the resources (GPU, CPU, memory) configured/requested by data scientists in Elyra (or via Kubeflow SDK), as long as they are available in the OpenShift cluster.
 
 
-* *OpenShift GitOps with ArgoCD for AI/ML flows* - While not part of the OpenShift AI but rather as part of OpenShift, it is worth mentioning that once ML models are created, GitOps can be leveraged to push them to other OpenShift instances (including OpenShift Edge devices) for being hosted on model servers for inference and/or embedded in intelligent apps.
+* *OpenShift GitOps with ArgoCD for automated model deployments* - While not part of the OpenShift AI but rather as part of OpenShift, it is worth mentioning that once ML models are created, GitOps can be leveraged to push them to other OpenShift instances (including OpenShift Edge devices) for being hosted on model servers for inference and/or embedded in intelligent apps.
 
 
 For a deep dive and in depth overview of these technologies, please check sections 2 and 3 in this module
