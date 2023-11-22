@@ -51,7 +51,7 @@ Those data scientists and ML engineers with access to and knowledge of container
 
 * *OpenShift Pipeline executing a Data Science Pipeline* - From the OpenShift Console, under Pipelines->PipelinesRuns one can see the underlying Tekton pipeline that runs in OCP, once a data scientist started a Data Science Pipeline in OpenShift AI
 
-image::../images/dsp-run-in-ocp-pipelines.png[OpenShift Pipeline executing a Data Science Pipeline]
+image::dsp-run-in-ocp-pipelines.png[OpenShift Pipeline executing a Data Science Pipeline]
 
 
 
