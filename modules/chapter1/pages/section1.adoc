@@ -41,7 +41,7 @@ image::dsps-main.png[Data Science Pipelines Menu / Main View]
 
 * *Data Science Pipelines Runs* - When looking for more details, end users explore the runs of their data science pipelines
 
-image::../images/dsps-runs.png[Data Science Pipelines Runs]
+image::dsps-runs.png[Data Science Pipelines Runs]
 
 * *Data Science Pipelines view within a Data Science Project* - While within their data science project, end users can visualise the runs and other details of pipelines that ran within that project.
 
