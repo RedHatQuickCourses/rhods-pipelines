@@ -1,2 +1,1 @@
 * xref:index.adoc[]
-** xref:section1.adoc[]

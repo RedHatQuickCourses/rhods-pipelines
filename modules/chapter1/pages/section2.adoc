@@ -1,532 +1,362 @@
-= Section 2
+= Elyra Pipelines
 
-== Data Science Pipelines in OpenShift AI
+Elyra provides a visual pipeline editor for building pipelines from Python and R scripts as well as Jupyter notebooks, simplifying the conversion of multiple files into batch jobs or workflows. A pipeline in Elyra consists of nodes that are connected with each other to define execution dependencies.
 
-== Data Science Pipeline Concepts
+Elyra's visual pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Tekton YAML definition on the fly and submitting it to the Data Science Pipelines backend.
 
-* *Pipeline* -  is a workflow definition containing the steps and their input and output artifacts.
-* *Step* - is a self-contained pipeline component that represents an execution stage in the pipeline.
-* *Experiment* - is a logical grouping of runs for the purpose of comparing different pipeline configurations, for instance.
-* *Run* - is a _single_ execution of a pipeline whereas a _recurring run_ is a scheduled, repeated execution of a pipeline.
+== Creating a Data Science Pipeline with Elyra
 
-[NOTE]
-====
-A pipeline is an execution graph of tasks, commonly known as a _DAG_ (Directed Acyclic Graph).
-A DAG is a directed graph without any cycles, i.e. direct loops.
-====
+In order to create Elyra pipelines with the visual pipeline editor:
 
-OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
+* Launch JupyterLab with the Elyra extension installed.
+* Create a new pipeline by clicking on the Elyra `Pipeline Editor` icon.
+* Add each node to the pipeline by dragging and dropping notebooks or scripts from the file browser onto the pipeline editor canvas.
+* Connect the nodes to define the flow of execution.
+* Configure each node by right-clicking on it, clicking 'Open Properties', and setting the appropriate runtime image and file dependencies.
+* You can also inject environment variables, secrets, and define output files.
+* Once the pipeline is complete, you can submit it to the Data Science Pipelines engine.
 
-The first mechanism is the _Elyra Pipelines_ JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts. 
+== Elyra runtime configuration
 
-The second mechanism and the one discussed here is based on the Kubeflow Pipelines SDK. With the SDK, pipelines are built using Python scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.
+A runtime configuration provides Elyra access to the Data Science Pipelines backend for scalable pipeline execution. You can manage runtime configurations using the JupyterLab UI or the Elyra CLI. The runtime configuration is included and is pre-configured for submitting pipelines to Data Science Pipelines. Refer to the https://elyra.readthedocs.io/en/latest/user_guide/runtime-conf.html#kubeflow-pipelines-configuration-settings[Elyra documentation] for more information about Elyra and the available runtime configuration options.
 
-[NOTE]
-====
-There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.
-====
+== Exercise: offline scoring for fraud detection
 
-In OpenShift AI we use the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
+=== Setup
 
-In OpenShift AI the Data Science Pipeline runtime consists of the following components:
-
-* A Data Science Pipeline Server container. 
-* A MariaDB for storing pipeline definitions and results.
-* A Pipeline scheduler for scheduling pipeline runs.
-* A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.
-
-Steps in the pipeline are executed as ephemeral pods (one per step).
+Let's walk through an example of creating and running an Elyra pipeline for fraud detection. We'll first set up the prerequisites to get started with Elyra and Data Science Pipelines.
 
 [NOTE]
 ====
-DS Pipeline in OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CRD is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_
+Data Science Pipelines has two major dependencies: OpenShift Pipelines and S3 object storage. The setup of OpenShift Pipelines and Minio for S3 has already been covered earlier in this course, so we won't discuss it here.
 ====
 
-.DataScience Pipeline pods
-[source,cmd]
-----
- ~/oc get pods -n redhat-ods-applications
-NAME                                                              READY   STATUS    RESTARTS   AGE
-ds-pipeline-persistenceagent-pipelines-definition-6d6676d58vzss   1/1     Running   0          9m49s
-ds-pipeline-pipelines-definition-7c7dd56b4d-qfz8t                 2/2     Running   0          9m49s
-ds-pipeline-scheduledworkflow-pipelines-definition-7f5c645hcg4g   1/1     Running   0          9m48s
-mariadb-pipelines-definition-795c57795b-27ljh                     1/1     Running   0          9m49s
-----
+==== Set up Data Science Pipelines
 
-== Creating a Data Science Pipeline with the KFP SDK
-
-=== Prerequisites 
-* Python Setup
-[source,cmd]
-----
-pip install kfp==1.8
-pip install kfp-tekton==1.7.2
-----
-IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
-
-* S3 Storage
-
-Follow these instructions to setup a local Minio instance
-https://ai-on-openshift.io/tools-and-applications/minio/minio/
-
-
-=== Creating a Pipeline Server
-
-To execute pipelines a _Pipeline server_ needs to be created, which in turn depends on the creation of an S3 Storage bucket. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
-****
-image::creating-data-connection.png[]
-****
-Once the data connection is created then the pipeline server can be created
-****
-image::pre-creating-pipeline-server.png[]
-****
-****
-image::pipeline-server-created.png[]
-****
-=== Building and deploying a Pipeline
-
-The following is a simplistic example of a KFP pipeline. The original is at 
-https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py and the example has downloaded it to a file named _coin-toss.py_
-
-****
-.Python Pipeline Example
-[source,python]
-----
-# Copyright 2020 kubeflow.org
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-from kfp import dsl
-from kfp import components
-
-def random_num(low:int, high:int) -> int:
-    """Generate a random number between low and high."""
-    import random
-    result = random.randint(low, high)
-    print(result)
-    return result
-
-def flip_coin() -> str:
-    """Flip a coin and output heads or tails randomly."""
-    import random
-    result = 'heads' if random.randint(0, 1) == 0 else 'tails'
-    print(result)
-    return result
-
-def print_msg(msg: str):
-    """Print a message."""
-    print(msg)
-
-
-flip_coin_op = components.create_component_from_func(
-    flip_coin, base_image='python:alpine3.6')
-print_op = components.create_component_from_func(
-    print_msg, base_image='python:alpine3.6')
-random_num_op = components.create_component_from_func(
-    random_num, base_image='python:alpine3.6')
-
-@dsl.pipeline(
-    name='conditional-execution-pipeline',
-    description='Shows how to use dsl.Condition().'
-)
-def flipcoin_pipeline():
-    flip = flip_coin_op()
-    with dsl.Condition(flip.output == 'heads'):
-        random_num_head = random_num_op(0, 9)
-        with dsl.Condition(random_num_head.output > 5):
-            print_op('heads and %s > 5!' % random_num_head.output)
-        with dsl.Condition(random_num_head.output <= 5):
-            print_op('heads and %s <= 5!' % random_num_head.output)
-
-    with dsl.Condition(flip.output == 'tails'):
-        random_num_tail = random_num_op(10, 19)
-        with dsl.Condition(random_num_tail.output > 15):
-            print_op('tails and %s > 15!' % random_num_tail.output)
-        with dsl.Condition(random_num_tail.output <= 15):
-            print_op('tails and %s <= 15!' % random_num_tail.output)
-
-
-if __name__ == '__main__':
-    from kfp_tekton.compiler import TektonCompiler
-    TektonCompiler().compile(flipcoin_pipeline, __file__.replace('.py', '.yaml'))
-----
-****
-
-To compile it into a Tekton resource definition just run the following in a terminal
-[source,python]
-----
-python3 coin-toss.py
-----
-
-It will generate a Tekton *_Pipeline Run_* , similar to this snippet
-****
-[source,yaml]
-----
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: conditional-execution-pipeline
-  annotations:
-    tekton.dev/output_artifacts: '{"flip-coin": [{"key": "artifacts/$PIPELINERUN/flip-coin/Output.tgz",
-      "name": "flip-coin-Output", "path": "/tmp/outputs/Output/data"}], "random-num":
-      [{"key": "artifacts/$PIPELINERUN/random-num/Output.tgz", "name": "random-num-Output",
-      "path": "/tmp/outputs/Output/data"}], "random-num-2": [{"key": "artifacts/$PIPELINERUN/random-num-2/Output.tgz",
-      "name": "random-num-2-Output", "path": "/tmp/outputs/Output/data"}]}'
-    tekton.dev/input_artifacts: '{"print-msg": [{"name": "random-num-Output", "parent_task":
-      "random-num"}], "print-msg-2": [{"name": "random-num-Output", "parent_task":
-      "random-num"}], "print-msg-3": [{"name": "random-num-2-Output", "parent_task":
-      "random-num-2"}], "print-msg-4": [{"name": "random-num-2-Output", "parent_task":
-      "random-num-2"}]}'
-    tekton.dev/artifact_bucket: mlpipeline
-    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
-    tekton.dev/artifact_endpoint_scheme: http://
-    tekton.dev/artifact_items: '{"flip-coin": [["Output", "$(results.Output.path)"]],
-      "print-msg": [], "print-msg-2": [], "print-msg-3": [], "print-msg-4": [], "random-num":
-      [["Output", "$(results.Output.path)"]], "random-num-2": [["Output", "$(results.Output.path)"]]}'
-    sidecar.istio.io/inject: "false"
-    tekton.dev/template: ''
-----
-****
-
-The resulting yaml file _(coin-toss.yaml)_ can then be uploaded throught the UI
-****
-image::import-pipeline.png[]
-****
-****
-image::pipeline-imported.png[]
-****
-Once imported the structure of the _DAG_ will be shown. Each step in the pipeline will be run as a container on OpenShift.
-
-****
-image::pipeline-run-view.png[]
-****
-
-To execute the pipeline, click on _Create Run_ in the menu and fill out the _Name_ and _Description_.
-If the pipeline has _Input Parameters_ or you need to schedule a recurring run, then that can be configured further down. Once ready, click _Create_ to submit the pipeline for scheduling.
-
-****
-image::creating-pipeline-run.png[]
-****
-
-The pipeline will execute and the outputs will be stored into the configured S3 bucket.
-As the pipeline executes the view will be updated to show the steps being executed. It's possible to click on the graph nodes to reveal information of the steps.
-
-****
-image::post-pipeline-run.png[]
-****
-
-Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio Storage UI.
-
-****
-image::object-store-after-run.png[]
-****
-
-=== Experiments And Runs
-
-An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs. 
-
-A run can be configured using the DSP UI or programatically using the _KFP SDK_.
-
-image::dsp-runs.png[]
-
-NOTE: Experiments are part of the KFP SDK and are not currently covered in this course.
-
-== Real World Example
-
-In this section we're going to demonstrate a real world Data Science Pipelines scenario. 
-
-****
-In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it's deployed in. On a regular schedule it uploads battery events via a data gateway, and those battery events are used to train a model which is then retrieved by the device and used. 
-
-
-image::openshift-ai-dsp-edge.png[]
-****
-
-The entire pipeline is here xref:attachment$sample-pipeline-full.py[Pipeline]
-
-We're not going to go through all of it but focus on the key aspects of it. 
-
-The actual pipeline is defined by the following function:
-
-****
-[source,python]
-include::example$sample-pipeline-full.py[lines=445..454]
-****
-
-The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.
-
-The function *_edgetest_pipeline_* is the implementation of the pipeline.
-
-=== Pipeline Parameters
-The pipeline has four parameters:
-
-* _file_obj_ and _src_bucket_ refer to S3 bucket details and can be ignored.
-* _VIN_ is the edge device identifier and has a default value of 412356.
-* _epoch_count_ is the number of training epochs to be used.
-
-In the _Create Run_ UI these parameters are available so that users can override the values as they need.
-
-****
-image::pipeline-parameters.png[]
-****
-
-=== Pipeline Steps
-The file contains the following Python functions, which roughly correspond to the steps in the diagram above
-
-* load_trigger_data()
-* prep_data_train_model()
-* model_upload_notify()
-* model_inference()
-
-These functions are mapped into individual containers by using the _create_component_from_func_ function. You can specify the container _base_image_ to use as well as any additional Python packages to be installed into the container at execution time.
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=433..443]
-
-The Python functions can be used in multiple different step definitions; in the example the _prep_data_train_model_ function is used in the _prep_data_train_op_ and the _prep_inference_data_op_ containers.
-
-The pipeline execution _graph_ is created using the following code:
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=471]
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=477]
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=482]
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=492]
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=495]
-
-
-[IMPORTANT] 
-====
-The execution order of the graph is top down but also can be controlled by using the *_.after()_* operator. 
-
-There are other operators which control the flow of pipeline execution such as _Condition_ , _ExitHandler_, _ParallelFor_ .
-These are not covered as part of this course but the https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py[KFP documentation] has examples.
-====
-
-The following diagram shows the order of execution.
-
-****
-image::pipeline-graph.png[]
-****
-
-This is also visible in the OpenShift AI user interface:
-
-****
-image::oai-pipeline-graph.png[]
-****
-
-=== Pipeline Parameter Passing
-As each step of our pipeline is executed in an independent container, input parameters and output values are handled as follows.
-
-==== Input Parameters
-
-* Simple parameters - booleans, numbers, strings - are passed by value into the container as command line arguments.
-* Complex types or large amounts of data are passed via files. The value of the input parameter is the file path.
-
-==== Output Parameters
-
-* Output values are returned via files.
-
-==== Passing Parameters via Files
-To pass an input parameter as a file, the function argument needs to be annotated using the _InputPath_ annotation.
-For returning data from a step as a file, the function argument needs to be annotated using the _OutputPath_ annotation.
-
-In both cases the actual value of the parameter is the file path and not the actual data. So the pipeline will have to read/write to the file as necessary.
-
-For example, in our sample pipeline we use the _parameter_data_ argument of the _prep_data_train_model_ function to return multiple data values as a file. Here's the function definition with the _OutputPath_ annotation
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=51]
-
-Here's the actual writing of the data to the file
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=238..242]
-
-This data is then consumed in the _model_upload_notify_ function, passed via the _paramater_data_ with the _InputPath_ annotation.
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=243]
-
-Reading the data
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=275..276]
-
-
-Linking the two functions together 
-
-[source,python]
-include::example$sample-pipeline-full.py[lines=482]
-
-
-[TIP]
-====
-There are other parameter annotations available to handle specialised file types 
-such as _InputBinaryFile_, _OutputBinaryFile_. 
-
-The full annotation list is in the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.components.html[KFP component documentation].
-
-====
-
-==== Returning multiple values from a step 
-If you return a single small value from your component using the _return_ statement, the output parameter is named *_output_*.
-It is, however, possible to return multiple small values using the Python _collection_ library method _namedtuple_.
-
-From a https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/Data%20passing%20in%20python%20components.ipynb[Kubeflow pipelines example]
- 
-[source,python]
-----
-def produce_two_small_outputs() -> NamedTuple('Outputs', [('text', str), ('number', int)]):
-    return ("data 1", 42)
-consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_task.outputs['number'])
-----
-
-====
-The KFP SDK uses the following rules to define the input and output parameter names in your component’s interface:
-
-    . If the argument name ends with _path and the argument is annotated as an _kfp.components.InputPath_ or _kfp.components.OutputPath_, the parameter name is the argument name with the trailing _path removed.
-    . If the argument name ends with _file, the parameter name is the argument name with the trailing _file removed.
-    . If you return a single small value from your component using the return statement, the output parameter is named *output*.
-    . If you return several small values from your component by returning a _collections.namedtuple_, the SDK uses the tuple’s field names as the output parameter names.
-
-    . Otherwise, the SDK uses the argument name as the parameter name.
-====
-
-[TIP]
-====
-In the Tekton definition you can see the definition of the _input and output artifacts_. This can be useful for debugging purposes.
-
-include::example$sample-pipeline-full.yaml[lines=12..18]
-
-include::example$sample-pipeline-full.yaml[lines=6..11]
-
-include::example$sample-pipeline-full.yaml[lines=22..25]
-
-You can also see the locations of data stored into the S3 bucket e.g. _artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz_
-====
-
-=== Execution on OpenShift
-
-To enable the _pipeline_ to run on OpenShift we need to pass it the associated _kubernetes_ resources 
-
-* _volumes_ 
-* _environment variables_
-* _node selectors, taints and tolerations_
-
-==== Volumes
-Our pipeline requires a number of volumes to be created and mounted into the executing pods. The volumes are primarily used for storage and secrets handling but can also be used for passing configuration files into the pods.
-
-Before mounting the volumes into the pods they need to be created. The following code creates two volumes, one from a pre-existing PVC and another from a pre-existing secret.
-
-include::example$sample-pipeline-full.py[lines=453..462]
-
-The volumes are mounted into the containers using the *_add_pvolumes_* method:
-
-include::example$sample-pipeline-full.py[lines=495..497]
-
-==== Environment Variables
-
-Environment variables can be added to the pod using the *_add_env_variable_* method. 
-
-include::example$sample-pipeline-full.py[lines=471..475]
+Data Science Pipelines relies on a backend S3 object storage for persisting artifacts, logs, and outputs that are associated with individual pipeline runs.
 
 [NOTE]
 ====
-The *_env_from_secret_* utility method also enables extracting values from secrets and mounting them as environment variables. In the example above the _AWS_ACCESS_KEY_ID_ value is extracted from the _s3-secret_ secret and added to the container defintion as the _s3_access_key_ environment variable.
+Any S3-compliant storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as a particularly lightweight S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where data resilience and desaster recovery are important concerns.
 ====
 
-==== Node Selectors, Taints and Tolerations
+Create a new data science project called `fraud-detection`. Enter the project.
 
-Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware such as GPUs; or there may be other constraints such as data locality. 
+Under `Pipelines`, select `Create a pipeline server`.
 
-In our example we're using the nodes with an attached GPU to execute the step. To do this we need to:
+image::create_pipeline_server.png[]
 
+Under `Object storage connection`, select `Create new data connection`.
 
-. Create the requisite toleration:
+* Enter the following details:
+* Name: `fraud-detection-pipelines`
+* Access key: `minio`
+* Secret key: `minio123`
+* Endpoint: `http://minio-service.minio.svc:9000`
+* Bucket: `fraud-detection-pipelines`
 
-include::example$sample-pipeline-full.py[lines=464..467]
+image::configure_pipeline_server.png[]
 
-. Add the _toleration_ to the pod and add a _node selector_ constraint.
+Hit `Configure`.
 
-include::example$sample-pipeline-full.py[lines=477..480]
+==== Prepare the bucket
 
+Log into the Minio console.
 
-[TIP]
-====
-You could also use this approach to ensure that pods without GPU needs are *not* scheduled to nodes with GPUs.
+Create a new S3 bucket named `fraud-detection` in Minio.
 
-For global pipeline pod settings take a look at the *_PipelineConf_* class in the 'https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.html?highlight=add_env_variable#kfp.dsl.PipelineConf'[KFP SDK Documentation]. 
-====
+Download the `model-latest.onnx` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection[model artefact repository] and upload it to the S3 bucket.
 
+Download the `live-data.csv` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-data-v0.1/data/fraud-detection[data set repository] and upload it to the S3 bucket.
+
+image::fraud-detection-bucket.png[]
+
+==== Import the custom workbench image
+
+Return to the RHOAI dashboard.
+
+Under `Settings` select `Notebook images`.
+
+Select `Import new image`.
+
+Enter the following details:
+
+* Repository: `quay.io/mmurakam/workbenches:fraud-detection-v1.0.1`
+* Name: `Fraud detection workbench`
+* Optionally a description.
+
+image::import-workbench-image.png[]
+
+Hit `Import`.
+
+==== Set up the workbench
+
+In the fraud-detection data science project, create a new data workbench and enter the following details:
+
+* Name: `fraud-detection-workbench`
+* Notebook image: `Fraud detection workbench`
+* Container size: `Small`
+* Create a new persistent storage with name `fraud-detection` and size 5 GB.
+* Use a data connection -> Create new data connection, enter the connection parameters for consuming the `fraud-detection` bucket.
+
+image::create-workbench.png[]
+
+Hit `Create workbench`.
+
+==== Set up pipeline storage
+
+We'll now create a persistent volume that the pipeline will use to persist and exchange data across tasks.
+
+Select `Add cluster storage`. Give it the name `offline-scoring-data-volume` and set `Persistent storage size` to 5 GB.
+
+Hit `Add storage`.
+
+image::pipeline-storage.png[]
+
+Finally, once the fraud detection workbench is up and running, access it.
+
+=== Working with Elyra
+
+==== The code
+
+Within the workbench, clone the course git repository:
+```
+https://github.com/RedHatQuickCourses/rhods-qc-apps.git
+```
+Within the cloned repository, navigate to the `5.pipelines/elyra` folder. The folder contains all the code that is needed for running offline scoring with a given model. In particular, it contains the Python modules:
+
+* `data_ingestion.py` for downloading a dataset from an S3 bucket,
+* `preprocessing.py` for preprocessing the downloaded dataset,
+* `model_loading.py` for downloading a model artefact from an S3 bucket,
+* `scoring.py` for running the classification on the preprocessed data using the downloaded model,
+* `results_upload.py` for uploading the classification results to an S3 bucket.
 
 [NOTE]
 ====
-We have only covered a _subset_ of what's possible with the _KFP SDK_.
-
-It is also possible to customise significant parts of the _pod spec_ definition with:
-
-* Init and Sidecar Pods
-* Pod affinity rules
-* Annotations and labels
-* Retries and Timeouts
-* Resource requests and limits
-
-See the the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.html[KFP SDK Documentation] for more details.
+In Elyra, each pipeline step is implemented by a separate file such as Python modules in our example. In line with software development best practices, pipelines are best implemented in a modular fashion, i.e. across several components. This way, generic pipeline tasks like data ingestion can be re-used in many different pipelines addressing different use cases.
 ====
 
-=== Compiling to Tekton 
+Explore these Python modules to get an understanding of the workflow. A few points of note:
 
-As stated previously, DSP Python scripts need to be compiled into Tekton definitions for execution. 
-This can be achieved in multiple ways:
+Three tasks (data ingestion, model loading, results upload) access the S3 backend. Instead of hardcoding the connection parameters into the pipeline code, these parameters are instead read from the environment at runtime:
+```
+s3_endpoint_url = environ.get('AWS_S3_ENDPOINT')
+s3_access_key = environ.get('AWS_ACCESS_KEY_ID')
+s3_secret_key = environ.get('AWS_SECRET_ACCESS_KEY')
+s3_bucket_name = environ.get('AWS_S3_BUCKET')
+```
+This approach is in line with best practices of handling credentials and allows us to control which S3 buckets are consumed in a given runtime context without changing the code. Importantly, these parameters are stored in a data connection, which is mounted into workbenches and pipeline pods to expose their values to the pipeline tasks.
 
-. Explicity calling the "dsl-compile" command from the _kfp_ Python package giving the input and output files, then uploading the resultant yaml file to the DSP server via the UI.
-. Adding the compile step to the Python script and then uploading the resultant yaml file to the DSP server via the UI.
-. Adding the compile step to the Python script and uploading the resulting Tekton definition via an api call.
+Three tasks (preprocessing, scoring, results upload) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artefact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
 
-In our example we've chosen the second option:
+==== Running the code interactively
 
-include::example$sample-pipeline-full.py[lines=511]
+The Python modules cover the offline scoring tasks end-to-end, so we can run the code in the workbench to perform all needed tasks interactively.
 
+For this, open the `offline-scoring.ipynb` Jupyter notebook. This notebook references each of the Python modules, so once you execute the notebook cells, you're executing the individual tasks implemented in the modules. This is a great way to develop, test, and debug the code that the pipeline will execute.
 
-The Tekton compiler also has a number of _global settings_, which are not covered here, see https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py[here] for more details.
-
-
-[IMPORTANT]
+[NOTE]
 ====
-We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md[kfp-tekton features] document for more advanced functionality.
+It's not recommended to rely on workbenches and Jupyter notebooks for production use cases. Implement your pipeline code in native Python modules and test it interactively in a notebook session. Applying the code in production requires stability, auditability, and reproducibility, which workbenches and Jupyter notebooks are not designed for.
 ====
 
-=== Triggering a DSP pipeline
+==== Building the pipeline
 
-In our real-world example above the entire pipeline is executed when a file is added to an S3 bucket. Here is the process followed:
+Let's now use Elyra to package the code into a pipeline and submit it to the Data Science Pipelines backend in order to:
 
-. File added to S3 bucket.
-. S3 triggers the send of a webhook payload to an _OCP Serverless_ function.
-. The _Serverless_ function parses the payload and invokes the configured _DSP pipeline_.
+* rely on the pipeline scheduler to manage the pipeline execution without having to depend on my workbench session,
+* keep track of the pipeline execution along with the previous executions,
+* be able to control resource usage of individual pipeline tasks in a fine-grained manner.
 
-We're not going to go through the code and configuration for this, but here is the code to trigger the pipeline.
+Within the workbench, open the launcher by clicking on the blue plus button.
 
-[source,python]
-include::example$dsp_trigger.py[lines=34..51]
+image::launcher.png[]
 
+Click on the `Pipeline Editor` tile in the launcher menu. This opens up Elyra's visual pipeline editor. Use the visual pipeline editor to drag-and-drop files from the file browser onto the canvas area. These files then define the individual tasks of your pipeline.
 
-The full code is xref:attachment$dsp_trigger.py[here].
+The pipeline should start by ingesting the dataset that we want to classify, so drag the `data_ingestion.py` module onto the empty canvas.
+
+image::pipeline-1.png[]
+
+Next, the ingested data should be preprocessed, so drag the `preprocessing.py` module onto the canvas, right next to the `data_ingestion.py` module.
+
+image::pipeline-2.png[]
+
+We have now defined two tasks of the pipeline, but the order of processing is not defined yet. To instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the `Output Port` (right black dot of the task icon) of the `data_ingestion` task with the `Input Port` (left black dot of the task icon) of the `preprocessing` task by drawing a line between these ports (click, hold & draw, release).
+
+image::pipeline-3.png[]
+
+You should now see the two nodes connected through a solid line. We have now defined a simple pipeline with two tasks, which are executed sequentially, first data ingestion and then preprocessing.
+
+[NOTE]
+====
+By visually defining pipeline tasks and connections, we can define _graphs_ spanning many nodes and interconnections. Elyra and Data Science Pipelines support the creation and execution of arbitrary _directed acyclic graphs_ (DAGs), i.e. graphs with a sequential order of nodes and without loops.
+====
+
+Now add the `scoring.py` and `results_upload.py` modules to the pipeline and connect them to form a straight 4-step pipeline.
+
+image::pipeline-4.png[]
+
+It looks like we have captured the end-to-end process of offline scoring from data ingestion to scoring and results upload, but there is one step missing. A closer look at the `scoring.py` module reveals that it requires not only the preprocessed data from the previous `preprocessing.py` step but also the model file, which is created by the `model_loading.py` module. So we have to ensure that model loading is executed before scoring. However, since model loading does not depend on data ingestion and preprocessing, we can have these tasks executed in parallel. To do this, add the `model_loading.py` onto the canvas and connect its `Output Port` with the `Input Port` of `scoring.py`.
+
+image:pipeline-5.png[]
+
+We have now created the final graph representation of the offline scoring pipeline using the five available modules. With this we have fully defined the full pipeline code and its order of execution. 
+
+==== Configuring the pipeline
+
+Before we can submit our pipeline, we have to configure the pipeline to specify:
+
+* the set of dependencies for each step, i.e. the corresponding runtime images,
+* how data is passed between the steps,
+* how the S3 credentials are exposed as environment variables during runtime,
+* and, optionally, the available compute resources per step.
+
+Corresponding to our custom workbench image, there is a custom pipeline runtime image containing the same libraries, which we will use throughout the pipeline tasks.
+
+[NOTE]
+====
+For every custom workbench image, we recommend building a corresponding pipeline runtime image to ensure consistency between interactive and pipeline-based code execution.
+====
+
+Before we can use a custom runtime image in our pipeline, we have to add it to the Elyra runtime image library. To do this, open the `Runtime Images` menu from the left toolbar.
+
+Select `Create new runtime image` via the plus sign in the top portion of the menu.
+
+image::runtime-images.png[]
+
+Fill out the required values:
+
+* display name: `fraud detection runtime`
+* image name: `quay.io/mmurakam/runtimes:fraud-detection-v0.2.0`
+
+image::runtime-image-2.png[]
+
+Hit `Save & Close`.
+
+Let's now set this runtime image in our pipeline. To do this, open the pipeline settings in the Elyra pipeline editor via `Open Panel` in the top right corner of the editor.
+
+image::pipeline-config-1.png[]
+
+You can now see the `PIPELINE PROPERTIES` tab of the settings menu. Here you can configure the default settings that are applied on all pipeline tasks.
+
+Scroll down to `Generic Node Defaults` and click on the drop down menu of `Runtime Image`. Select the `fraud detection runtime` that we just defined.
+
+We can use the `Kubernetes Secrets` setting to expose our data connection parameters to the pipeline tasks as environment variables. For each of the data connection parameters, add an entry to `Kubernetes Secrets` with the following values:
+
+* `Environment Variable`: the parameter name,
+* `Secret Name`: `aws-connection-fraud-detection` (the name of the Kubernetes secret belonging to the data connection),
+* `Secret Key`: the parameter name.
+
+Ensure there is an entry for each of the parameters:
+
+* `AWS_ACCESS_KEY_ID`
+* `AWS_SECRET_ACCESS_KEY`
+* `AWS_S3_ENDPOINT`
+* `AWS_S3_BUCKET`
+
+image::pipeline-config-3.png[]
+
+[NOTE]
+====
+The AWS default region is another parameter in the data connection, which is used for AWS S3-based connections. In case of self-managed S3 backends such as Minio or OpenShift Data Foundation, this parameter can be safely ignored.
+====
+
+[NOTE]
+====
+For simplicity, we have just defined a single runtime image and set of environment variables that are reused in each pipeline task. To optimize pipeline task behavior and control access to credentials, we recommend configuring these settings on a node basis.
+====
+
+Let's now set up data passing between the pipeline steps, in particular the model artifact and the dataset.
+
+Click on the `model_loading.py` node. If you're still in the configuration menu, you should now see the `NODE PROPERTIES` tab. If not, right-click on the node and select `Open Properties`.
+
+image::pipeline-config-4.png[]
+
+You can now view and edit the node-specific settings for the selected node. Under `Runtime Image` and `Kubernetes Secret`, you can see that the global pipeline settings are used by default. 
+
+In the `Outputs` section, you can declare one or more _output files_. These output files are created by this pipeline task and are made available to all subsequent tasks.
+
+[NOTE]
+====
+By default, all files within a containerized task are removed after its execution, so declaring files explicitly as output files is one way to ensure that they can be reused in downstream tasks.
+====
+
+`Add` the file `model.onnx` as an output file. This ensures that the downloaded model artifact is available to the `scoring.py` task.
+
+image::pipeline-config-5.png[]
+
+Let's now enable passing the dataset and results between the pipeline tasks. For this, open the node properties of the `data_ingestion.py` node. Instead of declaring the downloaded data file as an output file, we'll pass it through a mounted volume.
+
+[NOTE]
+====
+Output files are uploaded by Elyra to the corresponding S3 bucket of the respective pipeline run. This is useful for tracking the intermediate results and artifacts produced within the pipeline.
+
+If a task generates a large number of volume of data that need to be passed, network traffic and storage capacity for the intermediate results may become an issue. In this case, it is recommended to pass the data through mounted volumes, which prevents sending these files to the S3 backend.
+====
+
+Scroll down to `Data Volumes` and select `Add`.
+
+In the `Mount Path` field enter `/data`, which is where our pipeline tasks are storing and reading the data and results files. 
+
+In the `Persistent Volume Claim Name` field enter `offline-scoring-data-volume`, which refers to the cluster storage that we created earlier for this pipeline.
+
+image::pipeline-config-6.png[]
+
+Add this data volume entry to the nodes `preprocessing.py`, `scoring.py`, and `results_upload.py`.
+
+[NOTE]
+====
+We could have declared the data volume as a global pipeline property for simplicity. However, this would have prevented parallel execution of model loading and data ingestion/preprocessing since data volumes can only be used by single tasks by default.
+====
+
+Finally, rename the pipeline file to `offline-scoring.pipeline` and hit `Save Pipeline` in the top toolbar.
+
+image::pipeline-config-7.png[]
+
+==== Running the pipeline
+
+We have now fully created and configured the pipeline, so let's now see it in action!
+
+In the visual editor, click on the Play icon (`Run Pipeline`). Leave the default values and hit `OK`.
+
+Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.
+
+image::pipeline-submit.png[]
+
+To monitor the pipeline's execution, you can click on the `Run Details` link, which takes you to the pipeline run view within the RHOAI dashboard. Here you can track in real-time how each pipeline task is processed and whether it fails or resolves successfully.
+
+image::pipeline-run.png[]
+
+To confirm that the pipeline has indeed produced fraud detection scoring results, view the content of the `fraud-detection` bucket. You should now see a new CSV file containing the predicted result of each transaction within the used dataset.
+
+image::fraud-detection-bucket-2.png[]
+
+If you head back to the `Runs` overview in the RHOAI dashboard, you can see the history of all ongoing and previous pipeline executions and compare their run durations and status.
+
+image::pipeline-runs.png[]
+
+In the `Scheduled` tab you're able to schedule runs of the offline scoring pipeline according to a predefined schedule such as daily or according to a Cron statement.
+
+image::pipeline-scheduled.png[]
+
+==== Tracking the pipeline artifacts
+
+Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Data Science Pipelines use to store the pipeline artifacts.
+
+View the contents of the `fraud-detection-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
+
+* `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
+* `artifacts`: A folder used by Data Science Pipelines to store the metadata of each pipeline task for each pipeline run.
+* One folder for each pipeline run with name `[pipeline-name]-[timestamp]`. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.
+
+[NOTE]
+====
+If you need to troubleshoot a pipeline, the log files within the Elyra bucket are the best place to check any code-related issues. Other places are the Tekton run and pod events logs, which reveal integration or infrastructure-related problems.
+====
+
+image::pipelines-bucket.png[]
+
+image::pipeline-artifacts.png[]
+
+Now that we have seen how to work with Data Science Pipelines through Elyra, let's take a closer look at the Kubeflow Pipelines SDK.
