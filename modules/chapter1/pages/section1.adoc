@@ -66,7 +66,7 @@ image::elyra-pipeline-model-training.png[A Model Training pipeline in Elyra]
 
 A data scientist can assign resources visually, including CPUs and GPUs, to each individual step in the pipeline.
 
-image::../images/elyra-pipeline-step-config-with-gpu.png[Configuring GPUs and other resources for an Elyra pipeline step]
+image::elyra-pipeline-step-config-with-gpu.png[Configuring GPUs and other resources for an Elyra pipeline step]
 
 * *Kubeflow Pipelines* - Specialized data science pipelines engine which can translate an Elyra visual pipeline execution (or Kubeflow SDK calls) into a *Tekton* pipeline running in OpenShift.
 
