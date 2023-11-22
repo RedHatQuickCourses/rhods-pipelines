@@ -70,7 +70,7 @@ image::elyra-pipeline-step-config-with-gpu.png[Configuring GPUs and other resour
 
 * *Kubeflow Pipelines* - Specialized data science pipelines engine which can translate an Elyra visual pipeline execution (or Kubeflow SDK calls) into a *Tekton* pipeline running in OpenShift.
 
-image::../images/elyra-pipeline-running.png[Starting an Elyra pipeline]
+image::elyra-pipeline-running.png[Starting an Elyra pipeline]
 image::../images/elyra-pipeline-job-started.png[Details of a started Elyra pipeline]
 
 * *OpenShift Pipelines (based on Tekton)* - It executes each step in the pipeline as an individual container and ensures that each container gets allocated the resources (GPU, CPU, memory) configured/requested by data scientists in Elyra (or via Kubeflow SDK), as long as they are available in the OpenShift cluster.
