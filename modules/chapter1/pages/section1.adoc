@@ -61,7 +61,7 @@ At a high level, here are the technologies used to implement Data Science Pipeli
 
 * *Elyra Pipelines* - A *JupyterLab* extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks as well as Python or R scripts. User can drag and drop code and create visually such pipelines
 
-image::../images/elyra-pipeline-offline-scoring.png[An Offline Scoring pipeline in Elyra]
+image::elyra-pipeline-offline-scoring.png[An Offline Scoring pipeline in Elyra]
 image::../images/elyra-pipeline-model-training.png[A Model Training pipeline in Elyra]
 
 A data scientist can assign resources visually, including CPUs and GPUs, to each individual step in the pipeline.
