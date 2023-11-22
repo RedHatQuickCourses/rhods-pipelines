@@ -37,7 +37,7 @@ From the perspective of a data scientist or ML engineer user experience, OpenShi
 
 * *Data Science Pipelines Main View* - End users can find the pipelines to whom they have access under the data science pipelines menu / main view
 
-image::../images/dsps-main.png[Data Science Pipelines Menu / Main View]
+image::dsps-main.png[Data Science Pipelines Menu / Main View]
 
 * *Data Science Pipelines Runs* - When looking for more details, end users explore the runs of their data science pipelines
 
