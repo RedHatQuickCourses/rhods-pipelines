@@ -45,7 +45,7 @@ image::dsps-runs.png[Data Science Pipelines Runs]
 
 * *Data Science Pipelines view within a Data Science Project* - While within their data science project, end users can visualise the runs and other details of pipelines that ran within that project.
 
-image::../images/dsps-in-ds-project.png[Data Science Pipelines view within a Data Science Project]
+image::dsps-in-ds-project.png[Data Science Pipelines view within a Data Science Project]
 
 Those data scientists and ML engineers with access to and knowledge of containers and OpenShift, can also look "under the covers" and check their pipeline runs direct in OpenShift:
 
