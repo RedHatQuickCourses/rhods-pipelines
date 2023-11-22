@@ -116,8 +116,178 @@
 </aside>
 <article class="doc">
 <h1 class="page">Section 1</h1>
+<div class="sect1">
+<h2 id="_introduction_to_data_science_pipelines"><a class="anchor" href="#_introduction_to_data_science_pipelines"></a>Introduction to Data Science Pipelines</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>This is <em>Section 1</em> of <em>Chapter 1</em> in the <strong>hello</strong> quick course&#8230;&#8203;.</p>
+<p>A data science pipeline typically consists of several key activities that are performed in a structured sequence to transform raw data into meaningful insights or predictions. These activities may include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Collection</strong>: Gathering the data from various sources, such as databases, APIs, spreadsheets, or external datasets.</p>
+</li>
+<li>
+<p><strong>Data Cleaning</strong>: Identifying and handling missing or inconsistent data, removing duplicates, and addressing data quality issues to ensure that the data is reliable and ready for analysis.</p>
+</li>
+<li>
+<p><strong>Data Exploration</strong>: Exploring the data to understand its characteristics, including summary statistics, data distributions, and visualizations. This step helps in gaining insights into the data and identifying potential patterns or outliers.</p>
+</li>
+<li>
+<p><strong>Feature Engineering</strong>: Creating or transforming features (variables) to improve the performance of machine learning models. This may involve scaling, one-hot encoding, creating new variables, or reducing dimensionality.</p>
+</li>
+<li>
+<p><strong>Data Preprocessing</strong>: Preparing the data for modeling, which may involve standardizing, normalizing, or scaling the data. This step is crucial for machine learning algorithms that are sensitive to the scale of features.</p>
+</li>
+<li>
+<p><strong>Model Building</strong>: Developing machine learning or statistical models to solve a specific problem or make predictions. This step includes selecting an appropriate algorithm, training the model, and fine-tuning its hyperparameters.</p>
+</li>
+<li>
+<p><strong>Model Evaluation</strong>: Assessing the performance of the model using various metrics, such as accuracy, precision, recall, F1 score, or mean squared error. Cross-validation techniques may be used to ensure the model&#8217;s robustness.</p>
+</li>
+<li>
+<p><strong>Model Deployment</strong>: Integrating the trained model into a production environment so that it can make real-time predictions or recommendations. This may involve creating APIs, web applications, or embedding the model in an existing software system.</p>
+</li>
+<li>
+<p><strong>Monitoring and Maintenance</strong>: Continuously monitoring the deployed model&#8217;s performance and making necessary updates or retraining when the model&#8217;s accuracy decreases over time due to changing data distributions or other factors.</p>
+</li>
+<li>
+<p><strong>Reporting and Visualization</strong>: Communicating the results and insights to stakeholders through reports, dashboards, or interactive visualizations, making it easier for non-technical audiences to understand the findings.</p>
+</li>
+<li>
+<p><strong>Documentation</strong>: Creating documentation for the entire data science pipeline, including data sources, data processing steps, model details, and evaluation metrics. This documentation is essential for reproducibility and collaboration.</p>
+</li>
+<li>
+<p><strong>Collaboration and Communication</strong>: Collaborating with domain experts, stakeholders, and other team members to define project objectives, gather domain knowledge, and align the data science work with the business goals.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These activities are typically iterative and may involve going back and forth between different stages to refine the analysis and models. Data science pipelines can vary depending on the specific project and organization, but these general steps provide a framework for approaching data science tasks.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipelines_in_openshift_ai"><a class="anchor" href="#_data_science_pipelines_in_openshift_ai"></a>Data Science Pipelines in OpenShift AI</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>From the perspective of a data scientist or ML engineer user experience, OpenShift AI provides several user interface capabilities trying to cover as many as possible from these data science activities. It includes the following</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Science Pipelines Main View</strong> - End users can find the pipelines to whom they have access under the data science pipelines menu / main view</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsps-main.png" alt="Data Science Pipelines Menu / Main View">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Science Pipelines Runs</strong> - When looking for more details, end users explore the runs of their data science pipelines</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsps-runs.png" alt="Data Science Pipelines Runs">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Science Pipelines view within a Data Science Project</strong> - While within their data science project, end users can visualise the runs and other details of pipelines that ran within that project.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsps-in-ds-project.png" alt="Data Science Pipelines view within a Data Science Project">
+</div>
+</div>
+<div class="paragraph">
+<p>Those data scientists and ML engineers with access to and knowledge of containers and OpenShift, can also look "under the covers" and check their pipeline runs direct in OpenShift:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>OpenShift Pipeline executing a Data Science Pipeline</strong> - From the OpenShift Console, under Pipelines&#8594;PipelinesRuns one can see the underlying Tekton pipeline that runs in OCP, once a data scientist started a Data Science Pipeline in OpenShift AI</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsp-run-in-ocp-pipelines.png" alt="OpenShift Pipeline executing a Data Science Pipeline">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipelines_technologies"><a class="anchor" href="#_data_science_pipelines_technologies"></a>Data Science Pipelines Technologies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At a high level, here are the technologies used to implement Data Science Pipelines in OpenShift AI:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Elyra Pipelines</strong> - A <strong>JupyterLab</strong> extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks as well as Python or R scripts. User can drag and drop code and create visually such pipelines</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-offline-scoring.png" alt="An Offline Scoring pipeline in Elyra">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-model-training.png" alt="A Model Training pipeline in Elyra">
+</div>
+</div>
+<div class="paragraph">
+<p>A data scientist can assign resources visually, including CPUs and GPUs, to each individual step in the pipeline.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-step-config-with-gpu.png" alt="Configuring GPUs and other resources for an Elyra pipeline step">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Kubeflow Pipelines</strong> - Specialized data science pipelines engine which can translate an Elyra visual pipeline execution (or Kubeflow SDK calls) into a <strong>Tekton</strong> pipeline running in OpenShift.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-running.png" alt="Starting an Elyra pipeline">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-job-started.png" alt="Details of a started Elyra pipeline">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>OpenShift Pipelines (based on Tekton)</strong> - It executes each step in the pipeline as an individual container and ensures that each container gets allocated the resources (GPU, CPU, memory) configured/requested by data scientists in Elyra (or via Kubeflow SDK), as long as they are available in the OpenShift cluster.</p>
+</li>
+<li>
+<p><strong>OpenShift GitOps with ArgoCD for automated model deployments</strong> - While not part of the OpenShift AI but rather as part of OpenShift, it is worth mentioning that once ML models are created, GitOps can be leveraged to push them to other OpenShift instances (including OpenShift Edge devices) for being hosted on model servers for inference and/or embedded in intelligent apps.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For a deep dive and in depth overview of these technologies, please check sections 2 and 3 in this module</p>
+</div>
+</div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="index.html">Chapter 1</a></span>
