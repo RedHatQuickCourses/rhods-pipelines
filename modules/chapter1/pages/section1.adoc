@@ -1,6 +1,17 @@
-= Section 1
+= Introduction
 
-== Introduction to Data Science Pipelines
+== Data Science Pipeline Concepts
+
+* *Pipeline* -  is a workflow definition containing the steps and their input and output artifacts.
+* *Step* - is a self-contained pipeline component that represents an execution stage in the pipeline.
+* *Experiment* - is a logical grouping of runs for the purpose of comparing different pipeline configurations, for instance.
+* *Run* - is a _single_ execution of a pipeline whereas a _recurring run_ is a scheduled, repeated execution of a pipeline.
+
+[NOTE]
+====
+A pipeline is an execution graph of tasks, commonly known as a _DAG_ (Directed Acyclic Graph).
+A DAG is a directed graph without any cycles, i.e. direct loops.
+====
 
 A data science pipeline typically consists of several key activities that are performed in a structured sequence to transform raw data into meaningful insights or predictions. These activities may include:
 
@@ -30,7 +41,6 @@ A data science pipeline typically consists of several key activities that are pe
 
 These activities are typically iterative and may involve going back and forth between different stages to refine the analysis and models. Data science pipelines can vary depending on the specific project and organization, but these general steps provide a framework for approaching data science tasks.
 
-
 == Data Science Pipelines in OpenShift AI
 
 From the perspective of a data scientist or ML engineer user experience, OpenShift AI provides several user interface capabilities trying to cover as many as possible from these data science activities. It includes the following
@@ -53,8 +63,6 @@ Those data scientists and ML engineers with access to and knowledge of container
 
 image::dsp-run-in-ocp-pipelines.png[OpenShift Pipeline executing a Data Science Pipeline]
 
-
-
 == Data Science Pipelines Technologies
 
 At a high level, here are the technologies used to implement Data Science Pipelines in OpenShift AI:
@@ -75,8 +83,4 @@ image::elyra-pipeline-job-started.png[Details of a started Elyra pipeline]
 
 * *OpenShift Pipelines (based on Tekton)* - It executes each step in the pipeline as an individual container and ensures that each container gets allocated the resources (GPU, CPU, memory) configured/requested by data scientists in Elyra (or via Kubeflow SDK), as long as they are available in the OpenShift cluster.
 
-
 * *OpenShift GitOps with ArgoCD for automated model deployments* - While not part of the OpenShift AI but rather as part of OpenShift, it is worth mentioning that once ML models are created, GitOps can be leveraged to push them to other OpenShift instances (including OpenShift Edge devices) for being hosted on model servers for inference and/or embedded in intelligent apps.
-
-
-For a deep dive and in depth overview of these technologies, please check sections 2 and 3 in this module
