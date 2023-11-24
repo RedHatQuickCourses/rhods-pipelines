@@ -1,6 +1,6 @@
 # Automation using Data Science Pipelines
 
-This course is the fourth in a series of 6 courses about Red Hat OpenShift Data Science (RHODS). This course teaches you how to automate the lifecycle of machine learning models using Data Science Pipelines.
+This course is the last in a series of 6 courses about Red Hat OpenShift Data Science (RHODS). This course teaches you how to automate the lifecycle of machine learning models using Data Science Pipelines.
 
 # Creating Course Content
 
