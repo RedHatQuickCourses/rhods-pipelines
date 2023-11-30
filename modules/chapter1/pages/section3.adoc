@@ -611,7 +611,7 @@ image::create-s3-fraud-bucket.png[]
 [%interactive]
 * [ ] Download the following artifacts:
 
-** [ ] xref:attachment$offline_scoring_kfp_pipeline.py[ONNX Model]
+** [ ] xref:attachment$model-latest.onnx[ONNX Model]
 ** [ ] xref:attachment$live-data.csv.gz[Live Transaction Data]
 
 [%interactive]
