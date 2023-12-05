@@ -40,7 +40,7 @@ Continue using the https://demo.redhat.com/catalog?search=Red+Hat+OpenShift+Cont
 
 [TIP]
 ====
-To prevent problems when allocating the workbench pods, make sure that your catalog item has been configured with `64Gi` as the worker memory size.
+To prevent problems when allocating pipeline and workbench pods, make sure that your catalog item has been configured with `64Gi` as the worker memory size.
 ====
 
 This classroom does *NOT* have RHODS pre-installed. You are expected to complete the _Red Hat OpenShift Data Science Administration_ course, where you install and configure a basic RHODS instance, and then continue with this course.
