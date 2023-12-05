@@ -320,6 +320,22 @@ We have now fully created and configured the pipeline, so let's now see it in ac
 
 In the visual editor, click on the Play icon (`Run Pipeline`). Leave the default values and hit `OK`.
 
+
+[WARNING]
+====
+If you configure the pipeline server after you have created a workbench and specified a notebook image within the workbench, you will not be able to execute the pipeline, even after restarting the notebook.
+
+To solve this problem:
+
+1. Stop the running notebook.
+2. Edit the workbench to make a small modification.
+For example, add a new dummy environment variable, or delete an existing unnecessary environment variable.
+Save your changes.
+3. Restart the notebook.
+4. In the left sidebar of JupyterLab, click Runtimes.
+5. Confirm that the default Data Science Pipelines runtime is selected.
+====
+
 Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.
 
 image::pipeline-submit.png[]
@@ -339,6 +355,18 @@ image::pipeline-runs.png[]
 In the `Scheduled` tab you're able to schedule runs of the offline scoring pipeline according to a predefined schedule such as daily or according to a Cron statement.
 
 image::pipeline-scheduled.png[]
+
+
+[WARNING]
+====
+Pipeline versioning is not fully implemented yet.
+If you change an Elyra pipeline that you have already submitted before, the initial version might get executed.
+
+To ensure that your latest changes are executed, you have two options:
+
+* Delete the pipeline through the dashboard before running the pipeline again.
+* When you run the pipeline, define a new name for the new pipeline version (e.g `my-pipeline-1`, `my-pipeline-2`).
+====
 
 ==== Tracking the pipeline artifacts
 
