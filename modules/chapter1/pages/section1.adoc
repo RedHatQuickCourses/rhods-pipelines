@@ -66,7 +66,9 @@ image::dsp-run-in-ocp-pipelines.png[OpenShift Pipeline executing a Data Science 
 
 Data Science Pipelines allows users to utilize several different methods for creating and executing pipelines.  This section will discuss some of those options.
 
-* *Elyra Pipelines* - A *JupyterLab* extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks files (.ipynb), Python files (.py), or R scripts (.r). Elyra enables users to drag and drop files and visually create pipelines
+=== Elyra Pipelines
+
+Elyra is a *JupyterLab* extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks files (.ipynb), Python files (.py), or R scripts (.r). Elyra enables users to drag and drop files and visually create pipelines
 
 image::elyra-pipeline-offline-scoring.png[An Offline Scoring pipeline in Elyra]
 image::elyra-pipeline-model-training.png[A Model Training pipeline in Elyra]
@@ -80,7 +82,9 @@ After constructing a pipeline with Elyra, users can submit a job directly to Dat
 image::elyra-pipeline-running.png[Starting an Elyra pipeline]
 image::elyra-pipeline-job-started.png[Details of a started Elyra pipeline]
 
-* *kfp / kfp-tekton* - kfp and kfp-tekton are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the kfp and kfp-tekton python packages using standard package management tools such as pip and users have the ability to import the kfp packages into their python scripts and use them to control all aspects of the pipeline.
+=== kfp / kfp-tekton
+
+kfp and kfp-tekton are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the kfp and kfp-tekton python packages using standard package management tools such as pip and users have the ability to import the kfp packages into their python scripts and use them to control all aspects of the pipeline.
 
 With kfp and kfp-tekton users are able to compile pipelines to a YAML object which can then be uploaded to the OpenShift AI Dashboard.
 
