@@ -58,7 +58,7 @@ image::dsps-in-ds-project.png[Data Science Pipelines view within a Data Science 
 
 When executing a pipeline run, Data Science Pipelines utilizes OpenShift Pipelines (Tekton) as the underlying execution engine.  Users can access additional information and logs from the OpenShift Console from the execution of their runs.
 
-* *OpenShift Pipeline executing a Data Science Pipeline* - From the OpenShift Console, under Pipelines->PipelinesRuns one can see the underlying Tekton pipeline that runs in OpenShift, once a data scientist started a Data Science Pipeline in OpenShift AI
+* *OpenShift Pipeline executing a Data Science Pipeline* - From the OpenShift Console, under Pipelines->PipelinesRuns one can see the underlying Tekton pipeline that runs in OpenShift, once a user starts a Data Science Pipeline in OpenShift AI
 
 image::dsp-run-in-ocp-pipelines.png[OpenShift Pipeline executing a Data Science Pipeline]
 
