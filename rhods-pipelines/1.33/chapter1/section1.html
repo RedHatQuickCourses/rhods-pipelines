@@ -105,13 +105,13 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Data Science Pipelines is Red Hat&#8217;s implementation of Kubeflow Pipelines.  Data Science Pipelines uses OpenShift Pipelines (Tekton) as the execution engine for pipelines, unlike the upstream Kubeflow Pipelines, which utilizes Argo Workflows.</p>
+<p>Data Science Pipelines is Red Hat&#8217;s implementation of Kubeflow Pipelines.  Data Science Pipelines uses <strong>OpenShift Pipelines (Tekton)</strong> as the execution engine for pipelines, unlike the upstream Kubeflow Pipelines, which utilizes Argo Workflows.</p>
 </div>
 <div class="paragraph">
-<p>Another important distinction between the upstream Kubeflow Pipelines project and Data Science Pipelines, is that Data Science Pipelines is designed to support multi-tenancy.  Users are able to deploy their own instance of Data Science Pipelines in a namespace using an object called a DataSciencePipelineApplications.</p>
+<p>Another important distinction between the upstream Kubeflow Pipelines project and Data Science Pipelines, is that Data Science Pipelines is designed to support multi-tenancy.  Users are able to deploy their own instance of Data Science Pipelines in a namespace using an object called a <strong>DataSciencePipelineApplications</strong>.</p>
 </div>
 <div class="paragraph">
-<p>Users are then able to create pipelines using a variety of methods, and submit them to the DataSciencePipelineApplication instance for execution.</p>
+<p>Users are then able to create pipelines using a variety of methods, and submit them to the <strong>DataSciencePipelineApplication</strong> instance for execution.</p>
 </div>
 </div>
 </div>
@@ -192,7 +192,7 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 <h2 id="_data_science_pipelines_in_openshift_ai"><a class="anchor" href="#_data_science_pipelines_in_openshift_ai"></a>Data Science Pipelines in OpenShift AI</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>From the perspective of a data scientist or ML engineer, OpenShift AI provides several user interface capabilities to enable these data science activities. It includes the following:</p>
+<p>From the perspective of a data scientist or ML engineer, Red Hat OpenShift AI provides several user interface capabilities to enable these data science activities. It includes the following:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -236,7 +236,7 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>OpenShift Pipeline executing a Data Science Pipeline</strong> - From the OpenShift Console, under Pipelines&#8594;PipelinesRuns one can see the underlying Tekton pipeline that runs in OpenShift, once a user starts a Data Science Pipeline in OpenShift AI</p>
+<p><strong>OpenShift Pipeline executing a Data Science Pipeline</strong> - From the OpenShift Console, under <strong>Pipelines &gt; PipelinesRuns</strong> one can see the underlying Tekton pipeline that runs in OpenShift, once a user starts a Data Science Pipeline in Red Hat OpenShift AI</p>
 </li>
 </ul>
 </div>
@@ -293,10 +293,10 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 <div class="sect2">
 <h3 id="_kfp_kfp_tekton"><a class="anchor" href="#_kfp_kfp_tekton"></a>kfp / kfp-tekton</h3>
 <div class="paragraph">
-<p>kfp and kfp-tekton are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the kfp and kfp-tekton python packages using standard package management tools such as pip and users have the ability to import the kfp packages into their python scripts and use them to control all aspects of the pipeline.</p>
+<p><strong>kfp</strong> and <strong>kfp-tekton</strong> are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the <strong>kfp</strong> and <strong>kfp-tekton</strong> python packages using standard package management tools such as <strong>pip</strong>, and users have the ability to import the <strong>kfp</strong> packages into their python scripts and use them to control all aspects of the pipeline.</p>
 </div>
 <div class="paragraph">
-<p>With kfp and kfp-tekton users are able to compile pipelines to a YAML object which can then be uploaded to the OpenShift AI Dashboard.</p>
+<p>With <strong>kfp</strong> and <strong>kfp-tekton</strong>, users are able to compile pipelines to a YAML object which can then be uploaded to the Red Hat OpenShift AI Dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -304,10 +304,10 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Once uploaded, users are able to execute a run of the pipeline, or schedule a reoccurring run for the pipeline.</p>
+<p>Once uploaded, users are able to execute a run of the pipeline, or schedule a recurring run for the pipeline.</p>
 </div>
 <div class="paragraph">
-<p>Additionally, with the kfp and kfp-tekton packages, users are able to connect directly to the DataSciencePipelineApplication instance from their python environment and execute a run without compiling and manually uploading the pipeline.</p>
+<p>Additionally, with the <strong>kfp</strong> and <strong>kfp-tekton</strong> packages, users are able to connect directly to the <strong>DataSciencePipelineApplication</strong> instance from their python environment and execute a run without compiling and manually uploading the pipeline.</p>
 </div>
 </div>
 </div>

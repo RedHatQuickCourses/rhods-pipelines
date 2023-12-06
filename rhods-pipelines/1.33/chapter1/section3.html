@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Data Science Pipelines Using Kubeflow in OpenShift AI :: Automation using Data Science Pipelines</title>
+    <title>Data Science Pipelines Using Kubeflow in Red Hat OpenShift AI :: Automation using Data Science Pipelines</title>
     <link rel="prev" href="section2.html">
     <meta name="generator" content="Antora 3.1.3">
     <link rel="stylesheet" href="../../../_/css/site.css">
@@ -100,11 +100,11 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Data Science Pipelines Using Kubeflow in OpenShift AI</h1>
+<h1 class="page">Data Science Pipelines Using Kubeflow in Red Hat OpenShift AI</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.</p>
+<p>Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.</p>
 </div>
 <div class="paragraph">
 <p>The first mechanism is the <em>Elyra Pipelines</em> JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts.</p>
@@ -127,10 +127,10 @@
 </table>
 </div>
 <div class="paragraph">
-<p>In OpenShift AI we use the <strong><em>Tekton</em></strong> runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.</p>
+<p>In Red Hat OpenShift AI, we use the <strong><em>Tekton</em></strong> runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.</p>
 </div>
 <div class="paragraph">
-<p>In OpenShift AI the Data Science Pipeline runtime consists of the following components:</p>
+<p>In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -159,7 +159,7 @@
 </td>
 <td class="content">
 <div class="paragraph">
-<p>DS Pipelines in OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CR is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em>. Pipeline <em>runs</em> are instances of <em>tekton.dev/v1 PipelineRun</em>.</p>
+<p>DS Pipelines in Red Hat OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CR is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em>. Pipeline <em>runs</em> are instances of <em>tekton.dev/v1 PipelineRun</em>.</p>
 </div>
 </td>
 </tr>
@@ -654,7 +654,7 @@ These are not covered as part of this course but the <a href="https://github.com
 </div>
 </div>
 <div class="paragraph">
-<p>This is also visible in the OpenShift AI user interface:</p>
+<p>This is also visible in the Red Hat OpenShift AI user interface:</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -1081,7 +1081,7 @@ This can be achieved in multiple ways:</p>
 <div class="sect3">
 <h4 id="_submitting_a_pipeline_and_triggering_a_run"><a class="anchor" href="#_submitting_a_pipeline_and_triggering_a_run"></a>Submitting a Pipeline and Triggering a run</h4>
 <div class="paragraph">
-<p>The following code demonstrates how to submit and trigger a pipeline run from a <em>OpenShift AI WorkBench</em>.</p>
+<p>The following code demonstrates how to submit and trigger a pipeline run from a <em>Red Hat OpenShift AI WorkBench</em>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
