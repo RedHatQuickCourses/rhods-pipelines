@@ -1,4 +1,4 @@
 * xref:index.adoc[]
-** xref:section1.adoc[]
-** xref:section2.adoc[Elyra Pipelines]
-** xref:section3.adoc[Kubeflow SDK]
+** xref:intro.adoc[]
+** xref:elyra-pipelines.adoc[Elyra Pipelines]
+** xref:kfp.adoc[Kubeflow SDK]
