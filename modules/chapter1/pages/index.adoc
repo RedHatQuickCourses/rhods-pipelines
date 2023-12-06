@@ -1,3 +1,3 @@
 = Data Science Pipelines
 
-This chapter introduces the concept of data science pipelines and the two different types of pipelines available in RHODS - Elyra and Kubeflow.
+This chapter introduces the concept of data science pipelines and the two different types of pipelines available in RHOAI - *Elyra* and *Kubeflow*.

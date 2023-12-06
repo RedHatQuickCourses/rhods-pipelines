@@ -147,7 +147,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')
 ```
 This approach is in line with best practices of handling credentials and allows us to control which S3 buckets are consumed in a given runtime context without changing the code. Importantly, these parameters are stored in a data connection, which is mounted into workbenches and pipeline pods to expose their values to the pipeline tasks.
 
-Three tasks (preprocessing, scoring, results upload) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artefact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
+Three tasks (preprocessing, scoring, results upload) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artifact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
 
 ==== Running the code interactively
 

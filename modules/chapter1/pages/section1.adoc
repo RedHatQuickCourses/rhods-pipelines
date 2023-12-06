@@ -1,10 +1,10 @@
 = Introduction
 
-Data Science Pipelines is Red Hat's implementation of Kubeflow Pipelines.  Data Science Pipelines uses OpenShift Pipelines (Tekton) as the execution engine for pipelines, unlike the upstream Kubeflow Pipelines, which utilizes Argo Workflows.
+Data Science Pipelines is Red Hat's implementation of Kubeflow Pipelines.  Data Science Pipelines uses *OpenShift Pipelines (Tekton)* as the execution engine for pipelines, unlike the upstream Kubeflow Pipelines, which utilizes Argo Workflows.
 
-Another important distinction between the upstream Kubeflow Pipelines project and Data Science Pipelines, is that Data Science Pipelines is designed to support multi-tenancy.  Users are able to deploy their own instance of Data Science Pipelines in a namespace using an object called a DataSciencePipelineApplications.
+Another important distinction between the upstream Kubeflow Pipelines project and Data Science Pipelines, is that Data Science Pipelines is designed to support multi-tenancy.  Users are able to deploy their own instance of Data Science Pipelines in a namespace using an object called a *DataSciencePipelineApplications*.
 
-Users are then able to create pipelines using a variety of methods, and submit them to the DataSciencePipelineApplication instance for execution.
+Users are then able to create pipelines using a variety of methods, and submit them to the *DataSciencePipelineApplication* instance for execution.
 
 == Data Science Pipeline Concepts
 
@@ -42,7 +42,7 @@ A single pipeline may include the ability to train multiple models, complete com
 
 == Data Science Pipelines in OpenShift AI
 
-From the perspective of a data scientist or ML engineer, OpenShift AI provides several user interface capabilities to enable these data science activities. It includes the following:
+From the perspective of a data scientist or ML engineer, Red Hat OpenShift AI provides several user interface capabilities to enable these data science activities. It includes the following:
 
 * *Data Science Pipelines Main View* - Users can find the pipelines that have been uploaded to namespaces they have access to from within the OpenShift AI Dashboard 
 
@@ -58,7 +58,7 @@ image::dsps-in-ds-project.png[Data Science Pipelines view within a Data Science 
 
 When executing a pipeline run, Data Science Pipelines utilizes OpenShift Pipelines (Tekton) as the underlying execution engine.  Users can access additional information and logs from the OpenShift Console from the execution of their runs.
 
-* *OpenShift Pipeline executing a Data Science Pipeline* - From the OpenShift Console, under Pipelines->PipelinesRuns one can see the underlying Tekton pipeline that runs in OpenShift, once a user starts a Data Science Pipeline in OpenShift AI
+* *OpenShift Pipeline executing a Data Science Pipeline* - From the OpenShift Console, under *Pipelines > PipelinesRuns* one can see the underlying Tekton pipeline that runs in OpenShift, once a user starts a Data Science Pipeline in Red Hat OpenShift AI
 
 image::dsp-run-in-ocp-pipelines.png[OpenShift Pipeline executing a Data Science Pipeline]
 
@@ -84,12 +84,12 @@ image::elyra-pipeline-job-started.png[Details of a started Elyra pipeline]
 
 === kfp / kfp-tekton
 
-kfp and kfp-tekton are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the kfp and kfp-tekton python packages using standard package management tools such as pip and users have the ability to import the kfp packages into their python scripts and use them to control all aspects of the pipeline.
+*kfp* and *kfp-tekton* are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the *kfp* and *kfp-tekton* python packages using standard package management tools such as *pip*, and users have the ability to import the *kfp* packages into their python scripts and use them to control all aspects of the pipeline.
 
-With kfp and kfp-tekton users are able to compile pipelines to a YAML object which can then be uploaded to the OpenShift AI Dashboard.
+With *kfp* and *kfp-tekton*, users are able to compile pipelines to a YAML object which can then be uploaded to the Red Hat OpenShift AI Dashboard.
 
 image::import-pipeline.png[]
 
-Once uploaded, users are able to execute a run of the pipeline, or schedule a reoccurring run for the pipeline.
+Once uploaded, users are able to execute a run of the pipeline, or schedule a recurring run for the pipeline.
 
-Additionally, with the kfp and kfp-tekton packages, users are able to connect directly to the DataSciencePipelineApplication instance from their python environment and execute a run without compiling and manually uploading the pipeline.
+Additionally, with the *kfp* and *kfp-tekton* packages, users are able to connect directly to the *DataSciencePipelineApplication* instance from their python environment and execute a run without compiling and manually uploading the pipeline.

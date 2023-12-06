@@ -1,6 +1,6 @@
-= Data Science Pipelines Using Kubeflow in OpenShift AI
+= Data Science Pipelines Using Kubeflow in Red Hat OpenShift AI
 
-OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
+Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
 
 The first mechanism is the _Elyra Pipelines_ JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts. 
 
@@ -11,9 +11,9 @@ The second mechanism and the one discussed here is based on the Kubeflow Pipelin
 There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.
 ====
 
-In OpenShift AI we use the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
+In Red Hat OpenShift AI, we use the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
 
-In OpenShift AI the Data Science Pipeline runtime consists of the following components:
+In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:
 
 * A Data Science Pipeline Server container. 
 * A MariaDB for storing pipeline definitions and results.
@@ -24,7 +24,7 @@ Steps in the pipeline are executed as ephemeral pods (one per step).
 
 [NOTE]
 ====
-DS Pipelines in OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CR is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_. Pipeline _runs_ are instances of _tekton.dev/v1 PipelineRun_.
+DS Pipelines in Red Hat OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CR is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_. Pipeline _runs_ are instances of _tekton.dev/v1 PipelineRun_.
 ====
 
 == Creating a Data Science Pipeline with the KFP SDK
@@ -304,7 +304,7 @@ The following diagram shows the order of execution.
 image::pipeline-graph.png[]
 ****
 
-This is also visible in the OpenShift AI user interface:
+This is also visible in the Red Hat OpenShift AI user interface:
 
 ****
 image::oai-pipeline-graph.png[]
@@ -496,7 +496,7 @@ We have only covered a subset of the functionality avaiable in DSP as it pertain
 
 ==== Submitting a Pipeline and Triggering a run
 
-The following code demonstrates how to submit and trigger a pipeline run from a _OpenShift AI WorkBench_.
+The following code demonstrates how to submit and trigger a pipeline run from a _Red Hat OpenShift AI WorkBench_.
 
 [source, python]
 if __name__ == '__main__':  
