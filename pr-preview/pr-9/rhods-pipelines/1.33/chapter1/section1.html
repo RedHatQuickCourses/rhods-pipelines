@@ -253,12 +253,10 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 <div class="paragraph">
 <p>Data Science Pipelines allows users to utilize several different methods for creating and executing pipelines.  This section will discuss some of those options.</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>Elyra Pipelines</strong> - A <strong>JupyterLab</strong> extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks files (.ipynb), Python files (.py), or R scripts (.r). Elyra enables users to drag and drop files and visually create pipelines</p>
-</li>
-</ul>
+<div class="sect2">
+<h3 id="_elyra_pipelines"><a class="anchor" href="#_elyra_pipelines"></a>Elyra Pipelines</h3>
+<div class="paragraph">
+<p>Elyra is a <strong>JupyterLab</strong> extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks files (.ipynb), Python files (.py), or R scripts (.r). Elyra enables users to drag and drop files and visually create pipelines</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -291,12 +289,11 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 <img src="_images/elyra-pipeline-job-started.png" alt="Details of a started Elyra pipeline">
 </div>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>kfp / kfp-tekton</strong> - kfp and kfp-tekton are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the kfp and kfp-tekton python packages using standard package management tools such as pip and users have the ability to import the kfp packages into their python scripts and use them to control all aspects of the pipeline.</p>
-</li>
-</ul>
+</div>
+<div class="sect2">
+<h3 id="_kfp_kfp_tekton"><a class="anchor" href="#_kfp_kfp_tekton"></a>kfp / kfp-tekton</h3>
+<div class="paragraph">
+<p>kfp and kfp-tekton are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the kfp and kfp-tekton python packages using standard package management tools such as pip and users have the ability to import the kfp packages into their python scripts and use them to control all aspects of the pipeline.</p>
 </div>
 <div class="paragraph">
 <p>With kfp and kfp-tekton users are able to compile pipelines to a YAML object which can then be uploaded to the OpenShift AI Dashboard.</p>
@@ -311,6 +308,7 @@ A DAG is a directed graph without any cycles, i.e. direct loops.</p>
 </div>
 <div class="paragraph">
 <p>Additionally, with the kfp and kfp-tekton packages, users are able to connect directly to the DataSciencePipelineApplication instance from their python environment and execute a run without compiling and manually uploading the pipeline.</p>
+</div>
 </div>
 </div>
 </div>
