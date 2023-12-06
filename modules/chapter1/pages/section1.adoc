@@ -71,7 +71,7 @@ Data Science Pipelines allows users to utilize several different methods for cre
 image::elyra-pipeline-offline-scoring.png[An Offline Scoring pipeline in Elyra]
 image::elyra-pipeline-model-training.png[A Model Training pipeline in Elyra]
 
-Using Elyra, data scientist can assign resources visually, including CPUs and GPUs, to each individual step in the pipeline.
+Using Elyra, users can assign resources visually, including CPUs and GPUs, to each individual step in the pipeline.
 
 image::elyra-pipeline-step-config-with-gpu.png[Configuring GPUs and other resources for an Elyra pipeline step]
 
