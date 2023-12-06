@@ -1,0 +1,3 @@
+= Data Science Pipeline Applications
+
+This chapter introduces the concept of data science pipelines and the two different types of pipelines available in RHOAI - *Elyra* and *Kubeflow*.
