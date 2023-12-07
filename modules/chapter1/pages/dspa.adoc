@@ -113,7 +113,7 @@ image::create-dspa-configure-pipeline-server.png[]
 . After several seconds, the loading icon should complete and the `Pipelines` section will now show an option to `Import pipeline` along with a message that says `No pipelines`.
 image::create-dspa-verify-pipeline-server.png[]
 
-The DataSciencePipelineApplication has not successfully been configured and is ready for use.
+The DataSciencePipelineApplication has now successfully been configured and is ready for use.
 
 == Managing Permissions to the DataSciencePipelineApplication
 
