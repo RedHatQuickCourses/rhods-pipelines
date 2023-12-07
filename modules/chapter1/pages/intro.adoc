@@ -82,9 +82,9 @@ After constructing a pipeline with Elyra, users can submit a job directly to Dat
 image::elyra-pipeline-running.png[Starting an Elyra pipeline]
 image::elyra-pipeline-job-started.png[Details of a started Elyra pipeline]
 
-=== kfp / kfp-tekton
+=== Kubeflow Pipelines SDK
 
-*kfp* and *kfp-tekton* are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the *kfp* and *kfp-tekton* python packages using standard package management tools such as *pip*, and users have the ability to import the *kfp* packages into their python scripts and use them to control all aspects of the pipeline.
+The Kubeflow Pipelines SDK is enabled with the *kfp* and *kfp-tekton* are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the *kfp* and *kfp-tekton* python packages using standard package management tools such as *pip*, and users have the ability to import the *kfp* packages into their python scripts and use them to control all aspects of the pipeline.
 
 With *kfp* and *kfp-tekton*, users are able to compile pipelines to a YAML object which can then be uploaded to the Red Hat OpenShift AI Dashboard.
 
