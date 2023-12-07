@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Introduction :: Automation using Data Science Pipelines</title>
+    <link rel="prev" href="index.html">
+    <link rel="next" href="dspa.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Automation using Data Science Pipelines</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/rhods-pipelines/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhods-pipelines" data-version="1.33">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Automation using Data Science Pipelines</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Data Science Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="intro.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="dspa.html">Data Science Pipeline Applications</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="elyra-pipelines.html">Elyra Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="kfp.html">Kubeflow SDK</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Automation using Data Science Pipelines</span>
+    <span class="version">1.33</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Automation using Data Science Pipelines</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.33</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Automation using Data Science Pipelines</a></li>
+    <li><a href="index.html">Data Science Pipelines</a></li>
+    <li><a href="intro.html">Introduction</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Introduction</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Data Science Pipelines is Red Hat&#8217;s implementation of Kubeflow Pipelines.  Data Science Pipelines uses <strong>OpenShift Pipelines (Tekton)</strong> as the execution engine for pipelines, unlike the upstream Kubeflow Pipelines, which utilizes Argo Workflows.</p>
+</div>
+<div class="paragraph">
+<p>Another important distinction between the upstream Kubeflow Pipelines project and Data Science Pipelines, is that Data Science Pipelines is designed to support multi-tenancy.  Users are able to deploy their own instance of Data Science Pipelines in a namespace using an object called a <strong>DataSciencePipelineApplications</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Users are then able to create pipelines using a variety of methods, and submit them to the <strong>DataSciencePipelineApplication</strong> instance for execution.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipeline_concepts"><a class="anchor" href="#_data_science_pipeline_concepts"></a>Data Science Pipeline Concepts</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Pipeline</strong> -  is a workflow definition containing the steps and their input and output artifacts.</p>
+</li>
+<li>
+<p><strong>Run</strong> - is a <em>single</em> execution of a pipeline.  A run can be a one off execution of a pipeline, or pipelines can be scheduled as a <em>recurring run</em>.</p>
+</li>
+<li>
+<p><strong>Step</strong> - is a self-contained pipeline component that represents an execution stage in the pipeline.</p>
+</li>
+<li>
+<p><strong>Artifact</strong> - Steps have the ability to create artifacts, which are objects that can be persisted after the execution of the step completes.  Other steps may use those artifacts as inputs and some artifacts may be useful references after a pipeline run has completed.  Artifacts automatically stored by Data Science Pipelines in S3 compatible storage.</p>
+</li>
+<li>
+<p><strong>Experiment</strong> - is a logical grouping of runs for the purpose of organization.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>A pipeline is an execution graph of tasks, commonly known as a <em>DAG</em> (Directed Acyclic Graph).
+A DAG is a directed graph without any cycles, i.e. direct loops.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A data science pipeline is typically implemented to improve the repeatability of a data science experiment.  While the larger experimentation process may include steps such as data exploration, where data scientists seek to create a fundamental understanding of the characteristics of the data, data science pipelines tend to focus on turning a viable experiment into a repeatable solution that can be iterated on.</p>
+</div>
+<div class="paragraph">
+<p>A data science pipeline, may also fit within the context of a larger pipeline that manages the complete lifecycle of an application, and the data science pipeline is responsible for the process of training the machine learning model.</p>
+</div>
+<div class="paragraph">
+<p>Data science pipelines may consists of several key activities that are performed in a structured sequence to train a machine learning model. These activities may include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Collection</strong>: Gathering the data from various sources, such as databases, APIs, spreadsheets, or external datasets.</p>
+</li>
+<li>
+<p><strong>Data Cleaning</strong>: Identifying and handling missing or inconsistent data, removing duplicates, and addressing data quality issues to ensure that the data is reliable and ready for analysis.</p>
+</li>
+<li>
+<p><strong>Feature Engineering</strong>: Creating or transforming features (variables) to improve the performance of machine learning models. This may involve scaling, one-hot encoding, creating new variables, or reducing dimensionality.</p>
+</li>
+<li>
+<p><strong>Data Preprocessing</strong>: Preparing the data for modeling, which may involve standardizing, normalizing, or scaling the data. This step is crucial for machine learning algorithms that are sensitive to the scale of features.  This step may also include splitting the data into multiple subsets of data including a test and train dataset to allow the model to be validated using data the trained model has never seen.</p>
+</li>
+<li>
+<p><strong>Model Training</strong>: After the data has been split into an appropriate subset, the model is trained using the training dataset.  As part of the training process, the machine learning algorithm will generally iterate through the training data, making adjustments to the model until it arrives at the "best" version of the model.</p>
+</li>
+<li>
+<p><strong>Model Evaluation</strong>: The model performance is assessed with the previously unseen test dataset using various metrics, such as accuracy, precision, recall, F1 score, or mean squared error. Cross-validation techniques may be used to ensure the model&#8217;s robustness.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A single pipeline may include the ability to train multiple models, complete complex hyperparameter searches, or more.  Data Scientists can use a well crafted pipeline to quickly iterate on a model, adjust how data is transformed, test different algorithms, and more.  While the steps described above describe a common pattern for model training, different use cases and projects may have vastly different requirements and the tools and framework selected for creating a data science pipeline should help to enable a flexible design.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipelines_in_openshift_ai"><a class="anchor" href="#_data_science_pipelines_in_openshift_ai"></a>Data Science Pipelines in OpenShift AI</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>From the perspective of a data scientist or ML engineer, Red Hat OpenShift AI provides several user interface capabilities to enable these data science activities. It includes the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Science Pipelines Main View</strong> - Users can find the pipelines that have been uploaded to namespaces they have access to from within the OpenShift AI Dashboard</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsps-main.png" alt="Data Science Pipelines Menu / Main View">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Science Pipelines Runs</strong> - Users can explore the completed runs of their data science pipelines</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsps-runs.png" alt="Data Science Pipelines Runs">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data Science Pipelines view within a Data Science Project</strong> - While within their data science project, end users can visualize the runs and other details of pipelines that ran within that project.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsps-in-ds-project.png" alt="Data Science Pipelines view within a Data Science Project">
+</div>
+</div>
+<div class="paragraph">
+<p>When executing a pipeline run, Data Science Pipelines utilizes OpenShift Pipelines (Tekton) as the underlying execution engine.  Users can access additional information and logs from the OpenShift Console from the execution of their runs.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>OpenShift Pipeline executing a Data Science Pipeline</strong> - From the OpenShift Console, under <strong>Pipelines &gt; PipelinesRuns</strong> one can see the underlying Tekton pipeline that runs in OpenShift, once a user starts a Data Science Pipeline in Red Hat OpenShift AI</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsp-run-in-ocp-pipelines.png" alt="OpenShift Pipeline executing a Data Science Pipeline">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_creating_data_science_pipelines"><a class="anchor" href="#_creating_data_science_pipelines"></a>Creating Data Science Pipelines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Data Science Pipelines allows users to utilize several different methods for creating and executing pipelines.  This section will discuss some of those options.</p>
+</div>
+<div class="sect2">
+<h3 id="_elyra_pipelines"><a class="anchor" href="#_elyra_pipelines"></a>Elyra Pipelines</h3>
+<div class="paragraph">
+<p>Elyra is a <strong>JupyterLab</strong> extension, which provides a visual editor for creating data science pipelines based on Jupyter notebooks files (.ipynb), Python files (.py), or R scripts (.r). Elyra enables users to drag and drop files and visually create pipelines</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-offline-scoring.png" alt="An Offline Scoring pipeline in Elyra">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-model-training.png" alt="A Model Training pipeline in Elyra">
+</div>
+</div>
+<div class="paragraph">
+<p>Using Elyra, users can assign resources visually, including CPUs and GPUs, to each individual step in the pipeline.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-step-config-with-gpu.png" alt="Configuring GPUs and other resources for an Elyra pipeline step">
+</div>
+</div>
+<div class="paragraph">
+<p>After constructing a pipeline with Elyra, users can submit a job directly to Data Science Pipelines, where it will be executed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-running.png" alt="Starting an Elyra pipeline">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elyra-pipeline-job-started.png" alt="Details of a started Elyra pipeline">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kfp_kfp_tekton"><a class="anchor" href="#_kfp_kfp_tekton"></a>kfp / kfp-tekton</h3>
+<div class="paragraph">
+<p><strong>kfp</strong> and <strong>kfp-tekton</strong> are Python packages that allow users to write Kubeflow Pipelines using Python.  Users can install the <strong>kfp</strong> and <strong>kfp-tekton</strong> python packages using standard package management tools such as <strong>pip</strong>, and users have the ability to import the <strong>kfp</strong> packages into their python scripts and use them to control all aspects of the pipeline.</p>
+</div>
+<div class="paragraph">
+<p>With <strong>kfp</strong> and <strong>kfp-tekton</strong>, users are able to compile pipelines to a YAML object which can then be uploaded to the Red Hat OpenShift AI Dashboard.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/import-pipeline.png" alt="import pipeline">
+</div>
+</div>
+<div class="paragraph">
+<p>Once uploaded, users are able to execute a run of the pipeline, or schedule a recurring run for the pipeline.</p>
+</div>
+<div class="paragraph">
+<p>Additionally, with the <strong>kfp</strong> and <strong>kfp-tekton</strong> packages, users are able to connect directly to the <strong>DataSciencePipelineApplication</strong> instance from their python environment and execute a run without compiling and manually uploading the pipeline.</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="index.html">Data Science Pipelines</a></span>
+  <span class="next"><a href="dspa.html">Data Science Pipeline Applications</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
