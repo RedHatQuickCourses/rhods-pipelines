@@ -24,58 +24,11 @@ A runtime configuration provides Elyra access to the Data Science Pipelines back
 
 === Setup
 
-Let's walk through an example of creating and running an Elyra pipeline for fraud detection. We'll first set up the prerequisites to get started with Elyra and Data Science Pipelines.
-
-[NOTE]
-====
-Data Science Pipelines has two major dependencies: OpenShift Pipelines and S3 object storage. The setup of OpenShift Pipelines and Minio for S3 has already been covered earlier in this course, so we won't discuss it here.
-====
-
-==== Set up Data Science Pipelines
-
-Data Science Pipelines relies on a backend S3 object storage for persisting artifacts, logs, and outputs that are associated with individual pipeline runs.
-
-[NOTE]
-====
-Any S3-compliant storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as a particularly lightweight S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where data resilience and desaster recovery are important concerns.
-====
-
-Create a new data science project called `fraud-detection`. Enter the project.
-
-Under `Pipelines`, select `Create a pipeline server`.
-
-image::create_pipeline_server.png[]
-
-Under `Object storage connection`, select `Create new data connection`.
-
-* Enter the following details:
-* Name: `fraud-detection-pipelines`
-* Access key: `minio`
-* Secret key: `minio123`
-* Endpoint: `http://minio-service.minio.svc:9000`
-* Bucket: `fraud-detection-pipelines`
-
-image::configure_pipeline_server.png[]
-
-Hit `Configure`.
-
-==== Prepare the bucket
-
-Log into the Minio console.
-
-Create a new S3 bucket named `fraud-detection` in Minio.
-
-Download the `model-latest.onnx` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection[model artefact repository] and upload it to the S3 bucket.
-
-Download the `live-data.csv` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-data-v0.1/data/fraud-detection[data set repository] and upload it to the S3 bucket.
-
-image::fraud-detection-bucket.png[]
+For this exercise we will be utilizing the DataSciencePipelineApplication created in the previous section.  In addition to that pipeline instance, we will need to import a custom workbench image, and create an additional bucket in S3 to store some items we will need to train the model.
 
 ==== Import the custom workbench image
 
-Return to the RHOAI dashboard.
-
-Under `Settings` select `Notebook images`.
+In the OpenShift AI Dashboard, under `Settings` select `Notebook images`.
 
 Select `Import new image`.
 
@@ -89,9 +42,21 @@ image::import-workbench-image.png[]
 
 Hit `Import`.
 
+==== Prepare the bucket
+
+Log into the Minio console.
+
+Create a new S3 bucket named `fraud-detection` in Minio.
+
+Download the `model-latest.onnx` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection[model artefact repository] and upload it to the S3 bucket.
+
+Download the `live-data.csv` file from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-data-v0.1/data/fraud-detection[data set repository] and upload it to the S3 bucket.
+
+image::fraud-detection-bucket.png[]
+
 ==== Set up the workbench
 
-In the fraud-detection data science project, create a new data workbench and enter the following details:
+In the pipelines-example data science project, create a new data workbench and enter the following details:
 
 * Name: `fraud-detection-workbench`
 * Notebook image: `Fraud detection workbench`
