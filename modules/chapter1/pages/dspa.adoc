@@ -13,11 +13,13 @@ Additionally, the DataSciencePipelineApplication requires an S3 compatible stora
 Any S3 compatible storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as it is a lightweight and easy to deploy S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where security, data resilience, and disaster recovery are important concerns.
 ====
 
-== Multi Tenancy with Data Science Pipeline Applications
+== Multi-Tenancy with Data Science Pipeline Applications
 
 As previously mentioned, Data Science Pipelines is designed to be a secure multi-tenant solution.  This means that multiple users and teams can all securely use their own instances of Data Science Pipelines without fear of leaking data from the pipelines to other users or groups.
 
 This multi-tenancy capability does require that each user or group needs their own instance of the DataSciencePipelineApplication instance.  Additionally, it is strongly recommended that each DataSciencePipelineApplication instance should have its own S3 instance that does not allow other groups to access.
+
+While a DataSciencePipelineApplication is a namespace scoped object, Workbenches and pods running in other namespaces can still interact with the pipeline instance if they have the correct permissions.
 
 == Exercise: Create a Data Science Pipeline Instance
 
