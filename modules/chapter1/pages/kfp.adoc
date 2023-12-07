@@ -1,4 +1,4 @@
-= Data Science Pipelines Using Kubeflow in Red Hat OpenShift AI
+= Kubeflow Pipelines SDK
 
 Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
 
