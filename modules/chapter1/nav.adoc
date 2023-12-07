@@ -2,4 +2,4 @@
 ** xref:intro.adoc[]
 ** xref:dspa.adoc[Data Science Pipeline Applications]
 ** xref:elyra-pipelines.adoc[Elyra Pipelines]
-** xref:kfp.adoc[Kubeflow SDK]
+** xref:kfp.adoc[Kubeflow Pipelines SDK]
