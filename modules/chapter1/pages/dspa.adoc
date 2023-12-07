@@ -39,7 +39,8 @@ To begin we will create an S3 instance using Minio to act as the artifact storag
 . Run the following yaml to install Minio
 +
 ```shell
-curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | oc apply -f - -n pipelines-example
+curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | \
+    oc apply -f - -n pipelines-example
 ```
 
 . Get the route to the Minio dashboard
