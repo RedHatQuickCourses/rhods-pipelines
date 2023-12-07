@@ -6,6 +6,13 @@ The DataSciencePipelineApplication custom resource creates several pods that are
 
 image::dspa-pods.png[]
 
+In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:
+
+* A Data Science Pipeline Server container. 
+* A MariaDB for storing pipeline definitions and results.
+* A Pipeline scheduler for scheduling pipeline runs.
+* A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.
+
 Additionally, the DataSciencePipelineApplication requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.
 
 [NOTE]
