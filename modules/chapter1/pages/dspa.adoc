@@ -108,9 +108,11 @@ image::create-dspa-verify-data-connection.png[]
 image::create-dspa-create-pipeline-server.png[]
 
 . Select the `data-science-pipelines` data connection in the `Existing data connection` menu, and click `Configure`.
++
 image::create-dspa-configure-pipeline-server.png[]
 
 . After several seconds, the loading icon should complete and the `Pipelines` section will now show an option to `Import pipeline` along with a message that says `No pipelines`.
++
 image::create-dspa-verify-pipeline-server.png[]
 
 The DataSciencePipelineApplication has now successfully been configured and is ready for use.
