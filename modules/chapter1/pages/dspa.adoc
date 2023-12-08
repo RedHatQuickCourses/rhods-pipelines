@@ -1,0 +1,180 @@
+= Data Science Pipeline Applications
+
+Data Science Pipelines require a namespace scoped instance of the DataSciencePipelineApplication (DSPA) custom resource to enable the ability to utilize Data Science Pipelines.
+
+The DataSciencePipelineApplication custom resource creates several pods that are necessary to utilize the tools.  This includes the creation of an API endpoint and a database where metadata is stored.  The API endpoint is used by the OpenShift AI Dashboard, as well as tools like Elyra and the kfp package to manage and execute pipelines.
+
+image::dspa-pods.png[]
+
+In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:
+
+* A Data Science Pipeline Server container. 
+* A MariaDB for storing pipeline definitions and results.
+* A Pipeline scheduler for scheduling pipeline runs.
+* A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.
+
+Additionally, the DataSciencePipelineApplication requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.
+
+[NOTE]
+====
+Any S3 compatible storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as it is a lightweight and easy to deploy S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where security, data resilience, and disaster recovery are important concerns.
+====
+
+== Multi-Tenancy with Data Science Pipeline Applications
+
+As previously mentioned, Data Science Pipelines is designed to be a secure multi-tenant solution.  This means that multiple users and teams can all securely use their own instances of Data Science Pipelines without fear of leaking data from the pipelines to other users or groups.
+
+This multi-tenancy capability does require that each user or group needs their own instance of the DataSciencePipelineApplication instance.  Additionally, it is strongly recommended that each DataSciencePipelineApplication instance should have its own S3 instance that does not allow other groups to access.
+
+While a DataSciencePipelineApplication is a namespace scoped object, Workbenches and pods running in other namespaces can still interact with the pipeline instance if they have the correct permissions.
+
+== Exercise: Create a Data Science Pipeline Instance
+
+=== Create an S3 instance with Minio
+
+To begin we will create an S3 instance using Minio to act as the artifact storage for the DataSciencePipelineApplication
+
+. From the OpenShift AI Dashboard, create a new project called `pipelines-example`.
+
+. Run the following yaml to install Minio
++
+```shell
+curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | \
+    oc apply -f - -n pipelines-example
+```
+
+. Get the route to the Minio dashboard
++
+```shell
+oc get routes minio-ui -n pipelines-example -o jsonpath='{.spec.host}'
+```
++
+[INFO]
+====
+Use this route to navigate to the S3 dashboard using a browser. With the browser, you will be able to create buckets, upload files, and navigate the S3 contents.
+====
+
+. Get the route to the Minio API
++
+```shell
+oc get routes minio-api -n pipelines-example -o jsonpath='{.spec.host}'
+```
++
+[INFO]
+====
+Use this route as the S3 API endpoint. Basically, this is the URL that we will use when creating a data connection to the S3 in OpenShift AI.
+
+Alternatively, you can utilize the api service port (port 9000) on the service minio-service to access the same resources from within the cluster.
+====
+
+The default username is `minio` and the password is `minio123`.
+
+=== Data Science Pipeline Application
+
+Next we will create a data connection for the Minio instance, and use that data connection to create a DataSciencePipelineApplication.
+
+. From the OpenShift AI Dashboard, navigate to the pipelines-example project we previously created.  Click on the option to `Add data connection`
++
+image::create-dspa-add-data-connection.png[]
+
+. Enter the following details and click `Add data connection`:
++
+```
+Name: data-science-pipelines
+Access key: minio
+Secret key: minio123
+Endpoint: http://minio-service.pipelines-example.svc:9000
+Bucket: data-science-pipelines
+```
++
+image::create-dspa-create-data-connection.png[]
++
+[NOTE]
+====
+At this point in time, the minio instance does not contain a bucket called `data-science-pipelines`.  Once the DataSciencePipelineApplication object is created, it will automatically create the bucket for us if it doesn't exist.
+====
++
+[TIP]
+====
+A Data Connection is simply a standard kubernetes secret object that contains the fields required to connect to an S3 compatible solution.  This secret can be managed via GitOps just like any other standard kubernetes secret object.  However, not all fields in the Data Connection are dynamically consumed by the DataSciencePipelineApplication object so be careful when updating the endpoint url or the bucket values.
+====
+
+. A new Data connection should now be listed in the `Data connections` section.
++
+image::create-dspa-verify-data-connection.png[]
+
+. Click on the `Create a pipeline server` in the `Pipelines` section of the Data Science Project view
++
+image::create-dspa-create-pipeline-server.png[]
+
+. Select the `data-science-pipelines` data connection in the `Existing data connection` menu, and click `Configure`.
++
+image::create-dspa-configure-pipeline-server.png[]
+
+. After several seconds, the loading icon should complete and the `Pipelines` section will now show an option to `Import pipeline` along with a message that says `No pipelines`.
++
+image::create-dspa-verify-pipeline-server.png[]
+
+The DataSciencePipelineApplication has now successfully been configured and is ready for use.
+
+== Managing Permissions to the DataSciencePipelineApplication
+
+The DataSciencePipelineApplication API endpoint route is protected using an OpenShift OAuth Proxy sidecar.
+
+The OAuth Proxy requires anything attempting to access the endpoint to be authenticated using the built in OpenShift login.  OpenShift is then able to admit or reject requests to the endpoint based on the Role Based Access and Control configuration of the resources in the namespace.
+
+[NOTE]
+====
+To Learn more about the OpenShift OAuth Proxy, please refer to the official git repo:
+
+https://github.com/openshift/oauth-proxy
+====
+
+In particular, the DataSciencePipelineApplication requires that users or Service Accounts have `get` access to the DataSciencePipelineApplication's route object.
+
+Any users that has already been granted Admin or Edit access to the namespace in which the DataSciencePipelineApplication is installed will have permission to access the object.
+
+It may be necessary to grant access to other resources such as a Service Account in the cluster to be able to interact with the API endpoint.
+
+To grant access to an object such as a Service Account, you must first create a role in the namespace where the DataSciencePipelineApplication is located that grants `get` access to the route object:
+
+```
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dspa-access
+  namespace: my-project
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+```
+
+Once the role has been created, a RoleBinding can grant the appropriate permissions to the user or Service Account:
+
+```
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dspa-access-my-service-account
+  namespace: my-project
+subjects:
+  - kind: ServiceAccount
+    name: my-service-account
+    namespace: my-project
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dspa-access
+```
+
+When programmatically accessing the API endpoint, a user can authenticate to the endpoint by passing the `BearerToken` header value in the http request.  Users can obtain their bearer token from the "Copy Login Command" menu option in the OpenShift Web Console, or by running the following command once they are already logged in:
+
+```
+oc whoami --show-token
+```
+
+Using the bearer token to authenticate to the endpoint will be discussed in more detail in the section discussing the Kubeflow Pipelines SDK.

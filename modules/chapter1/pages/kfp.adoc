@@ -1,4 +1,4 @@
-= Data Science Pipelines Using Kubeflow in Red Hat OpenShift AI
+= Kubeflow Pipelines SDK
 
 Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
 
@@ -11,14 +11,7 @@ The second mechanism and the one discussed here is based on the Kubeflow Pipelin
 There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.
 ====
 
-In Red Hat OpenShift AI, we use the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
-
-In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:
-
-* A Data Science Pipeline Server container. 
-* A MariaDB for storing pipeline definitions and results.
-* A Pipeline scheduler for scheduling pipeline runs.
-* A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.
+OpenShift AI uses the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
 
 Steps in the pipeline are executed as ephemeral pods (one per step).
 
@@ -38,28 +31,6 @@ pip install kfp-tekton==1.8.0
 ----
 IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
 
-* S3 Storage
-
-You can use any S3 compatible storage service such as _Red Hat OpenShift Data Foundation_ or _AWS S3_.
-For the purpose of this enablement we will be using _Minio_.
-
-Follow https://ai-on-openshift.io/tools-and-applications/minio/minio/[these instructions] to setup a local Minio instance on your OpenShift cluster.
-
-
-
-=== Creating a Pipeline Server
-
-To execute pipelines a _Pipeline server_ needs to be created, which in turn depends on the creation of an S3 Storage bucket. This is used to store the run artifacts and outputs of any pipeline run on the associated server. 
-****
-image::creating-data-connection.png[]
-****
-Once the data connection is created then the pipeline server can be created
-****
-image::pre-creating-pipeline-server.png[]
-****
-****
-image::pipeline-server-created.png[]
-****
 === Building and deploying a Pipeline
 
 The following is a simplistic example of a KFP pipeline. The original is at 
@@ -175,7 +146,7 @@ metadata:
 ----
 ****
 
-The resulting yaml file _(coin-toss.yaml)_ can then be uploaded throught the UI
+The resulting yaml file _(coin-toss.yaml)_ can then be uploaded through the UI
 ****
 image::import-pipeline.png[]
 ****
@@ -212,7 +183,7 @@ image::object-store-after-run.png[]
 
 An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs. 
 
-A run can be configured using the DSP UI or programatically using the _KFP SDK_.
+A run can be configured using the DSP UI or programmatically using the _KFP SDK_.
 
 image::dsp-runs.png[]
 
@@ -459,7 +430,7 @@ For global pipeline pod settings take a look at the *_PipelineConf_* class in th
 ====
 We have only covered a _subset_ of what's possible with the _KFP SDK_.
 
-It is also possible to customise significant parts of the _pod spec_ definition with:
+It is also possible to customize significant parts of the _pod spec_ definition with:
 
 * Init and Sidecar Pods
 * Pod affinity rules
@@ -475,7 +446,7 @@ See the the https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.h
 As stated previously, DSP Python scripts need to be compiled into Tekton definitions for execution. 
 This can be achieved in multiple ways:
 
-. Explicity calling the "dsl-compile" command from the _kfp_ Python package giving the input and output files, then uploading the resultant yaml file to the DSP server via the UI.
+. Explicitly calling the "dsl-compile" command from the _kfp_ Python package giving the input and output files, then uploading the resultant yaml file to the DSP server via the UI.
 . Adding the compile step to the Python script and then uploading the resultant yaml file to the DSP server via the UI.
 . Adding the compile step to the Python script and uploading the resulting Tekton definition via an api call.
 
@@ -489,7 +460,7 @@ The Tekton compiler also has a number of _global settings_, which are not covere
 
 [IMPORTANT]
 ====
-We have only covered a subset of the functionality avaiable in DSP as it pertains to our real-life scenario. Please see the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md[kfp-tekton features] document for more advanced functionality. The https://github.com/kubeflow/kfp-tekton/blob/master/guides/advanced_user_guide.md[KFP Tekton Advanced User Guide] also has more information.
+We have only covered a subset of the functionality available in DSP as it pertains to our real-life scenario. Please see the https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md[kfp-tekton features] document for more advanced functionality. The https://github.com/kubeflow/kfp-tekton/blob/master/guides/advanced_user_guide.md[KFP Tekton Advanced User Guide] also has more information.
 ====
 
 === Pipeline Execution
@@ -538,7 +509,7 @@ The _pipeline_ needs to have already been submitted to the DSP runtime.
 
 
 == Data Handling in Data Science Pipelines
-DSP have two sizes of data, conviently named *_Small Data_* and *_Big Data_*.
+DSP have two sizes of data, conveniently named *_Small Data_* and *_Big Data_*.
 
 . _Small Data_ is considered anything that can be passed as a _command line argument_ for example _Strings_, _URLS_, _Numbers_. The overall size should not exceed a few _kilobytes_.
 
@@ -638,12 +609,12 @@ oc create secret generic aws-connection-fraud-detection --from-literal=AWS_ACCES
 ** *offline-scoring-model-volume*
 ** *offline-scoring-data-volume*
 
-TIP: Example PVC definitions are here, download and customise as necessary this xref:attachment$offline-scoring-data-pvc.yaml[Data Volume definition] & xref:attachment$offline-scoring-model-pvc.yaml[Model Volume definition]
+TIP: Example PVC definitions are here, download and customize as necessary this xref:attachment$offline-scoring-data-pvc.yaml[Data Volume definition] & xref:attachment$offline-scoring-model-pvc.yaml[Model Volume definition]
 
 
 === Execute Pipeline
 
-Download and customise as necessary this xref:attachment$offline_scoring_kfp_pipeline.py[Example Pipeline definition]
+Download and customize as necessary this xref:attachment$offline_scoring_kfp_pipeline.py[Example Pipeline definition]
 
 [%interactive]
 * [ ] Create a _Workbench_ with the name _fraud-onnx_
