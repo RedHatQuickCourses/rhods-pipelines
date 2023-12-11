@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kubeflow Pipelines SDK :: Automation using Data Science Pipelines</title>
+    <link rel="prev" href="elyra-pipelines.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Automation using Data Science Pipelines</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/rhods-pipelines/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhods-pipelines" data-version="1.33">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Automation using Data Science Pipelines</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Data Science Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="intro.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="dspa.html">Data Science Pipeline Applications</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="elyra-pipelines.html">Elyra Pipelines</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="kfp.html">Kubeflow Pipelines SDK</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Automation using Data Science Pipelines</span>
+    <span class="version">1.33</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Automation using Data Science Pipelines</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.33</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Automation using Data Science Pipelines</a></li>
+    <li><a href="index.html">Data Science Pipelines</a></li>
+    <li><a href="kfp.html">Kubeflow Pipelines SDK</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Kubeflow Pipelines SDK</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.</p>
+</div>
+<div class="paragraph">
+<p>The first mechanism is the <em>Elyra Pipelines</em> JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts.</p>
+</div>
+<div class="paragraph">
+<p>The second mechanism and the one discussed here is based on the Kubeflow Pipelines SDK. With the SDK, pipelines are built using Python scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>OpenShift AI uses the <strong><em>Tekton</em></strong> runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.</p>
+</div>
+<div class="paragraph">
+<p>Steps in the pipeline are executed as ephemeral pods (one per step).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>DS Pipelines in Red Hat OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CR is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em>. Pipeline <em>runs</em> are instances of <em>tekton.dev/v1 PipelineRun</em>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_data_science_pipeline_with_the_kfp_sdk"><a class="anchor" href="#_creating_a_data_science_pipeline_with_the_kfp_sdk"></a>Creating a Data Science Pipeline with the KFP SDK</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Python Setup</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>pip install kfp==1.8.22
+pip install kfp-tekton==1.8.0</pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_and_deploying_a_pipeline"><a class="anchor" href="#_building_and_deploying_a_pipeline"></a>Building and deploying a Pipeline</h3>
+<div class="paragraph">
+<p>The following is a simplistic example of a KFP pipeline. The original is at
+<a href="https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py" class="bare">https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py</a> and the example has downloaded it to a file named <em>coin-toss.py</em></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">Python Pipeline Example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Copyright 2020 kubeflow.org
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from kfp import dsl
+from kfp import components
+
+def random_num(low:int, high:int) -&gt; int:
+    """Generate a random number between low and high."""
+    import random
+    result = random.randint(low, high)
+    print(result)
+    return result
+
+def flip_coin() -&gt; str:
+    """Flip a coin and output heads or tails randomly."""
+    import random
+    result = 'heads' if random.randint(0, 1) == 0 else 'tails'
+    print(result)
+    return result
+
+def print_msg(msg: str):
+    """Print a message."""
+    print(msg)
+
+
+flip_coin_op = components.create_component_from_func(
+    flip_coin, base_image='python:alpine3.6')
+print_op = components.create_component_from_func(
+    print_msg, base_image='python:alpine3.6')
+random_num_op = components.create_component_from_func(
+    random_num, base_image='python:alpine3.6')
+
+@dsl.pipeline(
+    name='conditional-execution-pipeline',
+    description='Shows how to use dsl.Condition().'
+)
+def flipcoin_pipeline():
+    flip = flip_coin_op()
+    with dsl.Condition(flip.output == 'heads'):
+        random_num_head = random_num_op(0, 9)
+        with dsl.Condition(random_num_head.output &gt; 5):
+            print_op('heads and %s &gt; 5!' % random_num_head.output)
+        with dsl.Condition(random_num_head.output &lt;= 5):
+            print_op('heads and %s &lt;= 5!' % random_num_head.output)
+
+    with dsl.Condition(flip.output == 'tails'):
+        random_num_tail = random_num_op(10, 19)
+        with dsl.Condition(random_num_tail.output &gt; 15):
+            print_op('tails and %s &gt; 15!' % random_num_tail.output)
+        with dsl.Condition(random_num_tail.output &lt;= 15):
+            print_op('tails and %s &lt;= 15!' % random_num_tail.output)
+
+
+if __name__ == '__main__':
+    from kfp_tekton.compiler import TektonCompiler
+    TektonCompiler().compile(flipcoin_pipeline, __file__.replace('.py', '.yaml'))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To compile it into a Tekton resource definition just run the following in a terminal</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">python3 coin-toss.py</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It will generate a Tekton <strong><em>Pipeline Run</em></strong> , similar to this snippet</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: conditional-execution-pipeline
+  annotations:
+    tekton.dev/output_artifacts: '{"flip-coin": [{"key": "artifacts/$PIPELINERUN/flip-coin/Output.tgz",
+      "name": "flip-coin-Output", "path": "/tmp/outputs/Output/data"}], "random-num":
+      [{"key": "artifacts/$PIPELINERUN/random-num/Output.tgz", "name": "random-num-Output",
+      "path": "/tmp/outputs/Output/data"}], "random-num-2": [{"key": "artifacts/$PIPELINERUN/random-num-2/Output.tgz",
+      "name": "random-num-2-Output", "path": "/tmp/outputs/Output/data"}]}'
+    tekton.dev/input_artifacts: '{"print-msg": [{"name": "random-num-Output", "parent_task":
+      "random-num"}], "print-msg-2": [{"name": "random-num-Output", "parent_task":
+      "random-num"}], "print-msg-3": [{"name": "random-num-2-Output", "parent_task":
+      "random-num-2"}], "print-msg-4": [{"name": "random-num-2-Output", "parent_task":
+      "random-num-2"}]}'
+    tekton.dev/artifact_bucket: mlpipeline
+    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
+    tekton.dev/artifact_endpoint_scheme: http://
+    tekton.dev/artifact_items: '{"flip-coin": [["Output", "$(results.Output.path)"]],
+      "print-msg": [], "print-msg-2": [], "print-msg-3": [], "print-msg-4": [], "random-num":
+      [["Output", "$(results.Output.path)"]], "random-num-2": [["Output", "$(results.Output.path)"]]}'
+    sidecar.istio.io/inject: "false"
+    tekton.dev/template: ''</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The resulting yaml file <em>(coin-toss.yaml)</em> can then be uploaded through the UI</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/import-pipeline.png" alt="import pipeline">
+</div>
+</div>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-imported.png" alt="pipeline imported">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once imported the structure of the <em>DAG</em> will be shown. Each step in the pipeline will be run as a container on OpenShift.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-run-view.png" alt="pipeline run view">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To execute the pipeline, click on <em>Create Run</em> in the menu and fill out the <em>Name</em> and <em>Description</em>.
+If the pipeline has <em>Input Parameters</em> or you need to schedule a recurring run, then that can be configured further down. Once ready, click <em>Create</em> to submit the pipeline for scheduling.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/creating-pipeline-run.png" alt="creating pipeline run">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The pipeline will execute and the outputs will be stored into the configured S3 bucket.
+As the pipeline executes the view will be updated to show the steps being executed. It&#8217;s possible to click on the graph nodes to reveal information of the steps.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/post-pipeline-run.png" alt="post pipeline run">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio Storage UI.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/object-store-after-run.png" alt="object store after run">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_experiments_and_runs"><a class="anchor" href="#_experiments_and_runs"></a>Experiments And Runs</h3>
+<div class="paragraph">
+<p>An experiment is a workspace where you can try different configurations of your pipelines. You can use experiments to organize your runs into logical groups. Experiments can contain arbitrary runs, including recurring runs.</p>
+</div>
+<div class="paragraph">
+<p>A run can be configured using the DSP UI or programmatically using the <em>KFP SDK</em>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dsp-runs.png" alt="dsp runs">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Experiments are part of the KFP SDK and are not currently covered in this course.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_real_world_example"><a class="anchor" href="#_real_world_example"></a>Real World Example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section we&#8217;re going to demonstrate a real world Data Science Pipelines scenario.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p>In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it&#8217;s deployed in. On a regular schedule it uploads battery events via a data gateway, and those battery events are used to train a model which is then retrieved by the device and used.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/openshift-ai-dsp-edge.png" alt="openshift ai dsp edge">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The entire pipeline is <a href="_attachments/sample-pipeline-full.py" class="xref attachment">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
+</div>
+<div class="paragraph">
+<p>The actual pipeline is defined by the following function:</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">@dsl.pipeline(
+  name='edge-pipeline',
+  description='edge pipeline demo'
+)
+def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=270):
+    '''Download files from s3, train, inference'''
+    print("Params",file_obj, src_bucket,VIN,epoch_count)
+    vol = V1Volume(
+        name='batterydatavol',</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.</p>
+</div>
+<div class="paragraph">
+<p>The function <strong><em>edgetest_pipeline</em></strong> is the implementation of the pipeline.</p>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_parameters"><a class="anchor" href="#_pipeline_parameters"></a>Pipeline Parameters</h3>
+<div class="paragraph">
+<p>The pipeline has four parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>file_obj</em> and <em>src_bucket</em> refer to S3 bucket details and can be ignored.</p>
+</li>
+<li>
+<p><em>VIN</em> is the edge device identifier and has a default value of 412356.</p>
+</li>
+<li>
+<p><em>epoch_count</em> is the number of training epochs to be used.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the <em>Create Run</em> UI these parameters are available so that users can override the values as they need.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-parameters.png" alt="pipeline parameters">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_steps"><a class="anchor" href="#_pipeline_steps"></a>Pipeline Steps</h3>
+<div class="paragraph">
+<p>The file contains the following Python functions, which roughly correspond to the steps in the diagram above</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>load_trigger_data()</p>
+</li>
+<li>
+<p>prep_data_train_model()</p>
+</li>
+<li>
+<p>model_upload_notify()</p>
+</li>
+<li>
+<p>model_inference()</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These functions are mapped into individual containers by using the <em>create_component_from_func</em> function. You can specify the container <em>base_image</em> to use as well as any additional Python packages to be installed into the container at execution time.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">load_trigger_data_op= components.create_component_from_func(
+    load_trigger_data, base_image='registry.access.redhat.com/ubi8/python-38')
+prep_train_data_op= components.create_component_from_func(
+    prep_data_train_model, base_image='quay.io/mickeymouse/awesomepython-30')
+upload_model_op= components.create_component_from_func(
+    model_upload_notify, base_image='registry.access.redhat.com/ubi8/python-38'
+    ,packages_to_install=['kaleido','paho-mqtt','boto3'])
+prep_inference_data_op= components.create_component_from_func(
+    prep_data_train_model, base_image='registry.access.redhat.com/ubi8/python-38')
+inference_model_op= components.create_component_from_func(
+    model_inference, base_image='registry.access.redhat.com/ubi8/python-38')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Python functions can be used in multiple different step definitions; in the example the <em>prep_data_train_model</em> function is used in the <em>prep_data_train_op</em> and the <em>prep_inference_data_op</em> containers.</p>
+</div>
+<div class="paragraph">
+<p>The pipeline execution <em>graph</em> is created using the following code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    trigger_data = load_trigger_data_op(file_obj, src_bucket,file_destination)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    prep_train_data = prep_train_data_op(data_path="/opt/data/pitstop/",epoch_count=epoch_count,experiment_name=trigger_data.output,run_mode=0).after(trigger_data)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inform_result = upload_model_op(data_path="/opt/data/pitstop/",paramater_data=prep_train_data.outputs["parameter_data"],experiment_name=trigger_data.output)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inference_prep = prep_inference_data_op(data_path="/opt/data/pitstop/",epoch_count=epoch_count,experiment_name=trigger_data.output,run_mode=2).after(inform_result)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inference_result = inference_model_op(data_path="/opt/data/pitstop/",paramater_data=inference_prep.outputs["parameter_data"],experiment_name=trigger_data.output,vin=VIN)</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The execution order of the graph is top down but also can be controlled by using the <strong><em>.after()</em></strong> operator.</p>
+</div>
+<div class="paragraph">
+<p>There are other operators which control the flow of pipeline execution such as <em>Condition</em> , <em>ExitHandler</em>, <em>ParallelFor</em> .
+These are not covered as part of this course but the <a href="https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/DSL%20-%20Control%20structures/DSL%20-%20Control%20structures.py">KFP documentation</a> has examples.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The following diagram shows the order of execution.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-graph.png" alt="pipeline graph">
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This is also visible in the Red Hat OpenShift AI user interface:</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/oai-pipeline-graph.png" alt="oai pipeline graph">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_parameter_passing"><a class="anchor" href="#_pipeline_parameter_passing"></a>Pipeline Parameter Passing</h3>
+<div class="paragraph">
+<p>As each step of our pipeline is executed in an independent container, input parameters and output values are handled as follows.</p>
+</div>
+<div class="sect3">
+<h4 id="_input_parameters"><a class="anchor" href="#_input_parameters"></a>Input Parameters</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Simple parameters - booleans, numbers, strings - are passed by value into the container as command line arguments.</p>
+</li>
+<li>
+<p>Complex types or large amounts of data are passed via files. The value of the input parameter is the file path.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_output_parameters"><a class="anchor" href="#_output_parameters"></a>Output Parameters</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Output values are returned via files.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_passing_parameters_via_files"><a class="anchor" href="#_passing_parameters_via_files"></a>Passing Parameters via Files</h4>
+<div class="paragraph">
+<p>To pass an input parameter as a file, the function argument needs to be annotated using the <em>InputPath</em> annotation.
+For returning data from a step as a file, the function argument needs to be annotated using the <em>OutputPath</em> annotation.</p>
+</div>
+<div class="paragraph">
+<p>In both cases the actual value of the parameter is the file path and not the actual data. So the pipeline will have to read/write to the file as necessary.</p>
+</div>
+<div class="paragraph">
+<p>For example, in our sample pipeline we use the <em>parameter_data</em> argument of the <em>prep_data_train_model</em> function to return multiple data values as a file. Here&#8217;s the function definition with the <em>OutputPath</em> annotation</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def prep_data_train_model(data_path : str, epoch_count : int, parameter_data : OutputPath(), experiment_name : str, run_mode : int=0):</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the actual writing of the data to the file</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    data_store = [train_x, train_y, train_battery_range, train_y_soh, y_norm, test_x, test_y]</code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>with open(parameter_data, "b+w") as f:
+    pickle.dump(data_store,f)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This data is then consumed in the <em>model_upload_notify</em> function, passed via the <em>paramater_data</em> with the <em>InputPath</em> annotation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def model_upload_notify(data_path:str,paramater_data:InputPath(),experiment_name:str,model_bucket:str="battery-model-bucket"):</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reading the data</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    f = open(paramater_data,"b+r")
+    data_store = pickle.load(f)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Linking the two functions together</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    inform_result = upload_model_op(data_path="/opt/data/pitstop/",paramater_data=prep_train_data.outputs["parameter_data"],experiment_name=trigger_data.output)</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There are other parameter annotations available to handle specialised file types
+such as <em>InputBinaryFile</em>, <em>OutputBinaryFile</em>.</p>
+</div>
+<div class="paragraph">
+<p>The full annotation list is in the <a href="https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.components.html">KFP component documentation</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_returning_multiple_values_from_a_step"><a class="anchor" href="#_returning_multiple_values_from_a_step"></a>Returning multiple values from a step</h4>
+<div class="paragraph">
+<p>If you return a single small value from your component using the <em>return</em> statement, the output parameter is named <strong><em>output</em></strong>.
+It is, however, possible to return multiple small values using the Python <em>collection</em> library method <em>namedtuple</em>.</p>
+</div>
+<div class="paragraph">
+<p>From a <a href="https://github.com/kubeflow/pipelines/blob/master/samples/tutorials/Data%20passing%20in%20python%20components.ipynb">Kubeflow pipelines example</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def produce_two_small_outputs() -&gt; NamedTuple('Outputs', [('text', str), ('number', int)]):
+    return ("data 1", 42)
+consume_task3 = consume_two_arguments(produce2_task.outputs['text'], produce2_task.outputs['number'])</code></pre>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>The KFP SDK uses the following rules to define the input and output parameter names in your component’s interface:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If the argument name ends with <em>path and the argument is annotated as an _kfp.components.InputPath</em> or <em>kfp.components.OutputPath</em>, the parameter name is the argument name with the trailing _path removed.</p>
+</li>
+<li>
+<p>If the argument name ends with _file, the parameter name is the argument name with the trailing _file removed.</p>
+</li>
+<li>
+<p>If you return a single small value from your component using the return statement, the output parameter is named <strong>output</strong>.</p>
+</li>
+<li>
+<p>If you return several small values from your component by returning a <em>collections.namedtuple</em>, the SDK uses the tuple’s field names as the output parameter names.</p>
+</li>
+<li>
+<p>Otherwise, the SDK uses the argument name as the parameter name.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>In the Tekton definition you can see the definition of the <em>input and output artifacts</em>. This can be useful for debugging purposes.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tekton.dev/input_artifacts: '{"model-inference": [{"name": "load-trigger-data-Output",
+  "parent_task": "load-trigger-data"}, {"name": "prep-data-train-model-2-parameter_data",
+  "parent_task": "prep-data-train-model-2"}], "model-upload-notify": [{"name":
+  "load-trigger-data-Output", "parent_task": "load-trigger-data"}, {"name": "prep-data-train-model-parameter_data",
+  "parent_task": "prep-data-train-model"}], "prep-data-train-model": [{"name":
+  "load-trigger-data-Output", "parent_task": "load-trigger-data"}], "prep-data-train-model-2":
+  [{"name": "load-trigger-data-Output", "parent_task": "load-trigger-data"}]}'</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tekton.dev/output_artifacts: '{"load-trigger-data": [{"key": "artifacts/$PIPELINERUN/load-trigger-data/Output.tgz",
+  "name": "load-trigger-data-Output", "path": "/tmp/outputs/Output/data"}], "prep-data-train-model":
+  [{"key": "artifacts/$PIPELINERUN/prep-data-train-model/parameter_data.tgz",
+  "name": "prep-data-train-model-parameter_data", "path": "/tmp/outputs/parameter_data/data"}],
+  "prep-data-train-model-2": [{"key": "artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz",
+  "name": "prep-data-train-model-2-parameter_data", "path": "/tmp/outputs/parameter_data/data"}]}'</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tekton.dev/artifact_items: '{"load-trigger-data": [["Output", "$(results.Output.path)"]],
+  "model-inference": [], "model-upload-notify": [], "prep-data-train-model": [["parameter_data",
+  "$(workspaces.prep-data-train-model.path)/artifacts/$ORIG_PR_NAME/$(context.taskRun.name)/parameter_data"]],
+  "prep-data-train-model-2": [["parameter_data", "$(workspaces.prep-data-train-model-2.path)/artifacts/$ORIG_PR_NAME/$(context.taskRun.name)/parameter_data"]]}'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also see the locations of data stored into the S3 bucket e.g. <em>artifacts/$PIPELINERUN/prep-data-train-model-2/parameter_data.tgz</em></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_execution_on_openshift"><a class="anchor" href="#_execution_on_openshift"></a>Execution on OpenShift</h3>
+<div class="paragraph">
+<p>To enable the <em>pipeline</em> to run on OpenShift we need to pass it the associated <em>kubernetes</em> resources</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>volumes</em></p>
+</li>
+<li>
+<p><em>environment variables</em></p>
+</li>
+<li>
+<p><em>node selectors, taints and tolerations</em></p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_volumes"><a class="anchor" href="#_volumes"></a>Volumes</h4>
+<div class="paragraph">
+<p>Our pipeline requires a number of volumes to be created and mounted into the executing pods. The volumes are primarily used for storage and secrets handling but can also be used for passing configuration files into the pods.</p>
+</div>
+<div class="paragraph">
+<p>Before mounting the volumes into the pods they need to be created. The following code creates two volumes, one from a pre-existing PVC and another from a pre-existing secret.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>vol = V1Volume(
+    name='batterydatavol',
+    persistent_volume_claim=V1PersistentVolumeClaimVolumeSource(
+        claim_name='batterydata',)
+    )    
+mqttcert = V1Volume(
+    name='mqttcert',
+    secret=V1SecretVolumeSource(
+        secret_name='mqtt-cert-secret')
+    )</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The volumes are mounted into the containers using the <strong><em>add_pvolumes</em></strong> method:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>inference_result = inference_model_op(data_path="/opt/data/pitstop/",paramater_data=inference_prep.outputs["parameter_data"],experiment_name=trigger_data.output,vin=VIN)
+inference_result.add_pvolumes({"/opt/data/pitstop": vol})
+inference_result.add_pvolumes({"/opt/certs/": mqttcert})</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_environment_variables"><a class="anchor" href="#_environment_variables"></a>Environment Variables</h4>
+<div class="paragraph">
+<p>Environment variables can be added to the pod using the <strong><em>add_env_variable</em></strong> method.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>trigger_data = load_trigger_data_op(file_obj, src_bucket,file_destination)
+trigger_data.add_pvolumes({"/opt/data/pitstop/": vol})
+trigger_data.add_env_variable(V1EnvVar(name='s3_host', value='http://rook-ceph-rgw-ceph-object-store.openshift-storage.svc:8080'))
+trigger_data.add_env_variable(env_from_secret('s3_access_key', 's3-secret', 'AWS_ACCESS_KEY_ID'))
+trigger_data.add_env_variable(env_from_secret('s3_secret_access_key', 's3-secret', 'AWS_SECRET_ACCESS_KEY'))</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The <strong><em>env_from_secret</em></strong> utility method also enables extracting values from secrets and mounting them as environment variables. In the example above the <em>AWS_ACCESS_KEY_ID</em> value is extracted from the <em>s3-secret</em> secret and added to the container defintion as the <em>s3_access_key</em> environment variable.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_node_selectors_taints_and_tolerations"><a class="anchor" href="#_node_selectors_taints_and_tolerations"></a>Node Selectors, Taints and Tolerations</h4>
+<div class="paragraph">
+<p>Selecting the correct worker node to execute a pipeline step is an important part of pipeline development. Specific nodes may have dedicated hardware such as GPUs; or there may be other constraints such as data locality.</p>
+</div>
+<div class="paragraph">
+<p>In our example we&#8217;re using the nodes with an attached GPU to execute the step. To do this we need to:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create the requisite toleration:</p>
+<div class="literalblock">
+<div class="content">
+<pre>gpu_toleration = V1Toleration(effect='NoSchedule',
+                              key='nvidia.com/gpu',
+                              operator='Equal',
+                              value='true')</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the <em>toleration</em> to the pod and add a <em>node selector</em> constraint.</p>
+<div class="literalblock">
+<div class="content">
+<pre>prep_train_data = prep_train_data_op(data_path="/opt/data/pitstop/",epoch_count=epoch_count,experiment_name=trigger_data.output,run_mode=0).after(trigger_data)
+prep_train_data.add_pvolumes({"/opt/data/pitstop": vol})
+prep_train_data.add_node_selector_constraint(label_name='nvidia.com/gpu.present',value='true')
+prep_train_data.add_toleration(gpu_toleration)</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You could also use this approach to ensure that pods without GPU needs are <strong>not</strong> scheduled to nodes with GPUs.</p>
+</div>
+<div class="paragraph">
+<p>For global pipeline pod settings take a look at the <strong><em>PipelineConf</em></strong> class in the '<a href="https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.html?highlight=add_env_variable#kfp.dsl.PipelineConf'">KFP SDK Documentation</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We have only covered a <em>subset</em> of what&#8217;s possible with the <em>KFP SDK</em>.</p>
+</div>
+<div class="paragraph">
+<p>It is also possible to customize significant parts of the <em>pod spec</em> definition with:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Init and Sidecar Pods</p>
+</li>
+<li>
+<p>Pod affinity rules</p>
+</li>
+<li>
+<p>Annotations and labels</p>
+</li>
+<li>
+<p>Retries and Timeouts</p>
+</li>
+<li>
+<p>Resource requests and limits</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See the the <a href="https://kubeflow-pipelines.readthedocs.io/en/1.8.22/source/kfp.dsl.html">KFP SDK Documentation</a> for more details.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_compiling_to_tekton"><a class="anchor" href="#_compiling_to_tekton"></a>Compiling to Tekton</h3>
+<div class="paragraph">
+<p>As stated previously, DSP Python scripts need to be compiled into Tekton definitions for execution.
+This can be achieved in multiple ways:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Explicitly calling the "dsl-compile" command from the <em>kfp</em> Python package giving the input and output files, then uploading the resultant yaml file to the DSP server via the UI.</p>
+</li>
+<li>
+<p>Adding the compile step to the Python script and then uploading the resultant yaml file to the DSP server via the UI.</p>
+</li>
+<li>
+<p>Adding the compile step to the Python script and uploading the resulting Tekton definition via an api call.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In our example we&#8217;ve chosen the second option:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>compiler.compile(edgetest_pipeline, __file__.replace('.py', '.yaml'),tekton_pipeline_conf=pipeline_conf)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Tekton compiler also has a number of <em>global settings</em>, which are not covered here, see <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/kfp_tekton/compiler/pipeline_utils.py">here</a> for more details.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We have only covered a subset of the functionality available in DSP as it pertains to our real-life scenario. Please see the <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/FEATURES.md">kfp-tekton features</a> document for more advanced functionality. The <a href="https://github.com/kubeflow/kfp-tekton/blob/master/guides/advanced_user_guide.md">KFP Tekton Advanced User Guide</a> also has more information.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pipeline_execution"><a class="anchor" href="#_pipeline_execution"></a>Pipeline Execution</h3>
+<div class="sect3">
+<h4 id="_submitting_a_pipeline_and_triggering_a_run"><a class="anchor" href="#_submitting_a_pipeline_and_triggering_a_run"></a>Submitting a Pipeline and Triggering a run</h4>
+<div class="paragraph">
+<p>The following code demonstrates how to submit and trigger a pipeline run from a <em>Red Hat OpenShift AI WorkBench</em>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == '__main__':
+    kubeflow_endpoint = 'http://ds-pipeline-pipelines-definition:8888'
+    sa_token_file_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    with open(sa_token_file_path, 'r') as token_file:
+        bearer_token = token_file.read()
+    print(f'Connecting to Data Science Pipelines: {kubeflow_endpoint}')
+    client = TektonClient(
+        host=kubeflow_endpoint,
+        existing_token=bearer_token
+    )
+    result = client.create_run_from_pipeline_func(
+        offline_scoring_pipeline,
+        arguments={},
+        experiment_name='offline-scoring-kfp'
+    )</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_externally_triggering_a_dsp_pipeline_run"><a class="anchor" href="#_externally_triggering_a_dsp_pipeline_run"></a>Externally Triggering a DSP pipeline run</h4>
+<div class="paragraph">
+<p>In our real-world example above the entire pipeline is executed when a file is added to an S3 bucket. Here is the process followed:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>File added to S3 bucket.</p>
+</li>
+<li>
+<p>S3 triggers the send of a webhook payload to an <em>OCP Serverless</em> function.</p>
+</li>
+<li>
+<p>The <em>Serverless</em> function parses the payload and invokes the configured <em>DSP pipeline</em>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We&#8217;re not going to go through the code and configuration for this, but here is the code to trigger the pipeline.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">def kubeflow_handler(kfp_host:str, kfp_name:str,file_obj:str, src_bucket:str)-&gt;None:
+    print('kubeflow_handler...Connecting to kubeflow API.....',kfp_host)
+    client = kfp.Client(host=kfp_host)
+    print('Connecting to kubeflow API.....connected')
+    v1 = src_bucket.split(".")
+    bucket_name = v1[2]
+    pipline_id  = client.get_pipeline_id(kfp_name)
+    if pipline_id is None:
+        print("No pipeline found with name ",kfp_name)
+    else:
+        try :
+            exp_obj = client.get_experiment(experiment_id="EdgeTestMonitoringExperiment")
+        except:
+            exp_obj = client.create_experiment("EdgeTestExperiment","monitoring experiment")
+        params_dict = dict(file_obj= file_obj, src_bucket = bucket_name)
+        run = client.run_pipeline(exp_obj.id,"edgetest monitor run @ "+str(time.asctime()), pipeline_id = pipline_id,params=params_dict)
+        print("Pipleline Run submitted ",run.id, run.pipeline_spec.parameters)
+    print('kubeflow_handler.....finish')</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The full code is <a href="_attachments/dsp_trigger.py" class="xref attachment">here</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The <em>pipeline</em> needs to have already been submitted to the DSP runtime.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_handling_in_data_science_pipelines"><a class="anchor" href="#_data_handling_in_data_science_pipelines"></a>Data Handling in Data Science Pipelines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>DSP have two sizes of data, conveniently named <strong><em>Small Data</em></strong> and <strong><em>Big Data</em></strong>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><em>Small Data</em> is considered anything that can be passed as a <em>command line argument</em> for example <em>Strings</em>, <em>URLS</em>, <em>Numbers</em>. The overall size should not exceed a few <em>kilobytes</em>.</p>
+</li>
+<li>
+<p>Unsurprisingly, everything else is considered <em>Big Data</em> and should be passed as files.</p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_handling_large_data_sets"><a class="anchor" href="#_handling_large_data_sets"></a>Handling large data sets</h3>
+<div class="paragraph">
+<p>DSP support two methods by which to pass large data sets aka <em>Big Data</em> between pipeline steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong><em>Tekton Workspaces</em></strong>.</p>
+</li>
+<li>
+<p><strong><em>Volume based data passing method</em></strong>.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Data Science Projects <strong><em>Data Connection</em></strong> S3 storage is used to store <em>Output Artifacts</em> and <em>Parameters</em> of the stages of a pipeline. It is not intended to be used to pass large amounts of data between pipeline steps.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tekton_workspaces"><a class="anchor" href="#_tekton_workspaces"></a>Tekton Workspaces</h3>
+<div class="paragraph">
+<p>This uses the native Tekton mechanism for storing and passing data between stages of a <em>Tekton Pipeline</em>.
+Tekton creates a <strong>Workspace</strong> to share large data files among tasks that run in the same pipeline. These <em>Workspaces</em> are backed by dynamically created storage volumes which are removed once the pipeline has completed.</p>
+</div>
+<div class="paragraph">
+<p>By default the storage is set to <strong><em>ReadWriteMany</em></strong>, the size is set to <strong><em>2Gi</em></strong> and uses the storage class called <strong><em>kfp-csi-s3</em></strong>.</p>
+</div>
+<div class="paragraph">
+<p>However, this can be changed to suit the target environment needs by setting the following <strong><em>Environment Variables</em></strong>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><em>DEFAULT_ACCESSMODES</em></p>
+</li>
+<li>
+<p><em>DEFAULT_STORAGE_SIZE</em></p>
+</li>
+<li>
+<p><em>DEFAULT_STORAGE_CLASS</em></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>An example of this in the <em>Sample Pipeline</em> is shown below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">    os.environ.setdefault("DEFAULT_STORAGE_CLASS","managed-csi")
+    os.environ.setdefault("DEFAULT_ACCESSMODES","ReadWriteOnce")
+    os.environ.setdefault("DEFAULT_STORAGE_SIZE","10Gi")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_volume_based_data_passing_method"><a class="anchor" href="#_volume_based_data_passing_method"></a>Volume-based data passing method</h3>
+<div class="paragraph">
+<p>This approach uses a pre-created OpenShift storage volume (aka <em>PVC</em>) to pass data between the pipeline steps.
+An example of this is in the <a href="https://github.com/kubeflow/kfp-tekton/blob/master/sdk/python/tests/compiler/testdata/artifact_passing_using_volume.py">KFP compiler tests</a> which we will discuss here.</p>
+</div>
+<div class="paragraph">
+<p>First create the volume to be used and assign it to a variable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from kubernetes.client.models import V1Volume, V1PersistentVolumeClaimVolumeSource
+from kfp.dsl import data_passing_methods</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">volume_based_data_passing_method = data_passing_methods.KubernetesVolume(
+    volume=V1Volume(
+        name='data',
+        persistent_volume_claim=V1PersistentVolumeClaimVolumeSource(
+            claim_name='data-volume',),
+    ),
+    path_prefix='artifact_data/',
+)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then add definition to the <em>pipeline configuration</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == '__main__':
+    pipeline_conf = kfp.dsl.PipelineConf()
+    pipeline_conf.data_passing_method = volume_based_data_passing_method</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The <strong><em>data-volume PVC claim</em></strong> needs to exist in the OpenShift namespace while running the pipeline, else the <em>pipeline execution pod</em> fails to deploy and the run terminates.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To pass big data using cloud provider volumes, it&#8217;s recommended to use the <strong><em>volume-based data passing method</em></strong>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_science_pipeline_hands_on_example"><a class="anchor" href="#_data_science_pipeline_hands_on_example"></a>Data Science Pipeline - Hands On Example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We&#8217;re now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.</p>
+</div>
+<div class="sect2">
+<h3 id="_setup"><a class="anchor" href="#_setup"></a>Setup</h3>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Using the Minio UI, create a new S3 Bucket named <em>fraud_detection_bucket</em>.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-s3-fraud-bucket.png" alt="create s3 fraud bucket">
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Download the following artifacts:</p>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><i class="fa fa-square-o"></i> <a href="_attachments/model-latest.onnx" class="xref attachment">ONNX Model</a></p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <a href="_attachments/live-data.csv.gz" class="xref attachment">Live Transaction Data</a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Uncompress the <strong><em>.gz</em></strong> files using the <code>gzip -d</code> command.</p>
+</li>
+<li>
+<p><input type="checkbox" data-item-complete="0"> Upload the files to S3 <em>fraud_detection_bucket</em> via the <em>Minio</em> UI.</p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/fraud-upload-files.png" alt="fraud upload files">
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="_images/fraud-files-uploaded.png" alt="fraud files uploaded">
+</div>
+</div>
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Create the <strong><em>aws-connection-fraud-detection</em></strong> <em>secret</em> containing the <em>S3</em> bucket name, endpoint and credentials.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic aws-connection-fraud-detection --from-literal=AWS_ACCESS_KEY_ID=minio --from-literal=AWS_DEFAULT_REGION=rhods-enablement-emea --from-literal=AWS_S3_BUCKET=fraud-detection-bucket --from-literal=AWS_S3_ENDPOINT=https://minio-api... --from-literal=AWS_SECRET_ACCESS_KEY=minio123</code></pre>
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Create two OpenShift Persistent Volumes with the following names:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>offline-scoring-model-volume</strong></p>
+</li>
+<li>
+<p><strong>offline-scoring-data-volume</strong></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Example PVC definitions are here, download and customize as necessary this <a href="_attachments/offline-scoring-data-pvc.yaml" class="xref attachment">Data Volume definition</a> &amp; <a href="_attachments/offline-scoring-model-pvc.yaml" class="xref attachment">Model Volume definition</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_execute_pipeline"><a class="anchor" href="#_execute_pipeline"></a>Execute Pipeline</h3>
+<div class="paragraph">
+<p>Download and customize as necessary this <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Example Pipeline definition</a></p>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Create a <em>Workbench</em> with the name <em>fraud-onnx</em></p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/fraud-onnx-workbench.png" alt="fraud onnx workbench">
+</div>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><input type="checkbox" data-item-complete="0"> Download the <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Offline Scoring Pipeline</a> and load it into your <em>workbench</em>.</p>
+</li>
+<li>
+<p><input type="checkbox" data-item-complete="0"> Click 'Restart Kernel and Run All Cells'.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/start-pipeline.png" alt="start pipeline">
+</div>
+</div>
+<div class="paragraph">
+<p>The Pipeline will be submitted to the server and a run <em>Triggered</em>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-run-triggered.png" alt="pipeline run triggered">
+</div>
+</div>
+<div class="paragraph">
+<p>If the pipeline run was executed without any issues, you should see something similar to below:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-finish.png" alt="pipeline finish">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_handling_pipeline_errors"><a class="anchor" href="#_handling_pipeline_errors"></a>Handling Pipeline Errors</h3>
+<div class="paragraph">
+<p>In case the pipeline fails, the UI shows something similar to the following:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-failure.png" alt="pipeline failure">
+</div>
+</div>
+<div class="paragraph">
+<p>Clicking on the <strong><em>failed</em></strong> node in the graph and then clicking on the <em>Details</em> tab presents the status of the execution step.
+When the mouse is placed over the <strong><em>Status</em></strong> field, the command to retrieve the detailed logs of the execution step is displayed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-error-details.png" alt="pipeline error details">
+</div>
+</div>
+<div class="paragraph">
+<p>The step logs can then be viewed using the command provided.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-pod-error.png" alt="pipeline pod error">
+</div>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="elyra-pipelines.html">Elyra Pipelines</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
