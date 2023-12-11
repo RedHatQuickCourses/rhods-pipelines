@@ -122,14 +122,14 @@ Once the workbench has successfully started, we will being the process of explor
 https://github.com/RedHatQuickCourses/rhods-qc-apps.git
 ```
 
-. Within the cloned repository, navigate to the `5.pipelines/elyra` folder. The folder contains all the code that is needed for running offline scoring with a given model. In particular, it contains the Python modules:
+. Within the cloned repository, navigate to the `5.pipelines/elyra` folder. The folder contains all the code that is needed for running offline scoring with a given model. The example contains the following Python modules:
 +
 * `data_ingestion.py` for downloading a dataset from an S3 bucket,
 * `preprocessing.py` for preprocessing the downloaded dataset,
 * `model_loading.py` for downloading a model artefact from an S3 bucket,
 * `scoring.py` for running the classification on the preprocessed data using the downloaded model,
 * `results_upload.py` for uploading the classification results to an S3 bucket.
-
++
 [NOTE]
 ====
 In Elyra, each pipeline step is implemented by a separate file such as Python modules in our example. In line with software development best practices, pipelines are best implemented in a modular fashion, i.e. across several components. This way, generic pipeline tasks like data ingestion can be re-used in many different pipelines addressing different use cases.
@@ -188,7 +188,7 @@ image::pipeline-2.png[]
 image::pipeline-3.png[]
 +
 You should now see the two nodes connected through a solid line. We have now defined a simple pipeline with two tasks, which are executed sequentially, first data ingestion and then preprocessing.
-
++
 [NOTE]
 ====
 By visually defining pipeline tasks and connections, we can define _graphs_ spanning many nodes and interconnections. Elyra and Data Science Pipelines support the creation and execution of arbitrary _directed acyclic graphs_ (DAGs), i.e. graphs with a sequential order of nodes and without loops.
@@ -229,7 +229,7 @@ image::runtime-images.png[]
 image::runtime-image-2.png[]
 
 . Click `Save & Close`
-
++
 [NOTE]
 ====
 For every custom workbench image, we recommend building a corresponding pipeline runtime image to ensure consistency between interactive and pipeline-based code execution.  Notebook images can be utilized as a pipeline execution environment, but they contain additional packages needed for the interactive development experience and are often larger than necessary for the pipeline execution.
@@ -257,18 +257,16 @@ Each parameter will include the following options:
 * `Secret Key`: the parameter name
 +
 image::pipeline-config-3.png[]
-
++
 [NOTE]
 ====
 A data connection in OpenShift AI is a standard Kubernetes secret that adheres to a specific format.  A data connection name is always pre-pended with `aws-connection-`.  To explore the data connection you can find the secret in the `Workloads` -> `Secrets` menu in the OpenShift Web Console.
 ====
-
++
 [NOTE]
 ====
 The AWS default region is another parameter in the data connection, which is used for AWS S3-based connections. In case of self-managed S3 backends such as Minio or OpenShift Data Foundation, this parameter can be safely ignored.  Alternatively, when using an AWS bucket, you can skip the endpoint, as it is inferred by the region parameter.
 ====
-
-For simplicity, we have just defined a single runtime image and set of environment variables that are reused in each pipeline task. To optimize pipeline task behavior and control access to credentials, we recommend configuring these settings on a node basis.
 
 . Next we will configure the data to be passed between the nodes. Click on the `model_loading.py` node. If you're still in the configuration menu, you should now see the `NODE PROPERTIES` tab. If not, right-click on the node and select `Open Properties`.
 +
@@ -281,7 +279,7 @@ image::pipeline-config-4.png[]
 . Click `Add` in the `Output File` section and input `model.onnx`. This ensures that the downloaded model artifact is available to downstream tasks, including the `scoring.py` task.
 +
 image::pipeline-config-5.png[]
-
++
 [NOTE]
 ====
 By default, all files within a containerized task are removed after its execution, so declaring files explicitly as output files is one way to ensure that they can be reused in downstream tasks.
@@ -304,7 +302,7 @@ image::pipeline-config-6.png[]
 * `preprocessing.py`
 * `scoring.py`
 * `results_upload.py`
-
++
 [NOTE]
 ====
 `Mount Volumes` and `Output Files` both provide the ability for files to persist between tasks and each has different strengths and weaknesses.
@@ -313,7 +311,7 @@ image::pipeline-config-6.png[]
 
 `Mount Volumes` can be helpful when a large amount of files, or a large dataset is required to be stored.  `Mount Volumes` also have the ability to persist data between runs of a pipeline, which can allow a volume to act as a cache for files between executions.
 ====
-
++
 [NOTE]
 ====
 We could have declared the data volume as a global pipeline property for simplicity. However, this would have prevented parallel execution of model loading and data ingestion/preprocessing since data volumes can only be used by single tasks by default.
@@ -328,14 +326,14 @@ image::pipeline-config-7.png[]
 We have now fully created and configured the pipeline, so let's now see it in action!
 
 . In the visual editor, click on the Play icon (`Run Pipeline`). Leave the default values and hit `OK`.
-
++
 [TIP]
 ====
 "Data Science Pipelines" should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the DataSciencePipelinesApplication instance we created previously as the default execution environment provided the DataSciencePipelinesApplication was created before the Workbench was started and it is located in the same namespace as the Workbench.
 
 If you wish to use DataSciencePipelinesApplication that is located in a different namespace from your workbench you can manually configure an execution environment.
 ====
-
++
 [WARNING]
 ====
 If you configure the pipeline server after you have created a workbench and specified a notebook image within the workbench, you will not be able to execute the pipeline, even after restarting the notebook.
@@ -370,8 +368,7 @@ image::pipeline-runs.png[]
 . In the `Scheduled` tab you're able to schedule runs of the offline scoring pipeline according to a predefined schedule such as daily or according to a Cron statement.
 +
 image::pipeline-scheduled.png[]
-
-
++
 [WARNING]
 ====
 Pipeline versioning is not fully implemented in Data Science Pipelines.
@@ -392,7 +389,7 @@ Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Da
 * `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
 * `artifacts`: A folder used by Data Science Pipelines to store the metadata of each pipeline task for each pipeline run.
 * One folder for each pipeline run with name `[pipeline-name]-[timestamp]`. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.
-
++
 [NOTE]
 ====
 The logs from the Tekton Pipeline submitted from Elyra will show generic task information and logs, including showing the execution of our python files as a subtask.  Log details from our code is not recorded in the pipeline logs.  
