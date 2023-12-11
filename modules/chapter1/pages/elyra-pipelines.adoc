@@ -32,13 +32,13 @@ To begin, we will add a new image that has all of the packages we need for our w
 
 . In the OpenShift AI Dashboard, under `Settings` select `Notebook images`.
 
-. Select `Import new image`.
+. Select `Import new image` and enter the following details:
 +
-Enter the following details:
-+
+--
 * Repository: `quay.io/mmurakam/workbenches:fraud-detection-v1.0.1`
 * Name: `Fraud detection workbench`
 * Optionally a description.
+--
 +
 image::import-workbench-image.png[]
 
@@ -59,8 +59,10 @@ Next we will create an additional bucket to host several files we will access fo
 
 . Download the following files from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection[model artifact repository]:
 +
+--
 * model-latest.onnx
 * live-data.csv
+--
 
 . Upload the files to th `fraud-detection` bucket
 +
@@ -68,11 +70,13 @@ image::fraud-detection-bucket.png[]
 
 . In the pipelines-example data science project within the OpenShift AI Dashboard, create a new data connection with the following details:
 +
+--
 * Name: fraud-detection
 * Access key: minio
 * Secret key: minio123
 * Endpoint: http://minio-service.pipelines-example.svc:9000
 * Bucket: fraud-detection
+--
 
 ==== Set up the workbench
 
@@ -80,11 +84,13 @@ Now we will start a workbench.
 
 . In the OpenShift AI dashboard, create a new data workbench and enter the following details:
 +
+--
 * Name: `fraud-detection-workbench`
 * Notebook image: `Fraud detection workbench`
 * Container size: `Small`
-* Create a new persistent storage with name `fraud-detection` and size 5 GB.
+* Create a new persistent storage with name `fraud-detection` and size 5 GB
 * Use a data connection and select the `fraud-detection` data connection
+--
 +
 image::create-workbench.png[]
 
@@ -101,8 +107,10 @@ While the workbench is starting, we will create a persistent volume that the pip
 
 . Select `Add cluster storage` and enter the following details:
 +
+--
 * Name: `offline-scoring-data-volume`
 * Persistent storage size: 5 GB
+--
 
 . Click `Add storage`
 +
@@ -124,11 +132,13 @@ https://github.com/RedHatQuickCourses/rhods-qc-apps.git
 
 . Within the cloned repository, navigate to the `5.pipelines/elyra` folder. The folder contains all the code that is needed for running offline scoring with a given model. The example contains the following Python modules:
 +
+--
 * `data_ingestion.py` for downloading a dataset from an S3 bucket,
 * `preprocessing.py` for preprocessing the downloaded dataset,
 * `model_loading.py` for downloading a model artefact from an S3 bucket,
 * `scoring.py` for running the classification on the preprocessed data using the downloaded model,
 * `results_upload.py` for uploading the classification results to an S3 bucket.
+--
 +
 [NOTE]
 ====
@@ -227,8 +237,10 @@ image::runtime-images.png[]
 
 . Fill out the required values:
 +
+--
 * display name: `fraud detection runtime`
 * image name: `quay.io/mmurakam/runtimes:fraud-detection-v0.2.0`
+--
 +
 image::runtime-image-2.png[]
 
@@ -307,9 +319,11 @@ image::pipeline-config-6.png[]
 
 . Repeat the same `Data Volumes` configuration for the following tasks in the pipeline:
 +
+--
 * `preprocessing.py`
 * `scoring.py`
 * `results_upload.py`
+--
 +
 [NOTE]
 ====
@@ -394,9 +408,11 @@ Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Da
 
 . View the contents of the `fraud-detection-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
 +
+--
 * `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
 * `artifacts`: A folder used by Data Science Pipelines to store the metadata of each pipeline task for each pipeline run.
 * One folder for each pipeline run with name `[pipeline-name]-[timestamp]`. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.
+--
 +
 [NOTE]
 ====
