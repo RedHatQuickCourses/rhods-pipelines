@@ -170,7 +170,7 @@ Let's now use Elyra to package the code into a pipeline and submit it to the Dat
 * Be able to control resource usage of individual pipeline tasks in a fine-grained manner.
 
 
-. Within the workbench, open the launcher by clicking on the blue plus button.
+. Within the workbench, open the launcher by clicking on the blue plus button in the top left hand corner.
 +
 image::launcher.png[]
 
