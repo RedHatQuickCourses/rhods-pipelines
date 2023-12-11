@@ -214,8 +214,9 @@ Before we can submit our pipeline, we have to configure the pipeline to specify:
 * Set the dependencies for each step, i.e. the corresponding runtime images
 * Configure how data is passed between the steps
 * Configure the S3 credentials as environment variables during runtime
-* Optionally, configure the available compute resources per step
--
+* Optionally, configure the available compute resources per step test
+
+//-
 
 . To begin, we will configure a new Runtime Image by opening th `Runtime Images` menu from the left toolbar.
 
