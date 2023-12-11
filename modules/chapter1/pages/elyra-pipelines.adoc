@@ -184,7 +184,7 @@ image::pipeline-1.png[]
 +
 image::pipeline-2.png[]
 
-. We have now defined two tasks of the pipeline, but the order of processing is not defined yet. To instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the `Output Port` (right black dot of the task icon) of the `data_ingestion` task with the `Input Port` (left black dot of the task icon) of the `preprocessing` task by drawing a line between these ports (click, hold & draw, release).
+. Connect the `Output Port` (right black dot of the task icon) of the `data_ingestion` task with the `Input Port` (left black dot of the task icon) of the `preprocessing` task by drawing a line between these ports (click, hold & draw, release).
 +
 image::pipeline-3.png[]
 +
