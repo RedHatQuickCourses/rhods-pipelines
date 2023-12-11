@@ -66,7 +66,7 @@ Next we will create an additional bucket to host several files we will access fo
 +
 image::fraud-detection-bucket.png[]
 
-. In the pipelines-example data science project, create a new data connection with the following details:
+. In the pipelines-example data science project within the OpenShift AI Dashboard, create a new data connection with the following details:
 +
 * Name: fraud-detection
 * Access key: minio
