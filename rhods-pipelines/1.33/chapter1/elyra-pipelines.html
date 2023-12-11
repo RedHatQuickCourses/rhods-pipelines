@@ -167,14 +167,17 @@
 <div class="sect3">
 <h4 id="_import_the_custom_workbench_image"><a class="anchor" href="#_import_the_custom_workbench_image"></a>Import the custom workbench image</h4>
 <div class="paragraph">
+<p>To begin, we will add a new image that has all of the packages we need for our workload.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
 <p>In the OpenShift AI Dashboard, under <code>Settings</code> select <code>Notebook images</code>.</p>
-</div>
-<div class="paragraph">
-<p>Select <code>Import new image</code>.</p>
-</div>
-<div class="paragraph">
-<p>Enter the following details:</p>
-</div>
+</li>
+<li>
+<p>Select <code>Import new image</code> and enter the following details:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -188,40 +191,105 @@
 </li>
 </ul>
 </div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/import-workbench-image.png" alt="import workbench image">
 </div>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>Hit <code>Import</code>.</p>
+</li>
+</ol>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>The process of managing model images requires admin access to OpenShift AI.  An admin user would normally be responsible for creating and managing custom images for data scientists to utilize.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_prepare_the_bucket"><a class="anchor" href="#_prepare_the_bucket"></a>Prepare the bucket</h4>
 <div class="paragraph">
+<p>Next we will create an additional bucket to host several files we will access for model training.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
 <p>Log into the Minio console.</p>
+</li>
+<li>
+<p>From the bucket section, create a new S3 bucket named <code>fraud-detection</code> in Minio.</p>
+</li>
+<li>
+<p>Download the following files from the <a href="https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection">model artifact repository</a>:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>model-latest.onnx</p>
+</li>
+<li>
+<p>live-data.csv</p>
+</li>
+</ul>
 </div>
-<div class="paragraph">
-<p>Create a new S3 bucket named <code>fraud-detection</code> in Minio.</p>
 </div>
-<div class="paragraph">
-<p>Download the <code>model-latest.onnx</code> file from the <a href="https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection">model artefact repository</a> and upload it to the S3 bucket.</p>
 </div>
-<div class="paragraph">
-<p>Download the <code>live-data.csv</code> file from the <a href="https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-data-v0.1/data/fraud-detection">data set repository</a> and upload it to the S3 bucket.</p>
-</div>
+</li>
+<li>
+<p>Upload the files to th <code>fraud-detection</code> bucket</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/fraud-detection-bucket.png" alt="fraud detection bucket">
 </div>
 </div>
+</li>
+<li>
+<p>In the pipelines-example data science project within the OpenShift AI Dashboard, create a new data connection with the following details:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Name: fraud-detection</p>
+</li>
+<li>
+<p>Access key: minio</p>
+</li>
+<li>
+<p>Secret key: minio123</p>
+</li>
+<li>
+<p>Endpoint: <a href="http://minio-service.pipelines-example.svc:9000" class="bare">http://minio-service.pipelines-example.svc:9000</a></p>
+</li>
+<li>
+<p>Bucket: fraud-detection</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</li>
+</ol>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_set_up_the_workbench"><a class="anchor" href="#_set_up_the_workbench"></a>Set up the workbench</h4>
 <div class="paragraph">
-<p>In the pipelines-example data science project, create a new data workbench and enter the following details:</p>
+<p>Now we will start a workbench.</p>
 </div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In the OpenShift AI dashboard, create a new data workbench and enter the following details:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -234,58 +302,101 @@
 <p>Container size: <code>Small</code></p>
 </li>
 <li>
-<p>Create a new persistent storage with name <code>fraud-detection</code> and size 5 GB.</p>
+<p>Create a new persistent storage with name <code>fraud-detection</code> and size 5 GB</p>
 </li>
 <li>
-<p>Use a data connection &#8594; Create new data connection, enter the connection parameters for consuming the <code>fraud-detection</code> bucket.</p>
+<p>Use a data connection and select the <code>fraud-detection</code> data connection</p>
 </li>
 </ul>
+</div>
+</div>
 </div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-workbench.png" alt="create workbench">
 </div>
 </div>
+</li>
+<li>
+<p>Click <code>Create workbench</code>.  The workbench creation may take several minutes the first time it is started.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>Hit <code>Create workbench</code>.</p>
+<p>Many things can prevent a Workbench image from starting, including issues pulling images, mounting volumes, or being unable to schedule the pods due to lack of resources or LimitRequests being set on the namespace that are too small.  To help troubleshoot these types of issues it is often helpful to check the events on the Deployment and Pods created by the Notebook object.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_set_up_pipeline_storage"><a class="anchor" href="#_set_up_pipeline_storage"></a>Set up pipeline storage</h4>
 <div class="paragraph">
-<p>We&#8217;ll now create a persistent volume that the pipeline will use to persist and exchange data across tasks.</p>
+<p>While the workbench is starting, we will create a persistent volume that the pipeline will use to persist and exchange data across tasks.</p>
 </div>
-<div class="paragraph">
-<p>Select <code>Add cluster storage</code>. Give it the name <code>offline-scoring-data-volume</code> and set <code>Persistent storage size</code> to 5 GB.</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Select <code>Add cluster storage</code> and enter the following details:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Name: <code>offline-scoring-data-volume</code></p>
+</li>
+<li>
+<p>Persistent storage size: 5 GB</p>
+</li>
+</ul>
 </div>
-<div class="paragraph">
-<p>Hit <code>Add storage</code>.</p>
 </div>
+</div>
+</li>
+<li>
+<p>Click <code>Add storage</code></p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-storage.png" alt="pipeline storage">
 </div>
 </div>
+</li>
+</ol>
+</div>
 <div class="paragraph">
-<p>Finally, once the fraud detection workbench is up and running, access it.</p>
+<p>This volume will only be utilized in our pipeline, and will not be used in the interactive Workbench environment, so there is no need for this volume to be mounted in our Workbench.</p>
 </div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_working_with_elyra"><a class="anchor" href="#_working_with_elyra"></a>Working with Elyra</h3>
 <div class="sect3">
-<h4 id="_the_code"><a class="anchor" href="#_the_code"></a>The code</h4>
+<h4 id="_exploring_the_code"><a class="anchor" href="#_exploring_the_code"></a>Exploring the Code</h4>
 <div class="paragraph">
-<p>Within the workbench, clone the course git repository:</p>
+<p>Once the workbench has successfully started, we will being the process of exploring and building our pipeline.</p>
 </div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Clone the course git repository:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-none hljs">https://github.com/RedHatQuickCourses/rhods-qc-apps.git</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Within the cloned repository, navigate to the <code>5.pipelines/elyra</code> folder. The folder contains all the code that is needed for running offline scoring with a given model. In particular, it contains the Python modules:</p>
-</div>
+</li>
+<li>
+<p>Within the cloned repository, navigate to the <code>5.pipelines/elyra</code> folder. The folder contains all the code that is needed for running offline scoring with a given model. The example contains the following Python modules:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -305,6 +416,8 @@
 </li>
 </ul>
 </div>
+</div>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -319,9 +432,9 @@
 </tr>
 </table>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>Explore these Python modules to get an understanding of the workflow. A few points of note:</p>
-</div>
 <div class="paragraph">
 <p>Three tasks (data ingestion, model loading, results upload) access the S3 backend. Instead of hardcoding the connection parameters into the pipeline code, these parameters are instead read from the environment at runtime:</p>
 </div>
@@ -339,9 +452,12 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="paragraph">
 <p>Three tasks (preprocessing, scoring, results upload) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can&#8217;t assume that the tasks automatically have access to each other&#8217;s files. Note that the dataset and result files are stored and read within a given data folder (<code>/data</code>), while the model artifact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.</p>
 </div>
+</li>
+</ol>
+</div>
 </div>
 <div class="sect3">
-<h4 id="_running_the_code_interactively"><a class="anchor" href="#_running_the_code_interactively"></a>Running the code interactively</h4>
+<h4 id="_running_the_code_interactively"><a class="anchor" href="#_running_the_code_interactively"></a>Running the Code Interactively</h4>
 <div class="paragraph">
 <p>The Python modules cover the offline scoring tasks end-to-end, so we can run the code in the workbench to perform all needed tasks interactively.</p>
 </div>
@@ -364,53 +480,54 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_building_the_pipeline"><a class="anchor" href="#_building_the_pipeline"></a>Building the pipeline</h4>
+<h4 id="_building_the_pipeline"><a class="anchor" href="#_building_the_pipeline"></a>Building the Pipeline</h4>
 <div class="paragraph">
 <p>Let&#8217;s now use Elyra to package the code into a pipeline and submit it to the Data Science Pipelines backend in order to:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>rely on the pipeline scheduler to manage the pipeline execution without having to depend on my workbench session,</p>
+<p>Rely on the pipeline scheduler to manage the pipeline execution without having to depend on my workbench session,</p>
 </li>
 <li>
-<p>keep track of the pipeline execution along with the previous executions,</p>
+<p>Keep track of the pipeline execution along with the previous executions,</p>
 </li>
 <li>
-<p>be able to control resource usage of individual pipeline tasks in a fine-grained manner.</p>
+<p>Be able to control resource usage of individual pipeline tasks in a fine-grained manner.</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>Within the workbench, open the launcher by clicking on the blue plus button.</p>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Within the workbench, open the launcher by clicking on the blue plus button in the top left hand corner.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/launcher.png" alt="launcher">
 </div>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>Click on the <code>Pipeline Editor</code> tile in the launcher menu. This opens up Elyra&#8217;s visual pipeline editor. Use the visual pipeline editor to drag-and-drop files from the file browser onto the canvas area. These files then define the individual tasks of your pipeline.</p>
-</div>
-<div class="paragraph">
-<p>The pipeline should start by ingesting the dataset that we want to classify, so drag the <code>data_ingestion.py</code> module onto the empty canvas.</p>
-</div>
+</li>
+<li>
+<p>Drag the <code>data_ingestion.py</code> module onto the empty canvas.  This will allow the pipeline to ingest the data we want to classify.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-1.png" alt="pipeline 1">
 </div>
 </div>
-<div class="paragraph">
-<p>Next, the ingested data should be preprocessed, so drag the <code>preprocessing.py</code> module onto the canvas, right next to the <code>data_ingestion.py</code> module.</p>
-</div>
+</li>
+<li>
+<p>Next, drag the preprocessing.py` module onto the canvas, right next to the <code>data_ingestion.py</code> module.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-2.png" alt="pipeline 2">
 </div>
 </div>
-<div class="paragraph">
-<p>We have now defined two tasks of the pipeline, but the order of processing is not defined yet. To instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the <code>Output Port</code> (right black dot of the task icon) of the <code>data_ingestion</code> task with the <code>Input Port</code> (left black dot of the task icon) of the <code>preprocessing</code> task by drawing a line between these ports (click, hold &amp; draw, release).</p>
-</div>
+</li>
+<li>
+<p>Connect the <code>Output Port</code> (right black dot of the task icon) of the <code>data_ingestion</code> task with the <code>Input Port</code> (left black dot of the task icon) of the <code>preprocessing</code> task by drawing a line between these ports (click, hold &amp; draw, release).</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-3.png" alt="pipeline 3">
@@ -433,19 +550,25 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>Now add the <code>scoring.py</code> and <code>results_upload.py</code> modules to the pipeline and connect them to form a straight 4-step pipeline.</p>
-</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-4.png" alt="pipeline 4">
 </div>
 </div>
+</li>
+<li>
+<p>In addition to the <code>preprocessing.py</code> task, the <code>scoring.py</code> module also requires <code>model_loading.py</code> as an additional input.  Since <code>model_loading.py</code> does not require any inputs from any other tasks, it can be executed in parallel to the other tasks.</p>
 <div class="paragraph">
-<p>It looks like we have captured the end-to-end process of offline scoring from data ingestion to scoring and results upload, but there is one step missing. A closer look at the <code>scoring.py</code> module reveals that it requires not only the preprocessed data from the previous <code>preprocessing.py</code> step but also the model file, which is created by the <code>model_loading.py</code> module. So we have to ensure that model loading is executed before scoring. However, since model loading does not depend on data ingestion and preprocessing, we can have these tasks executed in parallel. To do this, add the <code>model_loading.py</code> onto the canvas and connect its <code>Output Port</code> with the <code>Input Port</code> of <code>scoring.py</code>.</p>
+<p>Drag the <code>model_loading.py</code> module to the canvas and connect the output of the <code>model_loading.py</code> to the input of <code>scoring.py</code>.</p>
 </div>
 <div class="paragraph">
 <p><span class="image"><img src="_images/pipeline-5.png" alt="pipeline 5"></span></p>
+</div>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>We have now created the final graph representation of the offline scoring pipeline using the five available modules. With this we have fully defined the full pipeline code and its order of execution.</p>
@@ -459,50 +582,36 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="ulist">
 <ul>
 <li>
-<p>the set of dependencies for each step, i.e. the corresponding runtime images,</p>
+<p>Set the dependencies for each step, i.e. the corresponding runtime images</p>
 </li>
 <li>
-<p>how data is passed between the steps,</p>
+<p>Configure how data is passed between the steps</p>
 </li>
 <li>
-<p>how the S3 credentials are exposed as environment variables during runtime,</p>
+<p>Configure the S3 credentials as environment variables during runtime</p>
 </li>
 <li>
-<p>and, optionally, the available compute resources per step.</p>
+<p>Optionally, configure the available compute resources per step</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>Corresponding to our custom workbench image, there is a custom pipeline runtime image containing the same libraries, which we will use throughout the pipeline tasks.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>For every custom workbench image, we recommend building a corresponding pipeline runtime image to ensure consistency between interactive and pipeline-based code execution.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Before we can use a custom runtime image in our pipeline, we have to add it to the Elyra runtime image library. To do this, open the <code>Runtime Images</code> menu from the left toolbar.</p>
-</div>
-<div class="paragraph">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>To begin, we will configure a new Runtime Image by opening th <code>Runtime Images</code> menu from the left toolbar.</p>
+</li>
+<li>
 <p>Select <code>Create new runtime image</code> via the plus sign in the top portion of the menu.</p>
-</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/runtime-images.png" alt="runtime images">
 </div>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>Fill out the required values:</p>
-</div>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -513,47 +622,49 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 </ul>
 </div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/runtime-image-2.png" alt="runtime image 2">
 </div>
 </div>
+</li>
+<li>
+<p>Click <code>Save &amp; Close</code></p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>Hit <code>Save &amp; Close</code>.</p>
+<p>For every custom workbench image, we recommend building a corresponding pipeline runtime image to ensure consistency between interactive and pipeline-based code execution.  Notebook images can be utilized as a pipeline execution environment, but they contain additional packages needed for the interactive development experience and are often larger than necessary for the pipeline execution.</p>
 </div>
-<div class="paragraph">
-<p>Let&#8217;s now set this runtime image in our pipeline. To do this, open the pipeline settings in the Elyra pipeline editor via <code>Open Panel</code> in the top right corner of the editor.</p>
+</td>
+</tr>
+</table>
 </div>
+</li>
+<li>
+<p>Next we will configure this runtime image to be used by our pipeline. Open the pipeline settings in the Elyra pipeline editor via <code>Open Panel</code> in the top right corner of the editor.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-config-1.png" alt="pipeline config 1">
 </div>
 </div>
-<div class="paragraph">
-<p>You can now see the <code>PIPELINE PROPERTIES</code> tab of the settings menu. Here you can configure the default settings that are applied on all pipeline tasks.</p>
-</div>
-<div class="paragraph">
-<p>Scroll down to <code>Generic Node Defaults</code> and click on the drop down menu of <code>Runtime Image</code>. Select the <code>fraud detection runtime</code> that we just defined.</p>
-</div>
-<div class="paragraph">
-<p>We can use the <code>Kubernetes Secrets</code> setting to expose our data connection parameters to the pipeline tasks as environment variables. For each of the data connection parameters, add an entry to <code>Kubernetes Secrets</code> with the following values:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>Environment Variable</code>: the parameter name,</p>
 </li>
 <li>
-<p><code>Secret Name</code>: <code>aws-connection-fraud-detection</code> (the name of the Kubernetes secret belonging to the data connection),</p>
+<p>Select the <code>PIPELINE PROPERTIES</code> tab of the settings menu. Configurations in this section apply defaults to all nodes in the pipeline.</p>
 </li>
 <li>
-<p><code>Secret Key</code>: the parameter name.</p>
+<p>Scroll down to <code>Generic Node Defaults</code> and click on the drop down menu of <code>Runtime Image</code>. Select the <code>fraud detection runtime</code> that we previously defined.</p>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Ensure there is an entry for each of the parameters:</p>
-</div>
+<li>
+<p>Next we will configure the data connection to the fraud-detection bucket as a <code>Kubernetes Secret</code>.  In the <code>PIPELINE PROPERTIES</code> section add four entries for the following parameters:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -570,6 +681,28 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 </ul>
 </div>
+</div>
+</div>
+<div class="paragraph">
+<p>Each parameter will include the following options:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><code>Environment Variable</code>: the parameter name</p>
+</li>
+<li>
+<p><code>Secret Name</code>: <code>aws-connection-fraud-detection</code> (the name of the Kubernetes secret belonging to the data connection)</p>
+</li>
+<li>
+<p><code>Secret Key</code>: the parameter name</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-config-3.png" alt="pipeline config 3">
@@ -583,7 +716,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The AWS default region is another parameter in the data connection, which is used for AWS S3-based connections. In case of self-managed S3 backends such as Minio or OpenShift Data Foundation, this parameter can be safely ignored.</p>
+<p>A data connection in OpenShift AI is a standard Kubernetes secret that adheres to a specific format.  A data connection name is always pre-pended with <code>aws-connection-</code>.  To explore the data connection you can find the secret in the <code>Workloads</code> &#8594; <code>Secrets</code> menu in the OpenShift Web Console.</p>
 </div>
 </td>
 </tr>
@@ -597,28 +730,33 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>For simplicity, we have just defined a single runtime image and set of environment variables that are reused in each pipeline task. To optimize pipeline task behavior and control access to credentials, we recommend configuring these settings on a node basis.</p>
+<p>The AWS default region is another parameter in the data connection, which is used for AWS S3-based connections. In case of self-managed S3 backends such as Minio or OpenShift Data Foundation, this parameter can be safely ignored.  Alternatively, when using an AWS bucket, you can skip the endpoint, as it is inferred by the region parameter.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>Let&#8217;s now set up data passing between the pipeline steps, in particular the model artifact and the dataset.</p>
-</div>
-<div class="paragraph">
-<p>Click on the <code>model_loading.py</code> node. If you&#8217;re still in the configuration menu, you should now see the <code>NODE PROPERTIES</code> tab. If not, right-click on the node and select <code>Open Properties</code>.</p>
-</div>
+</li>
+<li>
+<p>Next we will configure the data to be passed between the nodes. Click on the <code>model_loading.py</code> node. If you&#8217;re still in the configuration menu, you should now see the <code>NODE PROPERTIES</code> tab. If not, right-click on the node and select <code>Open Properties</code>.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-config-4.png" alt="pipeline config 4">
 </div>
 </div>
-<div class="paragraph">
-<p>You can now view and edit the node-specific settings for the selected node. Under <code>Runtime Image</code> and <code>Kubernetes Secret</code>, you can see that the global pipeline settings are used by default.</p>
-</div>
-<div class="paragraph">
+</li>
+<li>
+<p>Under <code>Runtime Image</code> and <code>Kubernetes Secret</code>, you can see that the global pipeline settings are used by default.</p>
+</li>
+<li>
 <p>In the <code>Outputs</code> section, you can declare one or more <em>output files</em>. These output files are created by this pipeline task and are made available to all subsequent tasks.</p>
+</li>
+<li>
+<p>Click <code>Add</code> in the <code>Output File</code> section and input <code>model.onnx</code>. This ensures that the downloaded model artifact is available to downstream tasks, including the <code>scoring.py</code> task.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/pipeline-config-5.png" alt="pipeline config 5">
+</div>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -630,20 +768,53 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="paragraph">
 <p>By default, all files within a containerized task are removed after its execution, so declaring files explicitly as output files is one way to ensure that they can be reused in downstream tasks.</p>
 </div>
+<div class="paragraph">
+<p>Output files are automatically managed by Data Science Pipelines, and stored in the S3 bucket we configured when setting up the DataSciencePipelineApplication.</p>
+</div>
 </td>
 </tr>
 </table>
 </div>
+</li>
+<li>
+<p>Next we will configure the <code>offline-scoring-data-volume</code> we previously setup to allow the steps to store additional data as a mounted volume.</p>
 <div class="paragraph">
-<p><code>Add</code> the file <code>model.onnx</code> as an output file. This ensures that the downloaded model artifact is available to the <code>scoring.py</code> task.</p>
+<p>In the <code>NODE PROPERTIES</code> section of the <code>data_ingrestion.py</code> node, click <code>Add</code> in the <code>Data Volumes</code> section.  Enter the following configuration options:</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p>Mount Path: <code>/data</code></p>
+</li>
+<li>
+<p>Persistent Volume Claim Name: <code>offline-scoring-data-volume</code></p>
 <div class="imageblock">
 <div class="content">
-<img src="_images/pipeline-config-5.png" alt="pipeline config 5">
+<img src="_images/pipeline-config-6.png" alt="pipeline config 6">
 </div>
 </div>
-<div class="paragraph">
-<p>Let&#8217;s now enable passing the dataset and results between the pipeline tasks. For this, open the node properties of the <code>data_ingestion.py</code> node. Instead of declaring the downloaded data file as an output file, we&#8217;ll pass it through a mounted volume.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Repeat the same <code>Data Volumes</code> configuration for the following tasks in the pipeline:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><code>preprocessing.py</code></p>
+</li>
+<li>
+<p><code>scoring.py</code></p>
+</li>
+<li>
+<p><code>results_upload.py</code></p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -653,31 +824,17 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Output files are uploaded by Elyra to the corresponding S3 bucket of the respective pipeline run. This is useful for tracking the intermediate results and artifacts produced within the pipeline.</p>
+<p><code>Mount Volumes</code> and <code>Output Files</code> both provide the ability for files to persist between tasks and each has different strengths and weaknesses.</p>
 </div>
 <div class="paragraph">
-<p>If a task generates a large number of volume of data that need to be passed, network traffic and storage capacity for the intermediate results may become an issue. In this case, it is recommended to pass the data through mounted volumes, which prevents sending these files to the S3 backend.</p>
+<p><code>Output Files</code> are generally easy to configure and don&#8217;t require the creation of any additional kubernetes resources.  One disadvantage is that Output files are that it can generate a large amount of additional read and writes to S3 which may slow down a pipelines execution.</p>
+</div>
+<div class="paragraph">
+<p><code>Mount Volumes</code> can be helpful when a large amount of files, or a large dataset is required to be stored.  <code>Mount Volumes</code> also have the ability to persist data between runs of a pipeline, which can allow a volume to act as a cache for files between executions.</p>
 </div>
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>Scroll down to <code>Data Volumes</code> and select <code>Add</code>.</p>
-</div>
-<div class="paragraph">
-<p>In the <code>Mount Path</code> field enter <code>/data</code>, which is where our pipeline tasks are storing and reading the data and results files.</p>
-</div>
-<div class="paragraph">
-<p>In the <code>Persistent Volume Claim Name</code> field enter <code>offline-scoring-data-volume</code>, which refers to the cluster storage that we created earlier for this pipeline.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-config-6.png" alt="pipeline config 6">
-</div>
-</div>
-<div class="paragraph">
-<p>Add this data volume entry to the nodes <code>preprocessing.py</code>, <code>scoring.py</code>, and <code>results_upload.py</code>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -693,13 +850,16 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>Finally, rename the pipeline file to <code>offline-scoring.pipeline</code> and hit <code>Save Pipeline</code> in the top toolbar.</p>
-</div>
+</li>
+<li>
+<p>Rename the pipeline file to <code>offline-scoring.pipeline</code> and hit <code>Save Pipeline</code> in the top toolbar.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-config-7.png" alt="pipeline config 7">
 </div>
+</div>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect3">
@@ -707,8 +867,26 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="paragraph">
 <p>We have now fully created and configured the pipeline, so let&#8217;s now see it in action!</p>
 </div>
-<div class="paragraph">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
 <p>In the visual editor, click on the Play icon (<code>Run Pipeline</code>). Leave the default values and hit <code>OK</code>.</p>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>"Data Science Pipelines" should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the DataSciencePipelinesApplication instance we created previously as the default execution environment provided the DataSciencePipelinesApplication was created before the Workbench was started and it is located in the same namespace as the Workbench.</p>
+</div>
+<div class="paragraph">
+<p>If you wish to use DataSciencePipelinesApplication that is located in a different namespace from your workbench you can manually configure an execution environment.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -748,41 +926,41 @@ Save your changes.</p>
 </tr>
 </table>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.</p>
-</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-submit.png" alt="pipeline submit">
 </div>
 </div>
-<div class="paragraph">
-<p>To monitor the pipeline&#8217;s execution, you can click on the <code>Run Details</code> link, which takes you to the pipeline run view within the RHOAI dashboard. Here you can track in real-time how each pipeline task is processed and whether it fails or resolves successfully.</p>
-</div>
+</li>
+<li>
+<p>To monitor the pipeline&#8217;s execution, click on the <code>Run Details</code> link, which takes you to the pipeline run view within the RHOAI dashboard. Here you can track in real-time how each pipeline task is processed and whether it fails or resolves successfully.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-run.png" alt="pipeline run">
 </div>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>To confirm that the pipeline has indeed produced fraud detection scoring results, view the content of the <code>fraud-detection</code> bucket. You should now see a new CSV file containing the predicted result of each transaction within the used dataset.</p>
-</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/fraud-detection-bucket-2.png" alt="fraud detection bucket 2">
 </div>
 </div>
-<div class="paragraph">
-<p>If you head back to the <code>Runs</code> overview in the RHOAI dashboard, you can see the history of all ongoing and previous pipeline executions and compare their run durations and status.</p>
-</div>
+</li>
+<li>
+<p>Navigate back to the <code>Runs</code> overview in the RHOAI dashboard, to see the history of all ongoing and previous pipeline executions and compare their run durations and status.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-runs.png" alt="pipeline runs">
 </div>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>In the <code>Scheduled</code> tab you&#8217;re able to schedule runs of the offline scoring pipeline according to a predefined schedule such as daily or according to a Cron statement.</p>
-</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-scheduled.png" alt="pipeline scheduled">
@@ -796,7 +974,7 @@ Save your changes.</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Pipeline versioning is not fully implemented yet.
+<p>Pipeline versioning is not fully implemented in Data Science Pipelines.
 If you change an Elyra pipeline that you have already submitted before, the initial version might get executed.</p>
 </div>
 <div class="paragraph">
@@ -816,15 +994,21 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </tr>
 </table>
 </div>
+</li>
+</ol>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_tracking_the_pipeline_artifacts"><a class="anchor" href="#_tracking_the_pipeline_artifacts"></a>Tracking the pipeline artifacts</h4>
 <div class="paragraph">
 <p>Let&#8217;s finally peek behind the scenes and inspect the S3 bucket that Elyra and Data Science Pipelines use to store the pipeline artifacts.</p>
 </div>
-<div class="paragraph">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
 <p>View the contents of the <code>fraud-detection-pipelines</code> bucket, which we referenced through the <code>pipelines</code> data connection. You can see three types of folders:</p>
-</div>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -838,6 +1022,8 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </li>
 </ul>
 </div>
+</div>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -846,11 +1032,17 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you need to troubleshoot a pipeline, the log files within the Elyra bucket are the best place to check any code-related issues. Other places are the Tekton run and pod events logs, which reveal integration or infrastructure-related problems.</p>
+<p>The logs from the Tekton Pipeline submitted from Elyra will show generic task information and logs, including showing the execution of our python files as a subtask.  Log details from our code is not recorded in the pipeline logs.</p>
+</div>
+<div class="paragraph">
+<p>To view logs from the execution of our code, you can find the log files from our tasks in the runs in the Data Science Pipelines bucket.</p>
 </div>
 </td>
 </tr>
 </table>
+</div>
+</li>
+</ol>
 </div>
 <div class="imageblock">
 <div class="content">
