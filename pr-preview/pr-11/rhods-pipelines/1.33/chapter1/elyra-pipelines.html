@@ -638,6 +638,8 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Next we will configure the data connection to the fraud-detection bucket as a <code>Kubernetes Secret</code>.  In the <code>PIPELINE PROPERTIES</code> section add four entries for the following parameters:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -651,10 +653,18 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p><code>AWS_S3_BUCKET</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p>Each parameter will include the following options:</p>
 </div>
-</li>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
 <li>
 <p><code>Environment Variable</code>: the parameter name</p>
 </li>
@@ -663,6 +673,11 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p><code>Secret Key</code>: the parameter name</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-config-3.png" alt="pipeline config 3">
@@ -695,9 +710,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </td>
 </tr>
 </table>
-</div>
-</li>
-</ul>
 </div>
 </li>
 <li>
