@@ -245,22 +245,12 @@
 </div>
 </div>
 </li>
-</ol>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_set_up_the_workbench"><a class="anchor" href="#_set_up_the_workbench"></a>Set up the workbench</h4>
-<div class="paragraph">
-<p>Now we will start a workbench.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
 <li>
 <p>In the pipelines-example data science project, create a new data connection with the following details:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Name: data-science-pipelines</p>
+<p>Name: fraud-detection</p>
 </li>
 <li>
 <p>Access key: minio</p>
@@ -277,8 +267,18 @@
 </ul>
 </div>
 </li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_set_up_the_workbench"><a class="anchor" href="#_set_up_the_workbench"></a>Set up the workbench</h4>
+<div class="paragraph">
+<p>Now we will start a workbench.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
-<p>Create a new data workbench and enter the following details:</p>
+<p>In the OpenShift AI dashboard, create a new data workbench and enter the following details:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -294,7 +294,7 @@
 <p>Create a new persistent storage with name <code>fraud-detection</code> and size 5 GB.</p>
 </li>
 <li>
-<p>Use a data connection and select te <code>fraud-detection</code> data connection</p>
+<p>Use a data connection and select the <code>fraud-detection</code> data connection</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-workbench.png" alt="create workbench">
@@ -308,6 +308,20 @@
 <p>Click <code>Create workbench</code>.  The workbench creation may take several minutes the first time it is started.</p>
 </li>
 </ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Many things can prevent a Workbench image from starting, including issues pulling images, mounting volumes, or being unable to schedule the pods due to lack of resources or LimitRequests being set on the namespace that are too small.  To help troubleshoot these types of issues it is often helpful to check the events on the Deployment and Pods created by the Notebook object.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -340,6 +354,9 @@
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>This volume will only be utilized in our pipeline, and will not be used in the interactive Workbench environment, so there is no need for this volume to be mounted in our Workbench.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -360,7 +377,7 @@
 </div>
 </li>
 <li>
-<p>Within the cloned repository, navigate to the <code>5.pipelines/elyra</code> folder. The folder contains all the code that is needed for running offline scoring with a given model. In particular, it contains the Python modules:</p>
+<p>Within the cloned repository, navigate to the <code>5.pipelines/elyra</code> folder. The folder contains all the code that is needed for running offline scoring with a given model. The example contains the following Python modules:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -377,12 +394,6 @@
 </li>
 <li>
 <p><code>results_upload.py</code> for uploading the classification results to an S3 bucket.</p>
-</li>
-</ul>
-</div>
-</li>
-</ol>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -397,8 +408,10 @@
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
+</ul>
+</div>
+</li>
 <li>
 <p>Explore these Python modules to get an understanding of the workflow. A few points of note:</p>
 <div class="paragraph">
@@ -499,12 +512,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="paragraph">
 <p>You should now see the two nodes connected through a solid line. We have now defined a simple pipeline with two tasks, which are executed sequentially, first data ingestion and then preprocessing.</p>
 </div>
-</li>
-</ol>
-</div>
-</li>
-</ul>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -519,8 +526,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
 <li>
 <p>Now add the <code>scoring.py</code> and <code>results_upload.py</code> modules to the pipeline and connect them to form a straight 4-step pipeline.</p>
 <div class="imageblock">
@@ -539,6 +545,9 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </div>
 </li>
 </ol>
+</div>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>We have now created the final graph representation of the offline scoring pipeline using the five available modules. With this we have fully defined the full pipeline code and its order of execution.</p>
@@ -595,12 +604,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <ol class="arabic">
 <li>
 <p>Click <code>Save &amp; Close</code></p>
-</li>
-</ol>
-</div>
-</li>
-</ul>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -615,8 +618,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
 <li>
 <p>Next we will configure this runtime image to be used by our pipeline. Open the pipeline settings in the Elyra pipeline editor via <code>Open Panel</code> in the top right corner of the editor.</p>
 <div class="imageblock">
@@ -633,8 +635,10 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Next we will configure the data connection to the fraud-detection bucket as a <code>Kubernetes Secret</code>.  In the <code>PIPELINE PROPERTIES</code> section add four entries for the following parameters:</p>
-<div class="ulist">
-<ul>
+</li>
+</ol>
+</div>
+</li>
 <li>
 <p><code>AWS_ACCESS_KEY_ID</code></p>
 </li>
@@ -662,12 +666,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="content">
 <img src="_images/pipeline-config-3.png" alt="pipeline config 3">
 </div>
-</div>
-</li>
-</ul>
-</div>
-</li>
-</ol>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -697,9 +695,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>For simplicity, we have just defined a single runtime image and set of environment variables that are reused in each pipeline task. To optimize pipeline task behavior and control access to credentials, we recommend configuring these settings on a node basis.</p>
-</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -723,9 +718,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <img src="_images/pipeline-config-5.png" alt="pipeline config 5">
 </div>
 </div>
-</li>
-</ol>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -743,15 +735,16 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
 <li>
 <p>Next we will configure the <code>offline-scoring-data-volume</code> we previously setup to allow the steps to store additional data as a mounted volume.</p>
 <div class="paragraph">
 <p>In the <code>NODE PROPERTIES</code> section of the <code>data_ingrestion.py</code> node, click <code>Add</code> in the <code>Data Volumes</code> section.  Enter the following configuration options:</p>
 </div>
-<div class="ulist">
-<ul>
+</li>
+</ol>
+</div>
+</li>
 <li>
 <p>Mount Path: <code>/data</code></p>
 </li>
@@ -762,14 +755,14 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <img src="_images/pipeline-config-6.png" alt="pipeline config 6">
 </div>
 </div>
-</li>
-</ul>
-</div>
-</li>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p>Repeat the same <code>Data Volumes</code> configuration for the following tasks in the pipeline:</p>
-<div class="ulist">
-<ul>
+</li>
+</ol>
+</div>
+</li>
 <li>
 <p><code>preprocessing.py</code></p>
 </li>
@@ -778,12 +771,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p><code>results_upload.py</code></p>
-</li>
-</ul>
-</div>
-</li>
-</ol>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -830,6 +817,9 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 </ol>
 </div>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_running_the_pipeline"><a class="anchor" href="#_running_the_pipeline"></a>Running the pipeline</h4>
@@ -840,9 +830,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <ol class="arabic">
 <li>
 <p>In the visual editor, click on the Play icon (<code>Run Pipeline</code>). Leave the default values and hit <code>OK</code>.</p>
-</li>
-</ol>
-</div>
 <div class="admonitionblock tip">
 <table>
 <tr>
@@ -898,8 +885,7 @@ Save your changes.</p>
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
 <li>
 <p>Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.</p>
 <div class="imageblock">
@@ -939,9 +925,6 @@ Save your changes.</p>
 <img src="_images/pipeline-scheduled.png" alt="pipeline scheduled">
 </div>
 </div>
-</li>
-</ol>
-</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -970,6 +953,9 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </tr>
 </table>
 </div>
+</li>
+</ol>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_tracking_the_pipeline_artifacts"><a class="anchor" href="#_tracking_the_pipeline_artifacts"></a>Tracking the pipeline artifacts</h4>
@@ -990,12 +976,6 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </li>
 <li>
 <p>One folder for each pipeline run with name <code>[pipeline-name]-[timestamp]</code>. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.</p>
-</li>
-</ul>
-</div>
-</li>
-</ol>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -1012,6 +992,12 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </td>
 </tr>
 </table>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ol>
 </div>
 <div class="imageblock">
 <div class="content">
