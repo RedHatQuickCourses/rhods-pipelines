@@ -108,6 +108,8 @@ While the workbench is starting, we will create a persistent volume that the pip
 +
 image::pipeline-storage.png[]
 
+This volume will only be utilized in our pipeline, and will not be used in the interactive Workbench environment, so there is no need for this volume to be mounted in our Workbench.
+
 === Working with Elyra
 
 ==== Exploring the Code
