@@ -90,6 +90,11 @@ image::create-workbench.png[]
 
 . Click `Create workbench`.  The workbench creation may take several minutes the first time it is started.
 
+[TIP]
+====
+Many things can prevent a Workbench image from starting, including issues pulling images, mounting volumes, or being unable to schedule the pods due to lack of resources or LimitRequests being set on the namespace that are too small.  To help troubleshoot these types of issues it is often helpful to check the events on the Deployment and Pods created by the Notebook object.
+====
+
 ==== Set up pipeline storage
 
 While the workbench is starting, we will create a persistent volume that the pipeline will use to persist and exchange data across tasks.
