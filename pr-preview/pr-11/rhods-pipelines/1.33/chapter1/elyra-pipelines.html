@@ -175,10 +175,9 @@
 <p>In the OpenShift AI Dashboard, under <code>Settings</code> select <code>Notebook images</code>.</p>
 </li>
 <li>
-<p>Select <code>Import new image</code>.</p>
-<div class="paragraph">
-<p>Enter the following details:</p>
-</div>
+<p>Select <code>Import new image</code> and enter the following details:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -189,13 +188,15 @@
 </li>
 <li>
 <p>Optionally a description.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/import-workbench-image.png" alt="import workbench image">
 </div>
-</div>
-</li>
-</ul>
 </div>
 </li>
 <li>
@@ -226,6 +227,8 @@
 </li>
 <li>
 <p>Download the following files from the <a href="https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection">model artifact repository</a>:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -235,6 +238,8 @@
 <p>live-data.csv</p>
 </li>
 </ul>
+</div>
+</div>
 </div>
 </li>
 <li>
@@ -247,6 +252,8 @@
 </li>
 <li>
 <p>In the pipelines-example data science project within the OpenShift AI Dashboard, create a new data connection with the following details:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -266,6 +273,8 @@
 </li>
 </ul>
 </div>
+</div>
+</div>
 </li>
 </ol>
 </div>
@@ -279,6 +288,8 @@
 <ol class="arabic">
 <li>
 <p>In the OpenShift AI dashboard, create a new data workbench and enter the following details:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -291,17 +302,19 @@
 <p>Container size: <code>Small</code></p>
 </li>
 <li>
-<p>Create a new persistent storage with name <code>fraud-detection</code> and size 5 GB.</p>
+<p>Create a new persistent storage with name <code>fraud-detection</code> and size 5 GB</p>
 </li>
 <li>
 <p>Use a data connection and select the <code>fraud-detection</code> data connection</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-workbench.png" alt="create workbench">
 </div>
-</div>
-</li>
-</ul>
 </div>
 </li>
 <li>
@@ -333,6 +346,8 @@
 <ol class="arabic">
 <li>
 <p>Select <code>Add cluster storage</code> and enter the following details:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -342,6 +357,8 @@
 <p>Persistent storage size: 5 GB</p>
 </li>
 </ul>
+</div>
+</div>
 </div>
 </li>
 <li>
@@ -378,6 +395,8 @@
 </li>
 <li>
 <p>Within the cloned repository, navigate to the <code>5.pipelines/elyra</code> folder. The folder contains all the code that is needed for running offline scoring with a given model. The example contains the following Python modules:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -394,6 +413,11 @@
 </li>
 <li>
 <p><code>results_upload.py</code> for uploading the classification results to an S3 bucket.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -407,9 +431,6 @@
 </td>
 </tr>
 </table>
-</div>
-</li>
-</ul>
 </div>
 </li>
 <li>
@@ -589,6 +610,8 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Fill out the required values:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -596,13 +619,15 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>image name: <code>quay.io/mmurakam/runtimes:fraud-detection-v0.2.0</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/runtime-image-2.png" alt="runtime image 2">
 </div>
-</div>
-</li>
-</ul>
 </div>
 </li>
 <li>
@@ -774,6 +799,8 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Repeat the same <code>Data Volumes</code> configuration for the following tasks in the pipeline:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -784,6 +811,11 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p><code>results_upload.py</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -817,9 +849,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </td>
 </tr>
 </table>
-</div>
-</li>
-</ul>
 </div>
 </li>
 <li>
@@ -978,6 +1007,8 @@ If you change an Elyra pipeline that you have already submitted before, the init
 <ol class="arabic">
 <li>
 <p>View the contents of the <code>fraud-detection-pipelines</code> bucket, which we referenced through the <code>pipelines</code> data connection. You can see three types of folders:</p>
+<div class="openblock">
+<div class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -988,6 +1019,11 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </li>
 <li>
 <p>One folder for each pipeline run with name <code>[pipeline-name]-[timestamp]</code>. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -1004,9 +1040,6 @@ If you change an Elyra pipeline that you have already submitted before, the init
 </td>
 </tr>
 </table>
-</div>
-</li>
-</ul>
 </div>
 </li>
 </ol>
