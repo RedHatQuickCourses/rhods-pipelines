@@ -66,25 +66,25 @@ Next we will create an additional bucket to host several files we will access fo
 +
 image::fraud-detection-bucket.png[]
 
-==== Set up the workbench
-
-Now we will start a workbench.
-
 . In the pipelines-example data science project, create a new data connection with the following details:
 +
-* Name: data-science-pipelines
+* Name: fraud-detection
 * Access key: minio
 * Secret key: minio123
 * Endpoint: http://minio-service.pipelines-example.svc:9000
 * Bucket: fraud-detection
 
-. Create a new data workbench and enter the following details:
+==== Set up the workbench
+
+Now we will start a workbench.
+
+. In the OpenShift AI dashboard, create a new data workbench and enter the following details:
 +
 * Name: `fraud-detection-workbench`
 * Notebook image: `Fraud detection workbench`
 * Container size: `Small`
 * Create a new persistent storage with name `fraud-detection` and size 5 GB.
-* Use a data connection and select te `fraud-detection` data connection
+* Use a data connection and select the `fraud-detection` data connection
 +
 image::create-workbench.png[]
 
