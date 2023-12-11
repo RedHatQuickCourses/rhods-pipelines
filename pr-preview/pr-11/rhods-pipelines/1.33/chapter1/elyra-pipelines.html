@@ -571,6 +571,12 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Optionally, configure the available compute resources per step</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Test</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -586,10 +592,8 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Fill out the required values:</p>
-</li>
-</ol>
-</div>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p>display name: <code>fraud detection runtime</code></p>
 </li>
@@ -600,8 +604,10 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <img src="_images/runtime-image-2.png" alt="runtime image 2">
 </div>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
+</ul>
+</div>
+</li>
 <li>
 <p>Click <code>Save &amp; Close</code></p>
 <div class="admonitionblock note">
@@ -635,10 +641,8 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </li>
 <li>
 <p>Next we will configure the data connection to the fraud-detection bucket as a <code>Kubernetes Secret</code>.  In the <code>PIPELINE PROPERTIES</code> section add four entries for the following parameters:</p>
-</li>
-</ol>
-</div>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p><code>AWS_ACCESS_KEY_ID</code></p>
 </li>
@@ -695,8 +699,10 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
+</ul>
+</div>
+</li>
 <li>
 <p>Next we will configure the data to be passed between the nodes. Click on the <code>model_loading.py</code> node. If you&#8217;re still in the configuration menu, you should now see the <code>NODE PROPERTIES</code> tab. If not, right-click on the node and select <code>Open Properties</code>.</p>
 <div class="imageblock">
@@ -741,10 +747,8 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="paragraph">
 <p>In the <code>NODE PROPERTIES</code> section of the <code>data_ingrestion.py</code> node, click <code>Add</code> in the <code>Data Volumes</code> section.  Enter the following configuration options:</p>
 </div>
-</li>
-</ol>
-</div>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p>Mount Path: <code>/data</code></p>
 </li>
@@ -755,14 +759,14 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <img src="_images/pipeline-config-6.png" alt="pipeline config 6">
 </div>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Repeat the same <code>Data Volumes</code> configuration for the following tasks in the pipeline:</p>
 </li>
-</ol>
+</ul>
 </div>
 </li>
+<li>
+<p>Repeat the same <code>Data Volumes</code> configuration for the following tasks in the pipeline:</p>
+<div class="ulist">
+<ul>
 <li>
 <p><code>preprocessing.py</code></p>
 </li>
@@ -805,8 +809,10 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
+</ul>
+</div>
+</li>
 <li>
 <p>Rename the pipeline file to <code>offline-scoring.pipeline</code> and hit <code>Save Pipeline</code> in the top toolbar.</p>
 <div class="imageblock">
@@ -816,9 +822,6 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </div>
 </li>
 </ol>
-</div>
-</li>
-</ul>
 </div>
 </div>
 <div class="sect3">
