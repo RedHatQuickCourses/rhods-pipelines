@@ -249,16 +249,20 @@ image::pipeline-config-1.png[]
 
 . Next we will configure the data connection to the fraud-detection bucket as a `Kubernetes Secret`.  In the `PIPELINE PROPERTIES` section add four entries for the following parameters:
 +
+--
 * `AWS_ACCESS_KEY_ID`
 * `AWS_SECRET_ACCESS_KEY`
 * `AWS_S3_ENDPOINT`
 * `AWS_S3_BUCKET`
+--
 + 
 Each parameter will include the following options:
 +
+--
 * `Environment Variable`: the parameter name
 * `Secret Name`: `aws-connection-fraud-detection` (the name of the Kubernetes secret belonging to the data connection)
 * `Secret Key`: the parameter name
+--
 +
 image::pipeline-config-3.png[]
 +
