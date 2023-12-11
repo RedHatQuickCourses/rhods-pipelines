@@ -169,7 +169,7 @@ Let's now use Elyra to package the code into a pipeline and submit it to the Dat
 * Keep track of the pipeline execution along with the previous executions,
 * Be able to control resource usage of individual pipeline tasks in a fine-grained manner.
 
-
+//-
 . Within the workbench, open the launcher by clicking on the blue plus button in the top left hand corner.
 +
 image::launcher.png[]
@@ -215,6 +215,7 @@ Before we can submit our pipeline, we have to configure the pipeline to specify:
 * Configure how data is passed between the steps
 * Configure the S3 credentials as environment variables during runtime
 * Optionally, configure the available compute resources per step
+//-
 
 . To begin, we will configure a new Runtime Image by opening th `Runtime Images` menu from the left toolbar.
 
