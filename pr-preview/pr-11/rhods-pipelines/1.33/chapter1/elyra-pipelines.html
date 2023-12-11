@@ -476,7 +476,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Within the workbench, open the launcher by clicking on the blue plus button.</p>
+<p>Within the workbench, open the launcher by clicking on the blue plus button in the top left hand corner.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/launcher.png" alt="launcher">
@@ -503,7 +503,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')</code></pre>
 </div>
 </li>
 <li>
-<p>We have now defined two tasks of the pipeline, but the order of processing is not defined yet. To instruct Elyra to start with data ingestion and perform preprocessing only after data ingestion has finished, connect the <code>Output Port</code> (right black dot of the task icon) of the <code>data_ingestion</code> task with the <code>Input Port</code> (left black dot of the task icon) of the <code>preprocessing</code> task by drawing a line between these ports (click, hold &amp; draw, release).</p>
+<p>Connect the <code>Output Port</code> (right black dot of the task icon) of the <code>data_ingestion</code> task with the <code>Input Port</code> (left black dot of the task icon) of the <code>preprocessing</code> task by drawing a line between these ports (click, hold &amp; draw, release).</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-3.png" alt="pipeline 3">
