@@ -57,11 +57,11 @@ Next we will create an additional bucket to host several files we will access fo
 
 . From the bucket section, create a new S3 bucket named `fraud-detection` in Minio.
 
-. Download the following files from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1/models/fraud-detection[model artifact repository]:
+. Download the following files from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1[model artifact repository]:
 +
 --
-* model-latest.onnx
-* live-data.csv
+* https://github.com/mamurak/os-mlops-artefacts/blob/fraud-detection-model-v0.1/models/fraud-detection/model-latest.onnx[model-latest.onnx]
+* https://github.com/mamurak/os-mlops-artefacts/blob/fraud-detection-model-v0.1/data/fraud-detection/live-data.csv[live-data.csv]
 --
 
 . Upload the files to th `fraud-detection` bucket
