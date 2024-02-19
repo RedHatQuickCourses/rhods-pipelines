@@ -82,6 +82,20 @@ image::fraud-detection-bucket.png[]
 
 Now we will start a workbench.
 
+. Before starting a workbench, you need to set an environment variable in the Data Science Project to prevent SSL certificate verification errors. Add a new environment variable and set it's value as follows:
++
+```bash
+PIPELINES_SSL_SA_CERTS=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
+```
++
+Consult the blog article at https://www.goglides.dev/bkpandey/certificateverifyfaile-during-pipeline-run-g8i for more details.
++
+If you fail to set this environment variable correctly, you will see an error when you run the pipeline:
++
+```bash
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain...
+```
+
 . In the OpenShift AI dashboard, create a new data workbench and enter the following details:
 +
 --
