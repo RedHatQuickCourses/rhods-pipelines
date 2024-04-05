@@ -82,7 +82,7 @@ image::fraud-detection-bucket.png[]
 
 Now we will start a workbench.
 
-. Before starting a workbench, you need to set an environment variable in the Data Science Project to prevent SSL certificate verification errors. Add a new environment variable and set it's value as follows:
+. Before starting a workbench, you need to set an environment variable in the Data Science Project to prevent SSL certificate verification errors. Add a new environment variable and set its value as follows:
 +
 ```bash
 PIPELINES_SSL_SA_CERTS=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
