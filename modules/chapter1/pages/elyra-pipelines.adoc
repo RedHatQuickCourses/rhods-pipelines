@@ -348,13 +348,13 @@ image::pipeline-config-7.png[]
 
 We have now fully created and configured the pipeline, so let's now see it in action!
 
-. In the visual editor, click on the Play icon (`Run Pipeline`). Leave the default values and hit `OK`.
+. In the visual editor, click on the *Play* icon (`Run Pipeline`). Leave the default values and hit `OK`.
 +
 [TIP]
 ====
-"Data Science Pipelines" should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the DataSciencePipelinesApplication instance we created previously as the default execution environment provided the DataSciencePipelinesApplication was created before the Workbench was started and it is located in the same namespace as the Workbench.
+*Data Science Pipelines* should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the *DataSciencePipelinesApplication* instance we created previously as the default execution environment provided the *DataSciencePipelinesApplication* was created before the workbench was started and it is located in the same namespace as the workbench.
 
-If you wish to use DataSciencePipelinesApplication that is located in a different namespace from your workbench you can manually configure an execution environment.
+If you wish to use *DataSciencePipelinesApplication* that is located in a different namespace from your workbench you can manually configure an execution environment.
 ====
 +
 [WARNING]
@@ -368,11 +368,11 @@ To solve this problem:
 For example, add a new dummy environment variable, or delete an existing unnecessary environment variable.
 Save your changes.
 3. Restart the notebook.
-4. In the left sidebar of JupyterLab, click Runtimes.
-5. Confirm that the default Data Science Pipelines runtime is selected.
+4. In the left sidebar of JupyterLab, click `Runtimes`.
+5. Confirm that the default *Data Science Pipelines* runtime is selected.
 ====
 
-. Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.
+. Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few seconds, you should see confirmation that the pipeline has been successfully submitted.
 +
 image::pipeline-submit.png[]
 
@@ -384,7 +384,7 @@ image::pipeline-run.png[]
 +
 image::fraud-detection-bucket-2.png[]
 
-. Navigate back to the `Runs` overview in the RHOAI dashboard, to see the history of all ongoing and previous pipeline executions and compare their run durations and status.
+. Navigate back to the `Runs` overview in the RHOAI dashboard. Click the `Triggered` tab to see the history of all ongoing and previous pipeline executions and compare their run durations and status.
 +
 image::pipeline-runs.png[]
 
@@ -407,7 +407,7 @@ To ensure that your latest changes are executed, you have two options:
 
 Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Data Science Pipelines use to store the pipeline artifacts.
 
-. View the contents of the `fraud-detection-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
+. View the contents of the `data-science-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
 +
 --
 * `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
@@ -422,8 +422,8 @@ The logs from the Tekton Pipeline submitted from Elyra will show generic task in
 To view logs from the execution of our code, you can find the log files from our tasks in the runs in the Data Science Pipelines bucket.
 ====
 
-image::pipelines-bucket.png[]
+image::pipelines-bucket.png[title=Data Science Pipeline Bucket contents]
 
-image::pipeline-artifacts.png[]
+image::pipeline-artifacts.png[title=Data Science Pipeline Run Artifacts]
 
 Now that we have seen how to work with Data Science Pipelines through Elyra, let's take a closer look at the Kubeflow Pipelines SDK.
