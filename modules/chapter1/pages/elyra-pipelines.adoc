@@ -1,6 +1,6 @@
 = Elyra Pipelines
 
-Elyra provides a visual pipeline editor for building pipelines from Python and R scripts as well as Jupyter notebooks, simplifying the conversion of multiple files into batch jobs or workflows. A pipeline in Elyra consists of nodes that are connected with each other to define execution dependencies.
+Elyra provides a visual pipeline editor for building pipelines from Python and R scripts as well as Jupyter notebooks, simplifying the conversion of multiple files into batch jobs or workflows. A `Pipeline` in Elyra consists of `Nodes` that are connected with each other to define execution dependencies.
 
 Elyra's visual pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Tekton YAML definition on the fly and submitting it to the Data Science Pipelines backend.
 
@@ -20,11 +20,11 @@ In order to create Elyra pipelines with the visual pipeline editor:
 
 A runtime configuration provides Elyra access to the Data Science Pipelines backend for scalable pipeline execution. You can manage runtime configurations using the JupyterLab UI or the Elyra CLI. The runtime configuration is included and is pre-configured for submitting pipelines to Data Science Pipelines. Refer to the https://elyra.readthedocs.io/en/latest/user_guide/runtime-conf.html#kubeflow-pipelines-configuration-settings[Elyra documentation] for more information about Elyra and the available runtime configuration options.
 
-== Exercise: offline scoring for fraud detection
+== Exercise: Offline scoring for fraud detection
 
 === Setup
 
-For this exercise we will be utilizing the DataSciencePipelineApplication created in the previous section.  In addition to that pipeline instance, we will need to import a custom workbench image, and create an additional bucket in S3 to store some items we will need to train the model.
+For this exercise we will be utilizing the *DataSciencePipelineApplication* created in the previous section.  In addition to that pipeline instance, we will need to import a custom workbench image, and create an additional bucket in S3 to store some items we will need to train the model.
 
 ==== Import the custom workbench image
 
@@ -35,16 +35,16 @@ To begin, we will add a new image that has all of the packages we need for our w
 . Select `Import new image` and enter the following details:
 +
 --
-* Repository: `quay.io/mmurakam/workbenches:fraud-detection-v1.0.1`
-* Name: `Fraud detection workbench`
+* *Image location*: `quay.io/mmurakam/workbenches:fraud-detection-v1.0.1`
+* *Name*: `Fraud detection workbench`
 * Optionally a description.
 --
 +
-image::import-workbench-image.png[]
+image::import-workbench-image.png[title=Import a custom notebook image]
 
-. Hit `Import`.
+. Click `Import` to import the notebook image.
 
-[Note]
+[NOTE]
 ====
 The process of managing model images requires admin access to OpenShift AI.  An admin user would normally be responsible for creating and managing custom images for data scientists to utilize.
 ====
@@ -53,92 +53,82 @@ The process of managing model images requires admin access to OpenShift AI.  An 
 
 Next we will create an additional bucket to host several files we will access for model training.
 
-. Log into the Minio console.
+. Log into the Minio web console.
 
-. From the bucket section, create a new S3 bucket named `fraud-detection` in Minio.
+. Click `Administrator > Buckets` in the left navigation sidebar, and then click `Create Bucket` in the `Buckets` page to create a new bucket named `fraud-detection`.
 
-. Download the following files from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1[model artifact repository]:
+. Download the following two files from the https://github.com/mamurak/os-mlops-artefacts/tree/fraud-detection-model-v0.1[model artifact repository]:
 +
 --
 * https://github.com/mamurak/os-mlops-artefacts/blob/fraud-detection-model-v0.1/models/fraud-detection/model-latest.onnx[model-latest.onnx]
 * https://github.com/mamurak/os-mlops-artefacts/blob/fraud-detection-model-v0.1/data/fraud-detection/live-data.csv[live-data.csv]
 --
 
-. Upload the files to th `fraud-detection` bucket
+. Click `User > Object Browser` in the Minio web console sidebar. Upload the two files to the `fraud-detection` bucket.
 +
 image::fraud-detection-bucket.png[]
 
-. In the pipelines-example data science project within the OpenShift AI Dashboard, create a new data connection with the following details:
+. In the `pipelines-example` data science project within the OpenShift AI Dashboard, create a new data connection with the following details:
 +
 --
-* Name: fraud-detection
-* Access key: minio
-* Secret key: minio123
-* Endpoint: http://minio-service.pipelines-example.svc:9000
-* Bucket: fraud-detection
+* *Name*: `fraud-detection`
+* *Access key*: `minio`
+* *Secret key*: `minio123`
+* *Endpoint*: `http://minio-service.pipelines-example.svc:9000`
+* *Bucket*: `fraud-detection`
 --
+
+. Click `Add data connection` to create the data connection.
 
 ==== Set up the workbench
 
 Now we will start a workbench.
 
-. Before starting a workbench, you need to set an environment variable in the Data Science Project to prevent SSL certificate verification errors. Add a new environment variable and set its value as follows:
-+
-```bash
-PIPELINES_SSL_SA_CERTS=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
-```
-+
-Consult the blog article at https://www.goglides.dev/bkpandey/certificateverifyfaile-during-pipeline-run-g8i for more details.
-+
-If you fail to set this environment variable correctly, you will see an error when you run the pipeline:
-+
-```bash
-ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain...
-```
-
-. In the OpenShift AI dashboard, create a new data workbench and enter the following details:
+. In the OpenShift AI dashboard for the `pipelines-example` project, create a new workbench and enter the following details:
 +
 --
-* Name: `fraud-detection-workbench`
-* Notebook image: `Fraud detection workbench`
-* Container size: `Small`
-* Create a new persistent storage with name `fraud-detection` and size 5 GB
-* Use a data connection and select the `fraud-detection` data connection
+* *Name*: `fraud-detection-workbench`
+* *Image selection*: Select `Fraud detection workbench` from the drop-down
+* *Container size*: `Small`
+* *Persistent storage size*: Create a new persistent storage with name `fraud-detection` and size *5 GB*
+* Select `Use existing data connection` in the `Data Connections` section, and select the `fraud-detection` data connection
 --
 +
-image::create-workbench.png[]
+image::create-workbench.png[title=Create a new workbench]
 
 . Click `Create workbench`.  The workbench creation may take several minutes the first time it is started.
 
 [TIP]
 ====
-Many things can prevent a Workbench image from starting, including issues pulling images, mounting volumes, or being unable to schedule the pods due to lack of resources or LimitRequests being set on the namespace that are too small.  To help troubleshoot these types of issues it is often helpful to check the events on the Deployment and Pods created by the Notebook object.
+Many things can prevent a Workbench image from starting, including issues pulling images, mounting volumes, or being unable to schedule the pods due to lack of resources or `LimitRequests` being set on the namespace that are too small.  To help troubleshoot these types of issues it is often helpful to check the events on the `Deployment` and `Pods` created by the Notebook object.
 ====
 
 ==== Set up pipeline storage
 
 While the workbench is starting, we will create a persistent volume that the pipeline will use to persist and exchange data across tasks.
 
-. Select `Add cluster storage` and enter the following details:
+. In the `pipelines-example` project, click `Add cluster storage` and enter the following details:
 +
 --
-* Name: `offline-scoring-data-volume`
-* Persistent storage size: 5 GB
+* *Name*: `offline-scoring-data-volume`
+* *Persistent storage size*: 5 GB
 --
 
 . Click `Add storage`
 +
 image::pipeline-storage.png[]
-
-This volume will only be utilized in our pipeline, and will not be used in the interactive Workbench environment, so there is no need for this volume to be mounted in our Workbench.
++
+NOTE: This volume will only be utilized in our pipeline, and will not be used in the interactive workbench environment, so there is no need for this volume to be mounted in our workbench.
 
 === Working with Elyra
 
 ==== Exploring the Code
 
-Once the workbench has successfully started, we will being the process of exploring and building our pipeline.
+Once the `fraud-detection-workbench` has successfully started, we will being the process of exploring and building our pipeline.
 
-. Clone the course git repository:
+. Ensure that the `fraud-detection-workbench` is in `Running` state. Click the `Open` link next to the `fraud-detection-workbench`. Log in to the workbench as the `admin` user. If you are running the workbench for the first time, click `Allow selected permissions` in the `Authorize Access` page to open the Jupyter Notebook interface.
+
+. Clone the course git repository in the Jupyter notebook:
 +
 ```
 https://github.com/RedHatQuickCourses/rhods-qc-apps.git
@@ -161,9 +151,9 @@ In Elyra, each pipeline step is implemented by a separate file such as Python mo
 
 . Explore these Python modules to get an understanding of the workflow. A few points of note:
 +
-Three tasks (data ingestion, model loading, results upload) access the S3 backend. Instead of hardcoding the connection parameters into the pipeline code, these parameters are instead read from the environment at runtime:
+Three tasks (`data ingestion, model loading, results upload`) access the S3 backend. Instead of hardcoding the connection parameters into the pipeline code, these parameters are instead read from the environment at runtime:
 +
-```
+```python
 s3_endpoint_url = environ.get('AWS_S3_ENDPOINT')
 s3_access_key = environ.get('AWS_ACCESS_KEY_ID')
 s3_secret_key = environ.get('AWS_SECRET_ACCESS_KEY')
@@ -172,7 +162,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')
 +
 This approach is in line with best practices of handling credentials and allows us to control which S3 buckets are consumed in a given runtime context without changing the code. Importantly, these parameters are stored in a data connection, which is mounted into workbenches and pipeline pods to expose their values to the pipeline tasks.
 +
-Three tasks (preprocessing, scoring, results upload) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artifact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
+Three tasks (`preprocessing, scoring, results upload`) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artifact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
 
 ==== Running the Code Interactively
 
@@ -193,19 +183,17 @@ Let's now use Elyra to package the code into a pipeline and submit it to the Dat
 * Keep track of the pipeline execution along with the previous executions,
 * Be able to control resource usage of individual pipeline tasks in a fine-grained manner.
 
-//-
-
-. Within the workbench, open the launcher by clicking on the blue plus button in the top left hand corner.
+. Within the workbench, open the `Launcher` by clicking on the *blue plus button* in the top left hand corner.
 +
 image::launcher.png[]
 
-. Click on the `Pipeline Editor` tile in the launcher menu. This opens up Elyra's visual pipeline editor. Use the visual pipeline editor to drag-and-drop files from the file browser onto the canvas area. These files then define the individual tasks of your pipeline.
+. Click on the `Pipeline Editor` tile in the launcher menu. This opens up Elyra's visual pipeline editor. You will use the visual pipeline editor to drag-and-drop files from the file browser onto the canvas area. These files then define the individual tasks of your pipeline.
 
 . Drag the `data_ingestion.py` module onto the empty canvas.  This will allow the pipeline to ingest the data we want to classify.
 +
 image::pipeline-1.png[]
 
-. Next, drag the preprocessing.py` module onto the canvas, right next to the `data_ingestion.py` module.
+. Next, drag the `preprocessing.py` module onto the canvas, right next to the `data_ingestion.py` module.
 +
 image::pipeline-2.png[]
 
@@ -241,19 +229,15 @@ Before we can submit our pipeline, we have to configure the pipeline to specify:
 * Configure the S3 credentials as environment variables during runtime
 * Optionally, configure the available compute resources per step
 
-//-
-
-. To begin, we will configure a new Runtime Image by opening th `Runtime Images` menu from the left toolbar.
-
-. Select `Create new runtime image` via the plus sign in the top portion of the menu.
+. We will configure a new `Runtime Image` by opening th `Runtime Images` menu from the left toolbar. Select `Create new runtime image` via the plus sign in the top portion of the menu.
 +
-image::runtime-images.png[]
+image::runtime-images.png[title=Create a new Runtime image]
 
 . Fill out the required values:
 +
 --
-* display name: `fraud detection runtime`
-* image name: `quay.io/mmurakam/runtimes:fraud-detection-v0.2.0`
+* *Display Name*: `fraud detection runtime`
+* *Image Name*: `quay.io/mmurakam/runtimes:fraud-detection-v0.2.0`
 --
 +
 image::runtime-image-2.png[]
@@ -265,15 +249,17 @@ image::runtime-image-2.png[]
 For every custom workbench image, we recommend building a corresponding pipeline runtime image to ensure consistency between interactive and pipeline-based code execution.  Notebook images can be utilized as a pipeline execution environment, but they contain additional packages needed for the interactive development experience and are often larger than necessary for the pipeline execution.
 ====
 
-. Next we will configure this runtime image to be used by our pipeline. Open the pipeline settings in the Elyra pipeline editor via `Open Panel` in the top right corner of the editor.
+. Next we will configure this runtime image to be used by our pipeline. Open the pipeline settings in the Elyra pipeline editor via `Open Panel` in the top right corner of the editor. 
+
+.. Select the `PIPELINE PROPERTIES` tab of the settings menu. Configurations in this section apply defaults to all nodes in the pipeline.
+
+.. Scroll down to `Generic Node Defaults` and click on the drop down menu of `Runtime Image`. Select the `fraud detection runtime` that we previously defined.
 +
-image::pipeline-config-1.png[]
+image::pipeline-config-1.png[title=Set pipeline wide defaults]
++
+NOTE: Do not select any of the nodes in the canvas when you open the panel. You will see the `PIPELINE PROPERTIES` tab only when none of the nodes are selected. Click anywhere on the canvas and then open the panel.
 
-. Select the `PIPELINE PROPERTIES` tab of the settings menu. Configurations in this section apply defaults to all nodes in the pipeline.
-
-. Scroll down to `Generic Node Defaults` and click on the drop down menu of `Runtime Image`. Select the `fraud detection runtime` that we previously defined.
-
-. Next we will configure the data connection to the fraud-detection bucket as a `Kubernetes Secret`.  In the `PIPELINE PROPERTIES` section add four entries for the following parameters:
+. Next we will configure the data connection to the `fraud-detection` bucket as a Kubernetes secret.  In the `PIPELINE PROPERTIES` section, click `Add` beneath the `Kubernetes Secrets` section and add the following four entries:
 +
 --
 * `AWS_ACCESS_KEY_ID`
@@ -306,11 +292,11 @@ The AWS default region is another parameter in the data connection, which is use
 +
 image::pipeline-config-4.png[]
 
-. Under `Runtime Image` and `Kubernetes Secret`, you can see that the global pipeline settings are used by default.
+. Under `Runtime Image` and `Kubernetes Secrets`, you can see that the global pipeline settings are used by default.
 
 . In the `Outputs` section, you can declare one or more _output files_. These output files are created by this pipeline task and are made available to all subsequent tasks.
 
-. Click `Add` in the `Output File` section and input `model.onnx`. This ensures that the downloaded model artifact is available to downstream tasks, including the `scoring.py` task.
+. Click `Add` in the `Outputs` section and input `model.onnx`. This ensures that the downloaded model artifact is available to downstream tasks, including the `scoring.py` task.
 +
 image::pipeline-config-5.png[]
 +
@@ -318,16 +304,17 @@ image::pipeline-config-5.png[]
 ====
 By default, all files within a containerized task are removed after its execution, so declaring files explicitly as output files is one way to ensure that they can be reused in downstream tasks.
 
-Output files are automatically managed by Data Science Pipelines, and stored in the S3 bucket we configured when setting up the DataSciencePipelineApplication.
+Output files are automatically managed by Data Science Pipelines, and stored in the S3 bucket we configured when setting up the *DataSciencePipelineApplication*.
 ====
-
 
 . Next we will configure the `offline-scoring-data-volume` we previously setup to allow the steps to store additional data as a mounted volume.  
 +
-In the `NODE PROPERTIES` section of the `data_ingrestion.py` node, click `Add` in the `Data Volumes` section.  Enter the following configuration options:
+In the `NODE PROPERTIES` section of the `data_ingrestion.py` node, scroll to the bottom of the `NODE PROPERTIES` panel, and click `Add` in the `Data Volumes` section.  Enter the following configuration options:
 +
+--
 * Mount Path: `/data`
 * Persistent Volume Claim Name: `offline-scoring-data-volume`
+--
 +
 image::pipeline-config-6.png[]
 
@@ -341,16 +328,16 @@ image::pipeline-config-6.png[]
 +
 [NOTE]
 ====
-`Mount Volumes` and `Output Files` both provide the ability for files to persist between tasks and each has different strengths and weaknesses.
+`Mount Volumes` and `Output Files` both provide the ability for files to persist between tasks, and each has different strengths and weaknesses.
 
-`Output Files` are generally easy to configure and don't require the creation of any additional kubernetes resources.  One disadvantage is that Output files are that it can generate a large amount of additional read and writes to S3 which may slow down a pipelines execution.
+`Output Files` are generally easy to configure and don't require the creation of any additional kubernetes resources.  One disadvantage is that Output files can generate a large amount of additional read and writes to S3 which may slow down pipeline execution.
 
 `Mount Volumes` can be helpful when a large amount of files, or a large dataset is required to be stored.  `Mount Volumes` also have the ability to persist data between runs of a pipeline, which can allow a volume to act as a cache for files between executions.
 ====
 +
 [NOTE]
 ====
-We could have declared the data volume as a global pipeline property for simplicity. However, this would have prevented parallel execution of model loading and data ingestion/preprocessing since data volumes can only be used by single tasks by default.
+We could have declared the data volume as a global pipeline property for simplicity. However, this would have prevented parallel execution of model loading and data ingestion/preprocessing since data volumes can only be used by a single task by default.
 ====
 
 . Rename the pipeline file to `offline-scoring.pipeline` and hit `Save Pipeline` in the top toolbar.
@@ -361,13 +348,13 @@ image::pipeline-config-7.png[]
 
 We have now fully created and configured the pipeline, so let's now see it in action!
 
-. In the visual editor, click on the Play icon (`Run Pipeline`). Leave the default values and hit `OK`.
+. In the visual editor, click on the *Play* icon (`Run Pipeline`). Leave the default values and hit `OK`.
 +
 [TIP]
 ====
-"Data Science Pipelines" should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the DataSciencePipelinesApplication instance we created previously as the default execution environment provided the DataSciencePipelinesApplication was created before the Workbench was started and it is located in the same namespace as the Workbench.
+*Data Science Pipelines* should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the *DataSciencePipelinesApplication* instance we created previously as the default execution environment provided the *DataSciencePipelinesApplication* was created before the workbench was started and it is located in the same namespace as the workbench.
 
-If you wish to use DataSciencePipelinesApplication that is located in a different namespace from your workbench you can manually configure an execution environment.
+If you wish to use *DataSciencePipelinesApplication* that is located in a different namespace from your workbench you can manually configure an execution environment.
 ====
 +
 [WARNING]
@@ -381,11 +368,11 @@ To solve this problem:
 For example, add a new dummy environment variable, or delete an existing unnecessary environment variable.
 Save your changes.
 3. Restart the notebook.
-4. In the left sidebar of JupyterLab, click Runtimes.
-5. Confirm that the default Data Science Pipelines runtime is selected.
+4. In the left sidebar of JupyterLab, click `Runtimes`.
+5. Confirm that the default *Data Science Pipelines* runtime is selected.
 ====
 
-. Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few second you should see confirmation that the pipeline has been successfully submitted.
+. Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few seconds, you should see confirmation that the pipeline has been successfully submitted.
 +
 image::pipeline-submit.png[]
 
@@ -397,7 +384,7 @@ image::pipeline-run.png[]
 +
 image::fraud-detection-bucket-2.png[]
 
-. Navigate back to the `Runs` overview in the RHOAI dashboard, to see the history of all ongoing and previous pipeline executions and compare their run durations and status.
+. Navigate back to the `Runs` overview in the RHOAI dashboard. Click the `Triggered` tab to see the history of all ongoing and previous pipeline executions and compare their run durations and status.
 +
 image::pipeline-runs.png[]
 
@@ -420,7 +407,7 @@ To ensure that your latest changes are executed, you have two options:
 
 Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Data Science Pipelines use to store the pipeline artifacts.
 
-. View the contents of the `fraud-detection-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
+. View the contents of the `data-science-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
 +
 --
 * `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
@@ -435,8 +422,8 @@ The logs from the Tekton Pipeline submitted from Elyra will show generic task in
 To view logs from the execution of our code, you can find the log files from our tasks in the runs in the Data Science Pipelines bucket.
 ====
 
-image::pipelines-bucket.png[]
+image::pipelines-bucket.png[title=Data Science Pipeline Bucket contents]
 
-image::pipeline-artifacts.png[]
+image::pipeline-artifacts.png[title=Data Science Pipeline Run Artifacts]
 
 Now that we have seen how to work with Data Science Pipelines through Elyra, let's take a closer look at the Kubeflow Pipelines SDK.
