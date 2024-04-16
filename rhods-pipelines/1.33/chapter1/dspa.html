@@ -108,10 +108,10 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Data Science Pipelines require a namespace scoped instance of the DataSciencePipelineApplication (DSPA) custom resource to enable the ability to utilize Data Science Pipelines.</p>
+<p>Data Science Pipelines require a namespace scoped instance of the <strong>DataSciencePipelineApplication (DSPA)</strong> custom resource to enable the ability to utilize Data Science Pipelines.</p>
 </div>
 <div class="paragraph">
-<p>The DataSciencePipelineApplication custom resource creates several pods that are necessary to utilize the tools.  This includes the creation of an API endpoint and a database where metadata is stored.  The API endpoint is used by the OpenShift AI Dashboard, as well as tools like Elyra and the kfp package to manage and execute pipelines.</p>
+<p>The <strong>DataSciencePipelineApplication</strong> custom resource creates several pods that are necessary to utilize the tools.  This includes the creation of an API endpoint and a database where metadata is stored.  The API endpoint is used by the OpenShift AI Dashboard, as well as tools like <strong>Elyra</strong> and the <strong>kfp</strong> package to manage and execute pipelines.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -127,7 +127,7 @@
 <p>A Data Science Pipeline Server container.</p>
 </li>
 <li>
-<p>A MariaDB for storing pipeline definitions and results.</p>
+<p>A MariaDB database for storing pipeline definitions and results.</p>
 </li>
 <li>
 <p>A Pipeline scheduler for scheduling pipeline runs.</p>
@@ -138,7 +138,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>Additionally, the DataSciencePipelineApplication requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.</p>
+<p>Additionally, the <strong>DataSciencePipelineApplication</strong> requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -163,10 +163,10 @@
 <p>As previously mentioned, Data Science Pipelines is designed to be a secure multi-tenant solution.  This means that multiple users and teams can all securely use their own instances of Data Science Pipelines without fear of leaking data from the pipelines to other users or groups.</p>
 </div>
 <div class="paragraph">
-<p>This multi-tenancy capability does require that each user or group needs their own instance of the DataSciencePipelineApplication instance.  Additionally, it is strongly recommended that each DataSciencePipelineApplication instance should have its own S3 instance that does not allow other groups to access.</p>
+<p>This multi-tenancy capability does require that each user or group needs their own instance of the <strong>DataSciencePipelineApplication</strong> instance.  Additionally, it is strongly recommended that each <strong>DataSciencePipelineApplication</strong> instance should have its own S3 instance that does not allow other groups to access.</p>
 </div>
 <div class="paragraph">
-<p>While a DataSciencePipelineApplication is a namespace scoped object, Workbenches and pods running in other namespaces can still interact with the pipeline instance if they have the correct permissions.</p>
+<p>While a <strong>DataSciencePipelineApplication</strong> is a namespace scoped object, workbenches and pods running in other namespaces can still interact with the pipeline instance if they have the correct permissions.</p>
 </div>
 </div>
 </div>
@@ -176,19 +176,22 @@
 <div class="sect2">
 <h3 id="_create_an_s3_instance_with_minio"><a class="anchor" href="#_create_an_s3_instance_with_minio"></a>Create an S3 instance with Minio</h3>
 <div class="paragraph">
-<p>To begin we will create an S3 instance using Minio to act as the artifact storage for the DataSciencePipelineApplication</p>
+<p>To begin we will create an S3 instance using <strong>Minio</strong> to act as the artifact storage for the <strong>DataSciencePipelineApplication</strong></p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>From the OpenShift AI Dashboard, create a new project called <code>pipelines-example</code>.</p>
+<p>Log in to the OpenShift cluster using the <code>oc</code> CLI as the <code>admin</code> user with the <code>cluster-admin</code> role.</p>
 </li>
 <li>
-<p>Run the following yaml to install Minio</p>
+<p>From the OpenShift AI Dashboard, create a new data science project called <code>pipelines-example</code>.</p>
+</li>
+<li>
+<p>Run the following yaml to install Minio. Ensure that you are logged in to the OpenShift cluster using the <code>oc</code> CLI as the <code>admin</code> user before you execute any of the <code>oc</code> commands listed below.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | \
-    oc apply -f - -n pipelines-example</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | \
+  oc apply -f - -n pipelines-example</code></pre>
 </div>
 </div>
 </li>
@@ -196,13 +199,13 @@
 <p>Get the route to the Minio dashboard</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc get routes minio-ui -n pipelines-example -o jsonpath='{.spec.host}'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get routes minio-ui -n pipelines-example -o jsonpath='{.spec.host}'</code></pre>
 </div>
 </div>
 <div class="exampleblock">
 <div class="content">
 <div class="paragraph">
-<p>Use this route to navigate to the S3 dashboard using a browser. With the browser, you will be able to create buckets, upload files, and navigate the S3 contents.</p>
+<p>Use this route to navigate to the S3 dashboard using a browser. With the browser, you will be able to create buckets, upload files, and navigate the S3 bucket contents.</p>
 </div>
 </div>
 </div>
@@ -211,7 +214,7 @@
 <p>Get the route to the Minio API</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">oc get routes minio-api -n pipelines-example -o jsonpath='{.spec.host}'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get routes minio-api -n pipelines-example -o jsonpath='{.spec.host}'</code></pre>
 </div>
 </div>
 <div class="exampleblock">
@@ -220,7 +223,7 @@
 <p>Use this route as the S3 API endpoint. Basically, this is the URL that we will use when creating a data connection to the S3 in OpenShift AI.</p>
 </div>
 <div class="paragraph">
-<p>Alternatively, you can utilize the api service port (port 9000) on the service minio-service to access the same resources from within the cluster.</p>
+<p>Alternatively, you can utilize the api service port (port <code>9000</code>) on the service <code>minio-service</code> to access the same resources from within the cluster.</p>
 </div>
 </div>
 </div>
@@ -232,14 +235,14 @@
 </div>
 </div>
 <div class="sect2">
-<h3 id="_data_science_pipeline_application"><a class="anchor" href="#_data_science_pipeline_application"></a>Data Science Pipeline Application</h3>
+<h3 id="_create_a_data_science_pipeline_application"><a class="anchor" href="#_create_a_data_science_pipeline_application"></a>Create a Data Science Pipeline Application</h3>
 <div class="paragraph">
-<p>Next we will create a data connection for the Minio instance, and use that data connection to create a DataSciencePipelineApplication.</p>
+<p>Next we will create a data connection for the Minio instance, and use that data connection to create a <strong>DataSciencePipelineApplication</strong>.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>From the OpenShift AI Dashboard, navigate to the pipelines-example project we previously created.  Click on the option to <code>Add data connection</code></p>
+<p>From the OpenShift AI Dashboard, navigate to the <code>pipelines-example</code> project we previously created.  Click on the option to <code>Add data connection</code></p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-dspa-add-data-connection.png" alt="create dspa add data connection">
@@ -270,7 +273,7 @@ Bucket: data-science-pipelines</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>At this point in time, the minio instance does not contain a bucket called <code>data-science-pipelines</code>.  Once the DataSciencePipelineApplication object is created, it will automatically create the bucket for us if it doesn&#8217;t exist.</p>
+<p>At this point in time, the minio instance does not contain a bucket called <code>data-science-pipelines</code>.  Once the <strong>DataSciencePipelineApplication</strong> object is created, it will automatically create the bucket for us if it doesn&#8217;t exist.</p>
 </div>
 </td>
 </tr>
@@ -284,7 +287,7 @@ Bucket: data-science-pipelines</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>A Data Connection is simply a standard kubernetes secret object that contains the fields required to connect to an S3 compatible solution.  This secret can be managed via GitOps just like any other standard kubernetes secret object.  However, not all fields in the Data Connection are dynamically consumed by the DataSciencePipelineApplication object so be careful when updating the endpoint url or the bucket values.</p>
+<p>A <code>Data Connection</code> is simply a standard kubernetes secret object that contains the fields required to connect to an S3 compatible solution.  This secret can be managed via GitOps just like any other standard kubernetes secret object.  However, not all fields in the Data Connection are dynamically consumed by the <strong>DataSciencePipelineApplication</strong> object, so be careful when updating the endpoint url or the bucket values.</p>
 </div>
 </td>
 </tr>
@@ -300,7 +303,7 @@ Bucket: data-science-pipelines</code></pre>
 </div>
 </li>
 <li>
-<p>Click on the <code>Create a pipeline server</code> in the <code>Pipelines</code> section of the Data Science Project view</p>
+<p>Click on the <code>Configure pipeline server</code> in the <code>Pipelines</code> section of the Data Science Project view.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-dspa-create-pipeline-server.png" alt="create dspa create pipeline server">
@@ -308,7 +311,7 @@ Bucket: data-science-pipelines</code></pre>
 </div>
 </li>
 <li>
-<p>Select the <code>data-science-pipelines</code> data connection in the <code>Existing data connection</code> menu, and click <code>Configure</code>.</p>
+<p>Click the key icon in the right side of the <code>Access Key</code> field, and select the <code>data-science-pipelines</code> data connection. The fields in the form are automatically populated.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-dspa-configure-pipeline-server.png" alt="create dspa configure pipeline server">
@@ -316,7 +319,7 @@ Bucket: data-science-pipelines</code></pre>
 </div>
 </li>
 <li>
-<p>After several seconds, the loading icon should complete and the <code>Pipelines</code> section will now show an option to <code>Import pipeline</code> along with a message that says <code>No pipelines</code>.</p>
+<p>Click <code>Configure pipeline server</code>. After several seconds, the loading icon should complete and the <code>Pipelines</code> section will now show an option to <code>Import pipeline</code> along with a message that says <code>No pipelines</code>.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/create-dspa-verify-pipeline-server.png" alt="create dspa verify pipeline server">
@@ -326,7 +329,7 @@ Bucket: data-science-pipelines</code></pre>
 </ol>
 </div>
 <div class="paragraph">
-<p>The DataSciencePipelineApplication has now successfully been configured and is ready for use.</p>
+<p>The <strong>DataSciencePipelineApplication</strong> has now successfully been configured and is ready for use.</p>
 </div>
 </div>
 </div>
@@ -335,7 +338,7 @@ Bucket: data-science-pipelines</code></pre>
 <h2 id="_managing_permissions_to_the_datasciencepipelineapplication"><a class="anchor" href="#_managing_permissions_to_the_datasciencepipelineapplication"></a>Managing Permissions to the DataSciencePipelineApplication</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The DataSciencePipelineApplication API endpoint route is protected using an OpenShift OAuth Proxy sidecar.</p>
+<p>The <strong>DataSciencePipelineApplication</strong> API endpoint route is protected using an OpenShift OAuth Proxy sidecar.</p>
 </div>
 <div class="paragraph">
 <p>The OAuth Proxy requires anything attempting to access the endpoint to be authenticated using the built in OpenShift login.  OpenShift is then able to admit or reject requests to the endpoint based on the Role Based Access and Control configuration of the resources in the namespace.</p>
@@ -358,16 +361,16 @@ Bucket: data-science-pipelines</code></pre>
 </table>
 </div>
 <div class="paragraph">
-<p>In particular, the DataSciencePipelineApplication requires that users or Service Accounts have <code>get</code> access to the DataSciencePipelineApplication&#8217;s route object.</p>
+<p>In particular, the <strong>DataSciencePipelineApplication</strong> requires that users or Service Accounts have <code>get</code> access to the <strong>DataSciencePipelineApplication</strong> route object.</p>
 </div>
 <div class="paragraph">
-<p>Any user that has already been granted Admin or Edit access to the namespace in which the DataSciencePipelineApplication is installed will have permission to access the object.</p>
+<p>Any user that has already been granted <code>Admin</code> or <code>Edit</code> access to the namespace in which the <strong>DataSciencePipelineApplication</strong> is installed will have permission to access the object.</p>
 </div>
 <div class="paragraph">
 <p>It may be necessary to grant access to other resources such as a Service Account in the cluster to be able to interact with the API endpoint.</p>
 </div>
 <div class="paragraph">
-<p>To grant access to an object such as a Service Account, you must first create a role in the namespace where the DataSciencePipelineApplication is located that grants <code>get</code> access to the route object:</p>
+<p>To grant access to an object such as a Service Account, you must first create a role in the namespace where the <strong>DataSciencePipelineApplication</strong> is located that grants <code>get</code> access to the route object:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -386,7 +389,7 @@ rules:
 </div>
 </div>
 <div class="paragraph">
-<p>Once the role has been created, a RoleBinding can grant the appropriate permissions to the user or Service Account:</p>
+<p>Once the role has been created, a <code>RoleBinding</code> can grant the appropriate permissions to the user or Service Account:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -406,15 +409,15 @@ roleRef:
 </div>
 </div>
 <div class="paragraph">
-<p>When programmatically accessing the API endpoint, a user can authenticate to the endpoint by passing the <code>BearerToken</code> header value in the http request.  Users can obtain their bearer token from the "Copy Login Command" menu option in the OpenShift Web Console, or by running the following command once they are already logged in:</p>
+<p>When programmatically accessing the API endpoint, a user can authenticate to the endpoint by passing the <code>BearerToken</code> header value in the http request.  Users can obtain their bearer token from the <code>Copy Login Command</code> menu option in the OpenShift Web Console, or by running the following command once they are already logged in:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">oc whoami --show-token</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc whoami --show-token</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Using the bearer token to authenticate to the endpoint will be discussed in more detail in the section discussing the Kubeflow Pipelines SDK.</p>
+<p>Using the bearer token to authenticate to the endpoint will be discussed in more detail in the section discussing the <code>Kubeflow Pipelines SDK</code>.</p>
 </div>
 </div>
 </div>
