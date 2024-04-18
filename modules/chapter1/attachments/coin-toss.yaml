@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: conditional-execution-pipeline
+  name: coin-toss-pipeline
   annotations:
     tekton.dev/output_artifacts: '{"flip-coin": [{"key": "artifacts/$PIPELINERUN/flip-coin/Output.tgz",
       "name": "flip-coin-Output", "path": "/tmp/outputs/Output/data"}], "random-num":
@@ -22,8 +22,8 @@ metadata:
     sidecar.istio.io/inject: "false"
     tekton.dev/template: ''
     pipelines.kubeflow.org/big_data_passing_format: $(workspaces.$TASK_NAME.path)/artifacts/$ORIG_PR_NAME/$TASKRUN_NAME/$TASK_PARAM_NAME
-    pipelines.kubeflow.org/pipeline_spec: '{"description": "Shows how to use dsl.Condition().",
-      "name": "conditional-execution-pipeline"}'
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "A simple example to demonstrate
+      Kubeflow Pipelines", "name": "coin-toss-pipeline"}'
   labels:
     pipelines.kubeflow.org/pipelinename: ''
     pipelines.kubeflow.org/generation: ''
