@@ -107,13 +107,16 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.</p>
+<p>Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and running machine learning pipelines.</p>
 </div>
 <div class="paragraph">
-<p>The first mechanism is the <em>Elyra Pipelines</em> JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts.</p>
+<p>The first mechanism is the <strong>Elyra Pipelines</strong> JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as <code>Python</code> or <code>R</code> scripts.</p>
 </div>
 <div class="paragraph">
-<p>The second mechanism and the one discussed here is based on the Kubeflow Pipelines SDK. With the SDK, pipelines are built using Python scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.</p>
+<p>The second mechanism, and the one discussed here is based on the <strong>Kubeflow Pipelines SDK</strong>. With the SDK, pipelines are built using <code>Python</code> scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.</p>
+</div>
+<div class="paragraph">
+<p>While the Elyra extension offers an easy to use visual editor to compose pipelines, and is generally used for simple workflows, the Kubeflow Pipelines SDK (<strong>kfp</strong>) offers a flexible Python Domain Specific Language (DSL) API to create pipelines from Python code. This approach offers you flexibility in composing complex workflows and has the added benefit of offering all the Python tooling, frameworks and developer experience that comes with writing Python code.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -130,10 +133,7 @@
 </table>
 </div>
 <div class="paragraph">
-<p>OpenShift AI uses the <strong><em>Tekton</em></strong> runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.</p>
-</div>
-<div class="paragraph">
-<p>Steps in the pipeline are executed as ephemeral pods (one per step).</p>
+<p>OpenShift AI uses the <strong><em>Tekton</em></strong> runtime to execute pipelines, which is why your Kubeflow pipeline containing Python code needs to be compiled into a Tekton definition before it can be submitted to the runtime. Steps in the pipeline are executed as ephemeral pods (one per step).</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -143,7 +143,7 @@
 </td>
 <td class="content">
 <div class="paragraph">
-<p>DS Pipelines in Red Hat OpenShift AI are managed by the <code>data-science-pipelines-operator-controller-manager</code> operator in the <code>redhat-ods-applications</code> namespace. The CR is an instance of <em>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</em>. Pipeline <em>runs</em> are instances of <em>tekton.dev/v1 PipelineRun</em>.</p>
+<p>Data Science Pipelines in Red Hat OpenShift AI are managed by the <strong>data-science-pipelines-operator-controller-manager</strong> operator in the <strong>redhat-ods-applications</strong> namespace. The Custom Resource (CR) is an instance of <strong>datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io</strong>. Pipeline <em>runs</em> are instances of kind <strong>PipelineRun</strong>.</p>
 </div>
 </td>
 </tr>
@@ -152,21 +152,24 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_creating_a_data_science_pipeline_with_the_kfp_sdk"><a class="anchor" href="#_creating_a_data_science_pipeline_with_the_kfp_sdk"></a>Creating a Data Science Pipeline with the KFP SDK</h2>
+<h2 id="_exercise_creating_a_simple_data_science_pipeline_with_the_kfp_sdk"><a class="anchor" href="#_exercise_creating_a_simple_data_science_pipeline_with_the_kfp_sdk"></a>Exercise: Creating a Simple Data Science Pipeline with the KFP SDK</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
 <div class="ulist">
 <ul>
 <li>
-<p>Python Setup</p>
+<p>Continue to use the <code>pipelines-example</code> Data Science Project that you created in the previous section. Ensure you complete the exercises in the previous section on Elyra. You will reuse several components from the previous exercise</p>
 </li>
-</ul>
-</div>
+<li>
+<p>Create a local <strong>virtualenv</strong> on your workstation, install the <strong>kfp-tekton</strong> package</p>
 <div class="listingblock">
 <div class="content">
-<pre>pip install kfp==1.8.22
-pip install kfp-tekton==1.8.0</pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mkdir kfp #create a folder anywhere
+$ cd kfp
+$ python3 -m venv .venv
+$ source .venv/bin/activate # activate the venv
+$(.venv) pip install kfp-tekton~=1.5.0</code></pre>
 </div>
 </div>
 <div class="admonitionblock important">
@@ -176,58 +179,27 @@ pip install kfp-tekton==1.8.0</pre>
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
+Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions. Install the latest <strong>kfp-tekton</strong> module version 1.5.x. Installing the 1.8.x versions will result in failures during pipeline runs.
 </td>
 </tr>
 </table>
 </div>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_building_and_deploying_a_pipeline"><a class="anchor" href="#_building_and_deploying_a_pipeline"></a>Building and deploying a Pipeline</h3>
-<div class="paragraph">
-<p>The following is a simplistic example of a KFP pipeline. The original is at
-<a href="https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py" class="bare">https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py</a> and the example has downloaded it to a file named <em>coin-toss.py</em></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download the <a href="_attachments/coin-toss.py" class="xref attachment">Coin Toss Pipeline</a> Python file and copy it to your <strong>kfp</strong> folder where you created the virtualenv. Inspect the file to understand how  the pipeline is composed using plain Python functions. The pipeline name and other metadata is provided using the <strong>@dsl.pipeline</strong> annotation. Note the invocation to the <strong>TektonCompiler</strong> in the <code>main</code> function:</p>
 <div class="listingblock">
-<div class="title">Python Pipeline Example</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Copyright 2020 kubeflow.org
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">...
 from kfp import dsl
 from kfp import components
-
-def random_num(low:int, high:int) -&gt; int:
-    """Generate a random number between low and high."""
-    import random
-    result = random.randint(low, high)
-    print(result)
-    return result
-
-def flip_coin() -&gt; str:
-    """Flip a coin and output heads or tails randomly."""
-    import random
-    result = 'heads' if random.randint(0, 1) == 0 else 'tails'
-    print(result)
-    return result
-
-def print_msg(msg: str):
-    """Print a message."""
-    print(msg)
-
+...
 
 flip_coin_op = components.create_component_from_func(
     flip_coin, base_image='python:alpine3.6')
@@ -262,120 +234,83 @@ if __name__ == '__main__':
     TektonCompiler().compile(flipcoin_pipeline, __file__.replace('.py', '.yaml'))</code></pre>
 </div>
 </div>
-</div>
-</div>
-<div class="paragraph">
-<p>To compile it into a Tekton resource definition just run the following in a terminal</p>
-</div>
+</li>
+<li>
+<p>Compile the Python file into a Tekton resource definition. Run the following command from within the virtualenv.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">python3 coin-toss.py</code></pre>
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">$(.venv) python3 coin-toss.py</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>It will generate a Tekton <strong><em>Pipeline Run</em></strong> , similar to this snippet</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
+</li>
+<li>
+<p>A YAML file called <code>coin-toss.yaml</code> containing a Tekton <strong><em>PipelineRun</em></strong> resource will be created. Inspect this file to understand how the <code>kfp-tekton</code> SDK has transformed your pipeline definition in Python into a runnable Tekton <code>PipelineRun</code> resource:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: conditional-execution-pipeline
+  name: coin-toss-pipeline
   annotations:
-    tekton.dev/output_artifacts: '{"flip-coin": [{"key": "artifacts/$PIPELINERUN/flip-coin/Output.tgz",
-      "name": "flip-coin-Output", "path": "/tmp/outputs/Output/data"}], "random-num":
-      [{"key": "artifacts/$PIPELINERUN/random-num/Output.tgz", "name": "random-num-Output",
-      "path": "/tmp/outputs/Output/data"}], "random-num-2": [{"key": "artifacts/$PIPELINERUN/random-num-2/Output.tgz",
-      "name": "random-num-2-Output", "path": "/tmp/outputs/Output/data"}]}'
-    tekton.dev/input_artifacts: '{"print-msg": [{"name": "random-num-Output", "parent_task":
-      "random-num"}], "print-msg-2": [{"name": "random-num-Output", "parent_task":
-      "random-num"}], "print-msg-3": [{"name": "random-num-2-Output", "parent_task":
-      "random-num-2"}], "print-msg-4": [{"name": "random-num-2-Output", "parent_task":
-      "random-num-2"}]}'
-    tekton.dev/artifact_bucket: mlpipeline
-    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
-    tekton.dev/artifact_endpoint_scheme: http://
-    tekton.dev/artifact_items: '{"flip-coin": [["Output", "$(results.Output.path)"]],
-      "print-msg": [], "print-msg-2": [], "print-msg-3": [], "print-msg-4": [], "random-num":
-      [["Output", "$(results.Output.path)"]], "random-num-2": [["Output", "$(results.Output.path)"]]}'
-    sidecar.istio.io/inject: "false"
-    tekton.dev/template: ''</code></pre>
+    tekton.dev/output_artifacts
+    ...
+    tekton.dev/input_artifacts:
+    ...</code></pre>
 </div>
 </div>
-</div>
-</div>
-<div class="paragraph">
-<p>The resulting yaml file <em>(coin-toss.yaml)</em> can then be uploaded through the UI</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
+</li>
+<li>
+<p>The resulting yaml file <strong>coin-toss.yaml</strong> can then be uploaded through the RHOAI web console. Navigate to the <code>pipelines-example</code> DS project that you created in the previous section on Elyra piplines. Under the <code>Pipelines</code> section, click on <code>Import Pipeline</code>:</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/import-pipeline.png" alt="import pipeline">
 </div>
+<div class="title">Figure 1. Import Tekton YAML Resource File</div>
 </div>
-</div>
-</div>
-<div class="sidebarblock">
-<div class="content">
+</li>
+<li>
+<p>Enter <strong>coin-toss-pipeline</strong> in the <code>Pipeline name</code> field, provide a brief description and upload the <code>coin-toss.yaml</code> file. Click <code>Import pipeline</code> to import the pipeline.</p>
+</li>
+<li>
+<p>In the RHOAI side navigation menu, click <code>Data Science Pipelines &gt; Pipelines</code>, and then expand the <code>coin-toss-pipeline</code>. Click the <code>coin-toss-pipeline</code> link under the <code>Pipeline version</code> column to view the imported pipeline:</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/pipeline-imported.png" alt="pipeline imported">
 </div>
+<div class="title">Figure 2. Imported Tekton Pipeline Graph</div>
 </div>
-</div>
-</div>
-<div class="paragraph">
-<p>Once imported the structure of the <em>DAG</em> will be shown. Each step in the pipeline will be run as a container on OpenShift.</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-run-view.png" alt="pipeline run view">
-</div>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>To execute the pipeline, click on <em>Create Run</em> in the menu and fill out the <em>Name</em> and <em>Description</em>.
-If the pipeline has <em>Input Parameters</em> or you need to schedule a recurring run, then that can be configured further down. Once ready, click <em>Create</em> to submit the pipeline for scheduling.</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
+</li>
+<li>
+<p>To execute the pipeline, click on <code>Actions &gt; Create Run</code> in the menu and enter <strong>coin-toss-run1</strong> in the <code>Name</code> field and an optional <code>Description</code>. Ensure <code>coin-toss-pipeline</code> is selected in the <code>Pipeline</code> field, and then click <code>Create</code> to run the pipeline.</p>
 <div class="imageblock">
 <div class="content">
 <img src="_images/creating-pipeline-run.png" alt="creating pipeline run">
 </div>
+<div class="title">Figure 3. Schedule Pipeline for execution</div>
 </div>
-</div>
-</div>
-<div class="paragraph">
-<p>The pipeline will execute and the outputs will be stored into the configured S3 bucket.
+</li>
+<li>
+<p>The pipeline will execute and the outputs will be stored into the configured S3 buckets (Recall that you had added a Minio data connection to the project in the previous exercise).
 As the pipeline executes the view will be updated to show the steps being executed. It&#8217;s possible to click on the graph nodes to reveal information of the steps.</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
 <div class="imageblock">
 <div class="content">
 <img src="_images/post-pipeline-run.png" alt="post pipeline run">
 </div>
+<div class="title">Figure 4. Pipeline execution graphical view</div>
 </div>
-</div>
-</div>
+</li>
+<li>
+<p>Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio web console. Open the Minio web console (you installed and configured Minio in the previous exercise on Elyra pipelines).</p>
 <div class="paragraph">
-<p>Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio Storage UI.</p>
+<p>In the Minio web console, click <code>Object Browser &gt; data-science-pipelines &gt; artifacts &gt; coin-toss-pipeline-xxxxx &gt; flip-coin</code>, where <code>xxxxx</code> is a randomly generated number for the pipeline run. You should the output artifacts generated by the pipeline.</p>
 </div>
-<div class="sidebarblock">
-<div class="content">
 <div class="imageblock">
 <div class="content">
 <img src="_images/object-store-after-run.png" alt="object store after run">
 </div>
 </div>
-</div>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect2">
@@ -409,6 +344,18 @@ Experiments are part of the KFP SDK and are not currently covered in this course
 <div class="sect1">
 <h2 id="_real_world_example"><a class="anchor" href="#_real_world_example"></a>Real World Example</h2>
 <div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+This entire section is to cover some theoretical concepts around creating Kubeflow pipelines using the KFP SDK. You are <strong>NOT</strong> expected to run this in your set up since the system has numerous complex components which are missing in your runtime environment. Do <strong>NOT</strong> execute any code or commands in this section. This section is for informational and pedagogical purposes only!
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>In this section we&#8217;re going to demonstrate a real world Data Science Pipelines scenario.</p>
 </div>
@@ -421,14 +368,12 @@ Experiments are part of the KFP SDK and are not currently covered in this course
 <div class="content">
 <img src="_images/openshift-ai-dsp-edge.png" alt="openshift ai dsp edge">
 </div>
+<div class="title">Figure 5. AI/ML at the edge example</div>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>The entire pipeline is <a href="_attachments/sample-pipeline-full.py" class="xref attachment">here</a>.</p>
-</div>
-<div class="paragraph">
-<p>We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
+<p>The entire pipeline definition is available <a href="_attachments/sample-pipeline-full.py" class="xref attachment">here</a> for inspection. We&#8217;re not going to go through all of it but focus on the key aspects of it.</p>
 </div>
 <div class="paragraph">
 <p>The actual pipeline is defined by the following function:</p>
@@ -451,10 +396,10 @@ def edgetest_pipeline(file_obj:str, src_bucket:str,VIN="412356",epoch_count:int=
 </div>
 </div>
 <div class="paragraph">
-<p>The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.</p>
+<p>The <strong>@dsl.pipeline</strong> parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI can overwrite these values.</p>
 </div>
 <div class="paragraph">
-<p>The function <strong><em>edgetest_pipeline</em></strong> is the implementation of the pipeline.</p>
+<p>The function <strong><em>edgetest_pipeline</em></strong> function is the implementation of the pipeline.</p>
 </div>
 <div class="sect2">
 <h3 id="_pipeline_parameters"><a class="anchor" href="#_pipeline_parameters"></a>Pipeline Parameters</h3>
@@ -1236,192 +1181,6 @@ from kfp.dsl import data_passing_methods</code></pre>
 </div>
 <div class="paragraph">
 <p>To pass big data using cloud provider volumes, it&#8217;s recommended to use the <strong><em>volume-based data passing method</em></strong>.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_data_science_pipeline_hands_on_example"><a class="anchor" href="#_data_science_pipeline_hands_on_example"></a>Data Science Pipeline - Hands On Example</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>We&#8217;re now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.</p>
-</div>
-<div class="sect2">
-<h3 id="_setup"><a class="anchor" href="#_setup"></a>Setup</h3>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Using the Minio UI, create a new S3 Bucket named <em>fraud_detection_bucket</em>.</p>
-</li>
-</ul>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/create-s3-fraud-bucket.png" alt="create s3 fraud bucket">
-</div>
-</div>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Download the following artifacts:</p>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><i class="fa fa-square-o"></i> <a href="_attachments/model-latest.onnx" class="xref attachment">ONNX Model</a></p>
-</li>
-<li>
-<p><i class="fa fa-square-o"></i> <a href="_attachments/live-data.csv.gz" class="xref attachment">Live Transaction Data</a></p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Uncompress the <strong><em>.gz</em></strong> files using the <code>gzip -d</code> command.</p>
-</li>
-<li>
-<p><input type="checkbox" data-item-complete="0"> Upload the files to S3 <em>fraud_detection_bucket</em> via the <em>Minio</em> UI.</p>
-</li>
-</ul>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="imageblock">
-<div class="content">
-<img src="_images/fraud-upload-files.png" alt="fraud upload files">
-</div>
-</div>
-</div>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="imageblock">
-<div class="content">
-<img src="_images/fraud-files-uploaded.png" alt="fraud files uploaded">
-</div>
-</div>
-</div>
-</div>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Create the <strong><em>aws-connection-fraud-detection</em></strong> <em>secret</em> containing the <em>S3</em> bucket name, endpoint and credentials.</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic aws-connection-fraud-detection --from-literal=AWS_ACCESS_KEY_ID=minio --from-literal=AWS_DEFAULT_REGION=rhods-enablement-emea --from-literal=AWS_S3_BUCKET=fraud-detection-bucket --from-literal=AWS_S3_ENDPOINT=https://minio-api... --from-literal=AWS_SECRET_ACCESS_KEY=minio123</code></pre>
-</div>
-</div>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Create two OpenShift Persistent Volumes with the following names:</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>offline-scoring-model-volume</strong></p>
-</li>
-<li>
-<p><strong>offline-scoring-data-volume</strong></p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-Example PVC definitions are here, download and customize as necessary this <a href="_attachments/offline-scoring-data-pvc.yaml" class="xref attachment">Data Volume definition</a> &amp; <a href="_attachments/offline-scoring-model-pvc.yaml" class="xref attachment">Model Volume definition</a>
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_execute_pipeline"><a class="anchor" href="#_execute_pipeline"></a>Execute Pipeline</h3>
-<div class="paragraph">
-<p>Download and customize as necessary this <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Example Pipeline definition</a></p>
-</div>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Create a <em>Workbench</em> with the name <em>fraud-onnx</em></p>
-</li>
-</ul>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/fraud-onnx-workbench.png" alt="fraud onnx workbench">
-</div>
-</div>
-<div class="ulist checklist">
-<ul class="checklist">
-<li>
-<p><input type="checkbox" data-item-complete="0"> Download the <a href="_attachments/offline_scoring_kfp_pipeline.py" class="xref attachment">Offline Scoring Pipeline</a> and load it into your <em>workbench</em>.</p>
-</li>
-<li>
-<p><input type="checkbox" data-item-complete="0"> Click 'Restart Kernel and Run All Cells'.</p>
-</li>
-</ul>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/start-pipeline.png" alt="start pipeline">
-</div>
-</div>
-<div class="paragraph">
-<p>The Pipeline will be submitted to the server and a run <em>Triggered</em>.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-run-triggered.png" alt="pipeline run triggered">
-</div>
-</div>
-<div class="paragraph">
-<p>If the pipeline run was executed without any issues, you should see something similar to below:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-finish.png" alt="pipeline finish">
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_handling_pipeline_errors"><a class="anchor" href="#_handling_pipeline_errors"></a>Handling Pipeline Errors</h3>
-<div class="paragraph">
-<p>In case the pipeline fails, the UI shows something similar to the following:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-failure.png" alt="pipeline failure">
-</div>
-</div>
-<div class="paragraph">
-<p>Clicking on the <strong><em>failed</em></strong> node in the graph and then clicking on the <em>Details</em> tab presents the status of the execution step.
-When the mouse is placed over the <strong><em>Status</em></strong> field, the command to retrieve the detailed logs of the execution step is displayed.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-error-details.png" alt="pipeline error details">
-</div>
-</div>
-<div class="paragraph">
-<p>The step logs can then be viewed using the command provided.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/pipeline-pod-error.png" alt="pipeline pod error">
-</div>
 </div>
 </div>
 </div>
