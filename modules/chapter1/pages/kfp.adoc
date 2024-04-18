@@ -1,80 +1,53 @@
 = Kubeflow Pipelines SDK
 
-Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and triggering pipelines.
+Red Hat OpenShift AI offers two out-of-the-box mechanisms to work with Data Science Pipelines in terms of building and running machine learning pipelines.
 
-The first mechanism is the _Elyra Pipelines_ JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as Python or R scripts. 
+The first mechanism is the *Elyra Pipelines* JupyterLab extension, which provides a visual editor for creating pipelines based on Jupyter notebooks as well as `Python` or `R` scripts. 
 
-The second mechanism and the one discussed here is based on the Kubeflow Pipelines SDK. With the SDK, pipelines are built using Python scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.
+The second mechanism, and the one discussed here is based on the *Kubeflow Pipelines SDK*. With the SDK, pipelines are built using `Python` scripts and submitted to the Data Science Pipelines runtime to be scheduled for execution.
+
+While the Elyra extension offers an easy to use visual editor to compose pipelines, and is generally used for simple workflows, the Kubeflow Pipelines SDK (*kfp*) offers a flexible Python Domain Specific Language (DSL) API to create pipelines from Python code. This approach offers you flexibility in composing complex workflows and has the added benefit of offering all the Python tooling, frameworks and developer experience that comes with writing Python code.
 
 [NOTE]
 ====
 There is work in progress to integrate Kubeflow Pipelines version 2 in Data Science Pipelines. At the time of writing Kubeflow Pipelines version 1 is used, which needs to be considered when referring to the SDK documentation.
 ====
 
-OpenShift AI uses the *_Tekton_* runtime to execute pipelines, which is why the Python script needs to be compiled into a Tekton definition before it can be submitted to the runtime.
-
-Steps in the pipeline are executed as ephemeral pods (one per step).
+OpenShift AI uses the *_Tekton_* runtime to execute pipelines, which is why your Kubeflow pipeline containing Python code needs to be compiled into a Tekton definition before it can be submitted to the runtime. Steps in the pipeline are executed as ephemeral pods (one per step).
 
 [NOTE]
 ====
-DS Pipelines in Red Hat OpenShift AI are managed by the `data-science-pipelines-operator-controller-manager` operator in the `redhat-ods-applications` namespace. The CR is an instance of _datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io_. Pipeline _runs_ are instances of _tekton.dev/v1 PipelineRun_.
+Data Science Pipelines in Red Hat OpenShift AI are managed by the *data-science-pipelines-operator-controller-manager* operator in the *redhat-ods-applications* namespace. The Custom Resource (CR) is an instance of *datasciencepipelinesapplications.datasciencepipelinesapplications.opendatahub.io*. Pipeline _runs_ are instances of kind *PipelineRun*.
 ====
 
-== Creating a Data Science Pipeline with the KFP SDK
+== Exercise: Creating a Simple Data Science Pipeline with the KFP SDK
 
 === Prerequisites 
-* Python Setup
-[source,cmd]
+
+* Continue to use the `pipelines-example` Data Science Project that you created in the previous section. Ensure you complete the exercises in the previous section on Elyra. You will reuse several components from the previous exercise
+* Create a local *virtualenv* on your workstation, install the *kfp-tekton* package
++
+[source,bash]
 ----
-pip install kfp==1.8.22
-pip install kfp-tekton==1.8.0
+$ mkdir kfp #create a folder anywhere
+$ cd kfp
+$ python3 -m venv .venv
+$ source .venv/bin/activate # activate the venv
+$(.venv) pip install kfp-tekton~=1.5.0
 ----
-IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions.
++
+IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions. Install the latest *kfp-tekton* module version 1.5.x. Installing the 1.8.x versions will result in failures during pipeline runs.
 
 === Building and deploying a Pipeline
 
-The following is a simplistic example of a KFP pipeline. The original is at 
-https://github.com/kubeflow/kfp-tekton/blob/master/samples/flip-coin/condition.py and the example has downloaded it to a file named _coin-toss.py_
-
-****
-.Python Pipeline Example
+. Download the xref:attachment$coin-toss.py[Coin Toss Pipeline] Python file and copy it to your *kfp* folder where you created the virtualenv. Inspect the file to understand how  the pipeline is composed using plain Python functions. The pipeline name and other metadata is provided using the *@dsl.pipeline* annotation. Note the invocation to the *TektonCompiler* in the `main` function:
++
 [source,python]
 ----
-# Copyright 2020 kubeflow.org
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+...
 from kfp import dsl
 from kfp import components
-
-def random_num(low:int, high:int) -> int:
-    """Generate a random number between low and high."""
-    import random
-    result = random.randint(low, high)
-    print(result)
-    return result
-
-def flip_coin() -> str:
-    """Flip a coin and output heads or tails randomly."""
-    import random
-    result = 'heads' if random.randint(0, 1) == 0 else 'tails'
-    print(result)
-    return result
-
-def print_msg(msg: str):
-    """Print a message."""
-    print(msg)
-
+...
 
 flip_coin_op = components.create_component_from_func(
     flip_coin, base_image='python:alpine3.6')
@@ -108,76 +81,53 @@ if __name__ == '__main__':
     from kfp_tekton.compiler import TektonCompiler
     TektonCompiler().compile(flipcoin_pipeline, __file__.replace('.py', '.yaml'))
 ----
-****
 
-To compile it into a Tekton resource definition just run the following in a terminal
+. Compile the Python file into a Tekton resource definition. Run the following command from within the virtualenv.
++
 [source,python]
 ----
-python3 coin-toss.py
+$(.venv) python3 coin-toss.py
 ----
 
-It will generate a Tekton *_Pipeline Run_* , similar to this snippet
-****
+. A YAML file called `coin-toss.yaml` containing a Tekton *_PipelineRun_* resource will be created. Inspect this file to understand how the `kfp-tekton` SDK has transformed your pipeline definition in Python into a runnable Tekton `PipelineRun` resource:
++
 [source,yaml]
 ----
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: conditional-execution-pipeline
+  name: coin-toss-pipeline
   annotations:
-    tekton.dev/output_artifacts: '{"flip-coin": [{"key": "artifacts/$PIPELINERUN/flip-coin/Output.tgz",
-      "name": "flip-coin-Output", "path": "/tmp/outputs/Output/data"}], "random-num":
-      [{"key": "artifacts/$PIPELINERUN/random-num/Output.tgz", "name": "random-num-Output",
-      "path": "/tmp/outputs/Output/data"}], "random-num-2": [{"key": "artifacts/$PIPELINERUN/random-num-2/Output.tgz",
-      "name": "random-num-2-Output", "path": "/tmp/outputs/Output/data"}]}'
-    tekton.dev/input_artifacts: '{"print-msg": [{"name": "random-num-Output", "parent_task":
-      "random-num"}], "print-msg-2": [{"name": "random-num-Output", "parent_task":
-      "random-num"}], "print-msg-3": [{"name": "random-num-2-Output", "parent_task":
-      "random-num-2"}], "print-msg-4": [{"name": "random-num-2-Output", "parent_task":
-      "random-num-2"}]}'
-    tekton.dev/artifact_bucket: mlpipeline
-    tekton.dev/artifact_endpoint: minio-service.kubeflow:9000
-    tekton.dev/artifact_endpoint_scheme: http://
-    tekton.dev/artifact_items: '{"flip-coin": [["Output", "$(results.Output.path)"]],
-      "print-msg": [], "print-msg-2": [], "print-msg-3": [], "print-msg-4": [], "random-num":
-      [["Output", "$(results.Output.path)"]], "random-num-2": [["Output", "$(results.Output.path)"]]}'
-    sidecar.istio.io/inject: "false"
-    tekton.dev/template: ''
+    tekton.dev/output_artifacts
+    ...
+    tekton.dev/input_artifacts:
+    ...
 ----
-****
 
-The resulting yaml file _(coin-toss.yaml)_ can then be uploaded through the UI
-****
-image::import-pipeline.png[]
-****
-****
-image::pipeline-imported.png[]
-****
-Once imported the structure of the _DAG_ will be shown. Each step in the pipeline will be run as a container on OpenShift.
+. The resulting yaml file *coin-toss.yaml* can then be uploaded through the RHOAI web console. Navigate to the `pipelines-example` DS project that you created in the previous section on Elyra piplines. Under the `Pipelines` section, click on `Import Pipeline`:
++
+image::import-pipeline.png[title=Import Tekton YAML Resource File]
 
-****
-image::pipeline-run-view.png[]
-****
+. Enter *coin-toss-pipeline* in the `Pipeline name` field, provide a brief description and upload the `coin-toss.yaml` file. Click `Import pipeline` to import the pipeline.
 
-To execute the pipeline, click on _Create Run_ in the menu and fill out the _Name_ and _Description_.
-If the pipeline has _Input Parameters_ or you need to schedule a recurring run, then that can be configured further down. Once ready, click _Create_ to submit the pipeline for scheduling.
+. In the RHOAI side navigation menu, click `Data Science Pipelines > Pipelines`, and then expand the `coin-toss-pipeline`. Click the `coin-toss-pipeline` link under the `Pipeline version` column to view the imported pipeline:
++
+image::pipeline-imported.png[title=Imported Tekton Pipeline Graph]
 
-****
-image::creating-pipeline-run.png[]
-****
+. To execute the pipeline, click on `Actions > Create Run` in the menu and enter *coin-toss-run1* in the `Name` field and an optional `Description`. Ensure `coin-toss-pipeline` is selected in the `Pipeline` field, and then click `Create` to run the pipeline.
++
+image::creating-pipeline-run.png[title=Schedule Pipeline for execution]
 
-The pipeline will execute and the outputs will be stored into the configured S3 bucket.
+. The pipeline will execute and the outputs will be stored into the configured S3 buckets (Recall that you had added a Minio data connection to the project in the previous exercise).
 As the pipeline executes the view will be updated to show the steps being executed. It's possible to click on the graph nodes to reveal information of the steps.
++
+image::post-pipeline-run.png[title=Pipeline execution graphical view]
 
-****
-image::post-pipeline-run.png[]
-****
-
-Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio Storage UI.
-
-****
+. Once the pipeline has completed, it is possible to access the output and pipeline artifacts (if used) in the object storage browser of the Minio web console. Open the Minio web console (you installed and configured Minio in the previous exercise on Elyra pipelines).
++
+In the Minio web console, click `Object Browser > data-science-pipelines > artifacts > coin-toss-pipeline-xxxxx > flip-coin`, where `xxxxx` is a randomly generated number for the pipeline run. You should the output artifacts generated by the pipeline.
++
 image::object-store-after-run.png[]
-****
 
 === Experiments And Runs
 
@@ -191,18 +141,17 @@ NOTE: Experiments are part of the KFP SDK and are not currently covered in this 
 
 == Real World Example
 
+WARNING: This entire section is to cover some theoretical concepts around creating Kubeflow pipelines using the KFP SDK. You are *NOT* expected to run this in your set up since the system has numerous complex components which are missing in your runtime environment. Do *NOT* execute any code or commands in this section. This section is for informational and pedagogical purposes only!
+
 In this section we're going to demonstrate a real world Data Science Pipelines scenario. 
 
 ****
 In this scenario we have a remote edge device which uses an AI model to manage the characteristics of its battery usage depending on the environment it's deployed in. On a regular schedule it uploads battery events via a data gateway, and those battery events are used to train a model which is then retrieved by the device and used. 
 
-
-image::openshift-ai-dsp-edge.png[]
+image::openshift-ai-dsp-edge.png[title=AI/ML at the edge example]
 ****
 
-The entire pipeline is xref:attachment$sample-pipeline-full.py[here].
-
-We're not going to go through all of it but focus on the key aspects of it. 
+The entire pipeline definition is available xref:attachment$sample-pipeline-full.py[here] for inspection. We're not going to go through all of it but focus on the key aspects of it. 
 
 The actual pipeline is defined by the following function:
 
@@ -211,9 +160,9 @@ The actual pipeline is defined by the following function:
 include::example$sample-pipeline-full.py[lines=445..454]
 ****
 
-The '@dsl.pipeline' parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI overwrites these values.
+The *@dsl.pipeline* parameters provide the name and description if you were uploading the pipeline via an API call. The DSP UI can overwrite these values.
 
-The function *_edgetest_pipeline_* is the implementation of the pipeline.
+The function *_edgetest_pipeline_* function is the implementation of the pipeline.
 
 === Pipeline Parameters
 The pipeline has four parameters:
@@ -568,84 +517,117 @@ The *_data-volume PVC claim_* needs to exist in the OpenShift namespace while ru
 
 To pass big data using cloud provider volumes, it's recommended to use the *_volume-based data passing method_*.
 
-== Data Science Pipeline - Hands On Example
+// == Exercise: Data Science Pipeline for Fraud Detection Scenario
 
-We're now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.
+// === Prerequisites 
 
-=== Setup
+// * Continue to use the `pipelines-example` Data Science Project that you created in the previous section. Ensure you complete the exercises in the previous section on Elyra. You will reuse several components from the previous exercise
+// * If you have not already done so, Create a local *virtualenv* on your workstation, install the *kfp-tekton* package
+// +
+// [source,bash]
+// ----
+// $ mkdir kfp #create a folder anywhere
+// $ cd kfp
+// $ python3 -m venv .venv
+// $ source .venv/bin/activate # activate the venv
+// $(.venv) pip install kfp-tekton~=1.5.0
+// ----
+// +
+// IMPORTANT: Using the correct Python module versions is critical to avoid conflicts between the KFP SDK and Data Science Pipelines versions. Install the latest *kfp-tekton* module version 1.5.x. Installing the 1.8.x versions will result in failures during pipeline runs.
 
-[%interactive]
-* [ ] Using the Minio UI, create a new S3 Bucket named _fraud_detection_bucket_.
+// We're now going to deploy and run a sample pipeline. The use case is identifying fraudulent transactions among a large number of credit card transactions using an offline scoring approach.
 
-image::create-s3-fraud-bucket.png[]
+// === Setup
 
-[%interactive]
-* [ ] Download the following artifacts:
+// . If you have not already done so, create a new S3 Bucket named *fraud-detection* in the Minio web console (You should have done this in the previous exercise on Elyra pipelines).
+// +
+// image::create-s3-fraud-bucket.png[title=Create a new S3 bucket]
 
-** [ ] xref:attachment$model-latest.onnx[ONNX Model]
-** [ ] xref:attachment$live-data.csv.gz[Live Transaction Data]
+// . If you have not already done so, download the following artifacts:
 
-[%interactive]
-* [ ] Uncompress the *_.gz_* files using the `+gzip -d+` command. 
-* [ ] Upload the files to S3 _fraud_detection_bucket_ via the _Minio_ UI.
+// * xref:attachment$model-latest.onnx[ONNX Model File]
+// * xref:attachment$live-data.csv[Credit Card Transaction Data]
+ 
+// . If you have not already done so, upload the files to the S3 *fraud-detection* bucket using the Minio web console.
+// +
 
-====
-image::fraud-upload-files.png[]
-====
-====
-image::fraud-files-uploaded.png[]
-====
+// image::fraud-upload-files.png[title=Upload files to fraud-detection S3 Bucket]
+// +
+// image::fraud-files-uploaded.png[title=S3 Bucket Contents after upload]
 
-[%interactive]
-* [ ] Create the *_aws-connection-fraud-detection_* _secret_ containing the _S3_ bucket name, endpoint and credentials.
+// . If you have not already done so, log in to the OpenShift cluster using the `oc` CLI as the `admin` user, and create the *aws-connection-fraud-detection* secret containing the S3 bucket name, endpoint and credentials.
+// +
+// [source,bash]
+// ----
+// $ oc create secret \
+//   generic aws-connection-fraud-detection \
+//   --from-literal=AWS_ACCESS_KEY_ID=minio \
+//   --from-literal=AWS_S3_BUCKET=fraud-detection \
+//   --from-literal=AWS_S3_ENDPOINT=http://minio-service.pipelines-example.svc:9000 \
+//   --from-literal=AWS_SECRET_ACCESS_KEY=minio123 \
+//   -n pipelines-example
+// ----
 
-[source,bash]
---
-oc create secret generic aws-connection-fraud-detection --from-literal=AWS_ACCESS_KEY_ID=minio --from-literal=AWS_DEFAULT_REGION=rhods-enablement-emea --from-literal=AWS_S3_BUCKET=fraud-detection-bucket --from-literal=AWS_S3_ENDPOINT=https://minio-api... --from-literal=AWS_SECRET_ACCESS_KEY=minio123
---
+// . If you have not already done so, create two OpenShift Persistent Volume Claims (PVC) with the following names. Download the YAML files in the links below:
+// +
+// NOTE: You may have already created the *offline-scoring-data-volume* PVC in the previous Elyra pipelines section. In this scenario, create only the *offline-scoring-model-volume* PVC below.
+// +
+// * *offline-scoring-model-volume* (xref:attachment$offline-scoring-data-pvc.yaml[Data Volume definition])
+// * *offline-scoring-data-volume* (xref:attachment$offline-scoring-model-pvc.yaml[Model Volume definition])
 
-[%interactive]
-* [ ] Create two OpenShift Persistent Volumes with the following names:
-** *offline-scoring-model-volume*
-** *offline-scoring-data-volume*
+// . Log in to the OpenShift cluster as the `admin` user and create the two PVCs:
+// +
+// ```bash
+// $ oc apply -f offline-scoring-data-pvc.yaml -n pipelines-example
+// $ oc apply -f offline-scoring-model-pvc.yaml -n pipelines-example
+// ```
 
-TIP: Example PVC definitions are here, download and customize as necessary this xref:attachment$offline-scoring-data-pvc.yaml[Data Volume definition] & xref:attachment$offline-scoring-model-pvc.yaml[Model Volume definition]
+// . Verify that you see the two PVCs by navigating to `Storage > PersistentVolumeClaims` in the OpenShift web console (`Administrator` perspective).
+// +
+// image::fraud-demo-pvcs.png[title=PVCs for Demo]
 
+// === Execute Pipeline
 
-=== Execute Pipeline
+// . Download and inspect the xref:attachment$offline_scoring_kfp_pipeline.py[Credit Card Fraud Pipeline definition] Python file.
 
-Download and customize as necessary this xref:attachment$offline_scoring_kfp_pipeline.py[Example Pipeline definition]
+// . In the `pipelines-example` DS project, create a new `Workbench` with the following options:
+// +
+// * *Name*: `fraud-onnx`
+// * *Image selection*: `Standard Data Science`
+// * *Version selection*: Latest image marked `Recommended`
+// * *Container size*: `Small`
+// * *Cluster Storage*: Create new persistent storage with name `fraud-onnx`
+// * *Persistent storage size*: `5GB`
+// * *Data connections*: Use existing data connection `fraud-detection`
+// +
+// image::fraud-onnx-workbench.png[title=Create a new workbench]
 
-[%interactive]
-* [ ] Create a _Workbench_ with the name _fraud-onnx_
+// . Open the `fraud-onnx` workbench from your RHOAI dashboard. Create a new notebook named `fraud-detection-kfp` and copy the code from the `offline_scoring_kfp_pipeline.py` file into the notebook. Save the changes to the notebook file.
 
-image::fraud-onnx-workbench.png[]
+// . Click 'Restart Kernel and Run All Cells' in the Notebook.
+// +
+// image::start-pipeline.png[title=Start Pipeline Execution]
+// +
 
-[%interactive]
-* [ ] Download the xref:attachment$offline_scoring_kfp_pipeline.py[Offline Scoring Pipeline] and load it into your _workbench_.
-* [ ] Click 'Restart Kernel and Run All Cells'.
+// . The Pipeline will be submitted to the server and a run _Triggered_.
+// +
+// image::pipeline-run-triggered.png[title=Pipeline Triggered]
 
-image::start-pipeline.png[]
+// . If the pipeline run was executed without any issues, you should see something similar to below:
+// +
+// image::pipeline-finish.png[title=Successful Pipeline Execution]
 
-The Pipeline will be submitted to the server and a run _Triggered_.
+// === Handling Pipeline Errors
 
-image::pipeline-run-triggered.png[]
+// . In case the pipeline fails, the UI shows something similar to the following:
+// +
+// image::pipeline-failure.png[title=Pipeline Execution Failure]
 
-If the pipeline run was executed without any issues, you should see something similar to below:
+// . Clicking on the *_failed_* node in the graph and then clicking on the _Details_ tab presents the status of the execution step. 
+// When the mouse is placed over the *_Status_* field, the command to retrieve the detailed logs of the execution step is displayed.
+// +
+// image::pipeline-error-details.png[title=Pipeline Error Details]
 
-image::pipeline-finish.png[]
-
-=== Handling Pipeline Errors
-
-In case the pipeline fails, the UI shows something similar to the following:
-
-image::pipeline-failure.png[]
-
-Clicking on the *_failed_* node in the graph and then clicking on the _Details_ tab presents the status of the execution step. 
-When the mouse is placed over the *_Status_* field, the command to retrieve the detailed logs of the execution step is displayed.
-
-image::pipeline-error-details.png[]
-
-The step logs can then be viewed using the command provided.
-
-image::pipeline-pod-error.png[]
+// . The step logs can then be viewed using the command provided.
+// +
+// image::pipeline-pod-error.png[title=Pipeline Execution Step Logs]

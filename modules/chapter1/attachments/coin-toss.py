@@ -42,8 +42,8 @@ random_num_op = components.create_component_from_func(
     random_num, base_image='python:alpine3.6')
 
 @dsl.pipeline(
-    name='conditional-execution-pipeline',
-    description='Shows how to use dsl.Condition().'
+    name='coin-toss-pipeline',
+    description='A simple pipeline using Kubeflow pipelines'
 )
 def flipcoin_pipeline():
     flip = flip_coin_op()

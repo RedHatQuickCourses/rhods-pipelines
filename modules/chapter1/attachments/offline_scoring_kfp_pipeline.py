@@ -15,7 +15,7 @@ def data_ingestion(data_object_name: str):
 
     raw_data_file_location = '/data/raw_data.csv'
 
-    print('Commencing data ingestion.')
+    print('Commencing data ingestion...')
 
     s3_endpoint_url = environ.get('AWS_S3_ENDPOINT')
     s3_access_key = environ.get('AWS_ACCESS_KEY_ID')
@@ -78,7 +78,7 @@ def load_model(model_object_name: str):
 
     from boto3 import client
 
-    print('Commencing model loading.')
+    print('Commencing model loading...')
 
     s3_endpoint_url = environ.get('AWS_S3_ENDPOINT')
     s3_access_key = environ.get('AWS_ACCESS_KEY_ID')
@@ -99,7 +99,7 @@ def load_model(model_object_name: str):
         s3_bucket_name, model_object_name, model_path
     )
 
-    print('Finished model loading.')
+    print('Finished model loading...')
 
 
 def predict():
@@ -107,7 +107,7 @@ def predict():
     from onnxruntime import InferenceSession
     from pandas import DataFrame
 
-    print('Commencing offline scoring.')
+    print('Commencing offline scoring...')
 
     X = load('/data/features.npy').astype('float32')
 
@@ -119,7 +119,7 @@ def predict():
     class_map_array = array(['no fraud', 'fraud'])
     mapped_results = class_map_array[results]
 
-    print(f'Scored data set. Writing report.')
+    print(f'Scored data set. Writing report...')
 
     column_names = [f'V{i}' for i in range(1, 31)]
     report = DataFrame(X, columns=column_names)
