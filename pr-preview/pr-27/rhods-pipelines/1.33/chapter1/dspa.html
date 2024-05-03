@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Data Science Pipeline Applications :: Automation using Data Science Pipelines</title>
+    <link rel="prev" href="intro.html">
+    <link rel="next" href="elyra-pipelines.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Automation using Data Science Pipelines</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/rhods-pipelines/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhods-pipelines" data-version="1.33">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Automation using Data Science Pipelines</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Data Science Pipelines</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="intro.html">Introduction</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="dspa.html">Data Science Pipeline Applications</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="elyra-pipelines.html">Elyra Pipelines</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="kfp.html">Kubeflow Pipelines SDK</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Automation using Data Science Pipelines</span>
+    <span class="version">1.33</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Automation using Data Science Pipelines</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.33</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Automation using Data Science Pipelines</a></li>
+    <li><a href="index.html">Data Science Pipelines</a></li>
+    <li><a href="dspa.html">Data Science Pipeline Applications</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Data Science Pipeline Applications</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Data Science Pipelines require a namespace scoped instance of the <strong>DataSciencePipelineApplication (DSPA)</strong> custom resource to enable the ability to utilize Data Science Pipelines.</p>
+</div>
+<div class="paragraph">
+<p>The <strong>DataSciencePipelineApplication</strong> custom resource creates several pods that are necessary to utilize the tools.  This includes the creation of an API endpoint and a database where metadata is stored.  The API endpoint is used by the OpenShift AI Dashboard, as well as tools like <strong>Elyra</strong> and the <strong>kfp</strong> package to manage and execute pipelines.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dspa-pods.png" alt="dspa pods">
+</div>
+</div>
+<div class="paragraph">
+<p>In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A Data Science Pipeline Server container.</p>
+</li>
+<li>
+<p>A MariaDB database for storing pipeline definitions and results.</p>
+</li>
+<li>
+<p>A Pipeline scheduler for scheduling pipeline runs.</p>
+</li>
+<li>
+<p>A Persistent Agent to record the set of containers that are executed as well as their inputs and outputs.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Additionally, the <strong>DataSciencePipelineApplication</strong> requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Any S3 compatible storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as it is a lightweight and easy to deploy S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where security, data resilience, and disaster recovery are important concerns.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_multi_tenancy_with_data_science_pipeline_applications"><a class="anchor" href="#_multi_tenancy_with_data_science_pipeline_applications"></a>Multi-Tenancy with Data Science Pipeline Applications</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As previously mentioned, Data Science Pipelines is designed to be a secure multi-tenant solution.  This means that multiple users and teams can all securely use their own instances of Data Science Pipelines without fear of leaking data from the pipelines to other users or groups.</p>
+</div>
+<div class="paragraph">
+<p>This multi-tenancy capability does require that each user or group needs their own instance of the <strong>DataSciencePipelineApplication</strong> instance.  Additionally, it is strongly recommended that each <strong>DataSciencePipelineApplication</strong> instance should have its own S3 instance that does not allow other groups to access.</p>
+</div>
+<div class="paragraph">
+<p>While a <strong>DataSciencePipelineApplication</strong> is a namespace scoped object, workbenches and pods running in other namespaces can still interact with the pipeline instance if they have the correct permissions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exercise_create_a_data_science_pipeline_instance"><a class="anchor" href="#_exercise_create_a_data_science_pipeline_instance"></a>Exercise: Create a Data Science Pipeline Instance</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_create_an_s3_instance_with_minio"><a class="anchor" href="#_create_an_s3_instance_with_minio"></a>Create an S3 instance with Minio</h3>
+<div class="paragraph">
+<p>To begin we will create an S3 instance using <strong>Minio</strong> to act as the artifact storage for the <strong>DataSciencePipelineApplication</strong>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Log in to the OpenShift cluster using the <code>oc</code> CLI as the <code>admin</code> user with the <code>cluster-admin</code> role.</p>
+</li>
+<li>
+<p>From the OpenShift AI Dashboard, create a new data science project called <code>pipelines-example</code>.</p>
+</li>
+<li>
+<p>Run the following yaml to install Minio. Ensure that you are logged in to the OpenShift cluster using the <code>oc</code> CLI as the <code>admin</code> user before you execute any of the <code>oc</code> commands listed below.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | \
+  oc apply -f - -n pipelines-example</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Get the route to the Minio dashboard.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get routes minio-ui -n pipelines-example -o jsonpath='{.spec.host}'</code></pre>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Use this route to navigate to the S3 dashboard using a browser. With the browser, you will be able to create buckets, upload files, and navigate the S3 bucket contents.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p>Get the route to the Minio API.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get routes minio-api -n pipelines-example -o jsonpath='{.spec.host}'</code></pre>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Use this route as the S3 API endpoint. Basically, this is the URL that we will use when creating a data connection to the S3 in OpenShift AI.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, you can utilize the api service port (port <code>9000</code>) on the service <code>minio-service</code> to access the same resources from within the cluster.</p>
+</div>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The default username is <code>minio</code> and the password is <code>minio123</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_a_data_science_pipeline_application"><a class="anchor" href="#_create_a_data_science_pipeline_application"></a>Create a Data Science Pipeline Application</h3>
+<div class="paragraph">
+<p>Next we will create a data connection for the Minio instance, and use that data connection to create a <strong>DataSciencePipelineApplication</strong>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>From the OpenShift AI Dashboard, navigate to the <code>pipelines-example</code> project we previously created.  Click on the option to <code>Add data connection</code>.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-dspa-add-data-connection.png" alt="create dspa add data connection">
+</div>
+</div>
+</li>
+<li>
+<p>Enter the following details and click <code>Add data connection</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">Name: data-science-pipelines
+Access key: minio
+Secret key: minio123
+Endpoint: http://minio-service.pipelines-example.svc:9000
+Bucket: data-science-pipelines</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-dspa-create-data-connection.png" alt="create dspa create data connection">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>At this point in time, the minio instance does not contain a bucket called <code>data-science-pipelines</code>.  Once the <strong>DataSciencePipelineApplication</strong> object is created, it will automatically create the bucket for us if it doesn&#8217;t exist.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>A <code>Data Connection</code> is simply a standard kubernetes secret object that contains the fields required to connect to an S3 compatible solution.  This secret can be managed via GitOps just like any other standard kubernetes secret object.  However, not all fields in the Data Connection are dynamically consumed by the <strong>DataSciencePipelineApplication</strong> object, so be careful when updating the endpoint url or the bucket values.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>A new Data connection should now be listed in the <code>Data connections</code> section.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-dspa-verify-data-connection.png" alt="create dspa verify data connection">
+</div>
+</div>
+</li>
+<li>
+<p>Click on the <code>Configure pipeline server</code> in the <code>Pipelines</code> section of the Data Science Project view.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-dspa-create-pipeline-server.png" alt="create dspa create pipeline server">
+</div>
+</div>
+</li>
+<li>
+<p>Click the key icon in the right side of the <code>Access Key</code> field, and select the <code>data-science-pipelines</code> data connection. The fields in the form are automatically populated.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-dspa-configure-pipeline-server.png" alt="create dspa configure pipeline server">
+</div>
+</div>
+</li>
+<li>
+<p>Click <code>Configure pipeline server</code>. After several seconds, the loading icon should complete and the <code>Pipelines</code> section will now show an option to <code>Import pipeline</code> along with a message that says <code>No pipelines</code>.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-dspa-verify-pipeline-server.png" alt="create dspa verify pipeline server">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The <strong>DataSciencePipelineApplication</strong> has now successfully been configured and is ready for use.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_managing_permissions_to_the_datasciencepipelineapplication"><a class="anchor" href="#_managing_permissions_to_the_datasciencepipelineapplication"></a>Managing Permissions to the DataSciencePipelineApplication</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <strong>DataSciencePipelineApplication</strong> API endpoint route is protected using an OpenShift OAuth Proxy sidecar.</p>
+</div>
+<div class="paragraph">
+<p>The OAuth Proxy requires anything attempting to access the endpoint to be authenticated using the built in OpenShift login.  OpenShift is then able to admit or reject requests to the endpoint based on the Role Based Access and Control configuration of the resources in the namespace.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To Learn more about the OpenShift OAuth Proxy, please refer to the official git repo:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/openshift/oauth-proxy" class="bare">https://github.com/openshift/oauth-proxy</a></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In particular, the <strong>DataSciencePipelineApplication</strong> requires that users or Service Accounts have <code>get</code> access to the <strong>DataSciencePipelineApplication</strong> route object.</p>
+</div>
+<div class="paragraph">
+<p>Any user that has already been granted <code>Admin</code> or <code>Edit</code> access to the namespace in which the <strong>DataSciencePipelineApplication</strong> is installed will have permission to access the object.</p>
+</div>
+<div class="paragraph">
+<p>It may be necessary to grant access to other resources such as a Service Account in the cluster to be able to interact with the API endpoint.</p>
+</div>
+<div class="paragraph">
+<p>To grant access to an object such as a Service Account, you must first create a role in the namespace where the <strong>DataSciencePipelineApplication</strong> is located that grants <code>get</code> access to the route object:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dspa-access
+  namespace: my-project
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - route.openshift.io
+    resources:
+      - routes</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the role has been created, a <code>RoleBinding</code> can grant the appropriate permissions to the user or Service Account:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dspa-access-my-service-account
+  namespace: my-project
+subjects:
+  - kind: ServiceAccount
+    name: my-service-account
+    namespace: my-project
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dspa-access</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When programmatically accessing the API endpoint, a user can authenticate to the endpoint by passing the <code>BearerToken</code> header value in the http request.  Users can obtain their bearer token from the <code>Copy Login Command</code> menu option in the OpenShift Web Console, or by running the following command once they are already logged in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc whoami --show-token</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using the bearer token to authenticate to the endpoint will be discussed in more detail in the section discussing the <code>Kubeflow Pipelines SDK</code>.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="intro.html">Introduction</a></span>
+  <span class="next"><a href="elyra-pipelines.html">Elyra Pipelines</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
