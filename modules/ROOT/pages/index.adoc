@@ -49,7 +49,7 @@ You are expected to complete the _Red Hat OpenShift AI Administration_ course, w
 The overall objectives of this course include:
 
 * Describe KubeFlow and Elyra pipelines
-* Creating Data Science pipelines
-* Running Data Science pipelines
+* Create Data Science pipelines
+* Run Data Science pipelines
 * Manage Data Science pipelines
-* Troubleshooting Data Science pipelines
+* Troubleshoot Data Science pipelines

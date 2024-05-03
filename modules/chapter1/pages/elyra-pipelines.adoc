@@ -229,7 +229,7 @@ Before we can submit our pipeline, we have to configure the pipeline to specify:
 * Configure the S3 credentials as environment variables during runtime
 * Optionally, configure the available compute resources per step
 
-. We will configure a new `Runtime Image` by opening th `Runtime Images` menu from the left toolbar. Select `Create new runtime image` via the plus sign in the top portion of the menu.
+. We will configure a new `Runtime Image` by opening the `Runtime Images` menu from the left toolbar. Select `Create new runtime image` via the plus sign in the top portion of the menu.
 +
 image::runtime-images.png[title=Create a new Runtime image]
 
@@ -352,7 +352,7 @@ We have now fully created and configured the pipeline, so let's now see it in ac
 +
 [TIP]
 ====
-*Data Science Pipelines* should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the *DataSciencePipelinesApplication* instance we created previously as the default execution environment provided the *DataSciencePipelinesApplication* was created before the workbench was started and it is located in the same namespace as the workbench.
+*Data Science Pipelines* should be selected as the default execution environment automatically when starting the pipeline run. OpenShift AI will automatically configure and select the *DataSciencePipelinesApplication* instance we created previously as the default execution environment. This will happen provided the *DataSciencePipelinesApplication* was created before the workbench was started and it is located in the same namespace as the workbench.
 
 If you wish to use *DataSciencePipelinesApplication* that is located in a different namespace from your workbench you can manually configure an execution environment.
 ====
