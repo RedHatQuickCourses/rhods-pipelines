@@ -11,7 +11,7 @@ In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the follo
 * A Data Science Pipeline Server container. 
 * A MariaDB database for storing pipeline definitions and results.
 * A Pipeline scheduler for scheduling pipeline runs.
-* A Persistent Agent to record the set of containers that executed as well as their inputs and outputs.
+* A Persistent Agent to record the set of containers that are executed as well as their inputs and outputs.
 
 Additionally, the *DataSciencePipelineApplication* requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.
 
@@ -32,7 +32,7 @@ While a *DataSciencePipelineApplication* is a namespace scoped object, workbench
 
 === Create an S3 instance with Minio
 
-To begin we will create an S3 instance using *Minio* to act as the artifact storage for the *DataSciencePipelineApplication*
+To begin we will create an S3 instance using *Minio* to act as the artifact storage for the *DataSciencePipelineApplication*.
 
 . Log in to the OpenShift cluster using the `oc` CLI as the `admin` user with the `cluster-admin` role.
 
@@ -45,7 +45,7 @@ $ curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4
   oc apply -f - -n pipelines-example
 ```
 
-. Get the route to the Minio dashboard
+. Get the route to the Minio dashboard.
 +
 ```bash
 $ oc get routes minio-ui -n pipelines-example -o jsonpath='{.spec.host}'
@@ -56,7 +56,7 @@ $ oc get routes minio-ui -n pipelines-example -o jsonpath='{.spec.host}'
 Use this route to navigate to the S3 dashboard using a browser. With the browser, you will be able to create buckets, upload files, and navigate the S3 bucket contents.
 ====
 
-. Get the route to the Minio API
+. Get the route to the Minio API.
 +
 ```bash
 $ oc get routes minio-api -n pipelines-example -o jsonpath='{.spec.host}'
@@ -75,7 +75,7 @@ The default username is `minio` and the password is `minio123`.
 
 Next we will create a data connection for the Minio instance, and use that data connection to create a *DataSciencePipelineApplication*.
 
-. From the OpenShift AI Dashboard, navigate to the `pipelines-example` project we previously created.  Click on the option to `Add data connection`
+. From the OpenShift AI Dashboard, navigate to the `pipelines-example` project we previously created.  Click on the option to `Add data connection`.
 +
 image::create-dspa-add-data-connection.png[]
 
