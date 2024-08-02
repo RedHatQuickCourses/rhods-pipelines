@@ -2,7 +2,7 @@
 
 Elyra provides a visual pipeline editor for building pipelines from Python and R scripts as well as Jupyter notebooks, simplifying the conversion of multiple files into batch jobs or workflows. A `Pipeline` in Elyra consists of `Nodes` that are connected with each other to define execution dependencies.
 
-Elyra's visual pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the Tekton YAML definition on the fly and submitting it to the Data Science Pipelines backend.
+Elyra's visual pipeline editor lets you assemble pipelines by dragging and dropping supported files onto the canvas and defining their dependencies. After you've assembled the pipeline and are ready to run it, the editor takes care of generating the YAML definition on the fly and submitting it to the Data Science Pipelines backend.
 
 == Creating a Data Science Pipeline with Elyra
 
@@ -35,7 +35,7 @@ To begin, we will add a new image that has all of the packages we need for our w
 . Select `Import new image` and enter the following details:
 +
 --
-* *Image location*: `quay.io/mmurakam/workbenches:fraud-detection-v1.0.1`
+* *Image location*: `quay.io/mmurakam/workbenches:fraud-detection-v2.1.0`
 * *Name*: `Fraud detection workbench`
 * Optionally a description.
 --
@@ -49,22 +49,13 @@ image::import-workbench-image.png[title=Import a custom notebook image]
 The process of managing model images requires admin access to OpenShift AI.  An admin user would normally be responsible for creating and managing custom images for data scientists to utilize.
 ====
 
-==== Prepare the bucket
+==== Prepare the data connection
 
-Next we will create an additional bucket to host several files we will access for model training.
+Next we will create a data connection to access the files we will use for model training.
 
 . Log into the Minio web console.
 
-. Click `Administrator > Buckets` in the left navigation sidebar, and then click `Create Bucket` in the `Buckets` page to create a new bucket named `fraud-detection`.
-
-. Download the following two files:
-+
---
-* xref:attachment$model-latest.onnx[ONNX Model File]
-* xref:attachment$live-data.csv[Credit Card Transaction Data]
---
-
-. Click `User > Object Browser` in the Minio web console sidebar. Upload the two files to the `fraud-detection` bucket.
+. Click `Object Browser` in the left navigation sidebar and view the content of the `fraud-detection` bucket.
 +
 image::fraud-detection-bucket.png[]
 
@@ -74,7 +65,7 @@ image::fraud-detection-bucket.png[]
 * *Name*: `fraud-detection`
 * *Access key*: `minio`
 * *Secret key*: `minio123`
-* *Endpoint*: `http://minio-service.pipelines-example.svc:9000`
+* *Endpoint*: {MINIO_API_ROUTE_URL}
 * *Bucket*: `fraud-detection`
 --
 
@@ -102,23 +93,6 @@ image::create-workbench.png[title=Create a new workbench]
 ====
 Many things can prevent a Workbench image from starting, including issues pulling images, mounting volumes, or being unable to schedule the pods due to lack of resources or `LimitRequests` being set on the namespace that are too small.  To help troubleshoot these types of issues it is often helpful to check the events on the `Deployment` and `Pods` created by the Notebook object.
 ====
-
-==== Set up pipeline storage
-
-While the workbench is starting, we will create a persistent volume that the pipeline will use to persist and exchange data across tasks.
-
-. In the `pipelines-example` project, click `Add cluster storage` and enter the following details:
-+
---
-* *Name*: `offline-scoring-data-volume`
-* *Persistent storage size*: 5 GB
---
-
-. Click `Add storage`
-+
-image::pipeline-storage.png[]
-+
-NOTE: This volume will only be utilized in our pipeline, and will not be used in the interactive workbench environment, so there is no need for this volume to be mounted in our workbench.
 
 === Working with Elyra
 
@@ -162,7 +136,7 @@ s3_bucket_name = environ.get('AWS_S3_BUCKET')
 +
 This approach is in line with best practices of handling credentials and allows us to control which S3 buckets are consumed in a given runtime context without changing the code. Importantly, these parameters are stored in a data connection, which is mounted into workbenches and pipeline pods to expose their values to the pipeline tasks.
 +
-Three tasks (`preprocessing, scoring, results upload`) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset and result files are stored and read within a given data folder (`/data`), while the model artifact is stored and read in the respective working directory. We will see later how Elyra is capable of handling data passing in these contexts.
+Three tasks (`preprocessing, scoring, results upload`) require access to files that were stored by previous tasks. This is not an issue if we execute the code within the same filesystem like in the workbench, but since each task is later executed within a separate container in Data Science Pipelines, we can't assume that the tasks automatically have access to each other's files. Note that the dataset, result, and model artifact files are stored and read within the working directory. We will see later how Elyra is capable of handling data passing in this contexts.
 
 ==== Running the Code Interactively
 
@@ -237,7 +211,7 @@ image::runtime-images.png[title=Create a new Runtime image]
 +
 --
 * *Display Name*: `fraud detection runtime`
-* *Image Name*: `quay.io/mmurakam/runtimes:fraud-detection-v0.2.0`
+* *Image Name*: `quay.io/mmurakam/runtimes:fraud-detection-v2.1.0`
 --
 +
 image::runtime-image-2.png[]
@@ -307,42 +281,23 @@ By default, all files within a containerized task are removed after its executio
 Output files are automatically managed by Data Science Pipelines, and stored in the S3 bucket we configured when setting up the *DataSciencePipelineApplication*.
 ====
 
-. Next we will configure the `offline-scoring-data-volume` we previously setup to allow the steps to store additional data as a mounted volume.  
-+
-In the `NODE PROPERTIES` section of the `data_ingrestion.py` node, scroll to the bottom of the `NODE PROPERTIES` panel, and click `Add` in the `Data Volumes` section.  Enter the following configuration options:
-+
---
-* Mount Path: `/data`
-* Persistent Volume Claim Name: `offline-scoring-data-volume`
---
-+
-image::pipeline-config-6.png[]
-
-. Repeat the same `Data Volumes` configuration for the following tasks in the pipeline:
-+
---
-* `preprocessing.py`
-* `scoring.py`
-* `results_upload.py`
---
-+
-[NOTE]
-====
-`Mount Volumes` and `Output Files` both provide the ability for files to persist between tasks, and each has different strengths and weaknesses.
-
-`Output Files` are generally easy to configure and don't require the creation of any additional kubernetes resources.  One disadvantage is that Output files can generate a large amount of additional read and writes to S3 which may slow down pipeline execution.
-
-`Mount Volumes` can be helpful when a large amount of files, or a large dataset is required to be stored.  `Mount Volumes` also have the ability to persist data between runs of a pipeline, which can allow a volume to act as a cache for files between executions.
-====
-+
-[NOTE]
-====
-We could have declared the data volume as a global pipeline property for simplicity. However, this would have prevented parallel execution of model loading and data ingestion/preprocessing since data volumes can only be used by a single task by default.
-====
+. Repeat the `Output` configuration for the following tasks in the pipeline:
+* task `data_ingestion` with output file `data.csv`,
+* task `preprocessing` with output file `samples.npy`,
+* task `scoring` with output file `predictions.csv`.
 
 . Rename the pipeline file to `offline-scoring.pipeline` and hit `Save Pipeline` in the top toolbar.
 +
 image::pipeline-config-7.png[]
++
+[NOTE]
+====
+Apart from `Output Files`, it's possible to transfer files between tasks with `Mount Volumes`, which is based on mounting persistent volumes into task containers. Each of these options has different strengths and weaknesses.
+
+`Output Files` are generally easy to configure and don't require the creation of any additional kubernetes resources. One disadvantage is that Output files can generate a large amount of additional read and writes to S3 which may slow down pipeline execution.
+
+`Mount Volumes` can be helpful when a large amount of files, or a large dataset is required to be stored. `Mount Volumes` also have the ability to persist data between runs of a pipeline, which can allow a volume to act as a cache for files between executions. However, relying on mount volumes may restrict the ability to run tasks in parallel since data volumes can only be used by a single task at at time by default.
+====
 
 ==== Running the pipeline
 
@@ -372,11 +327,11 @@ Save your changes.
 5. Confirm that the default *Data Science Pipelines* runtime is selected.
 ====
 
-. Elyra is now converting your pipeline definition into a Tekton YAML representation and sending it to the Data Science Pipelines backend. After a few seconds, you should see confirmation that the pipeline has been successfully submitted.
+. Elyra is now converting your pipeline definition into a YAML representation and sending it to the Data Science Pipelines backend. After a few seconds, you should see confirmation that the pipeline has been successfully submitted.
 +
 image::pipeline-submit.png[]
 
-. To monitor the pipeline's execution, click on the `Run Details` link, which takes you to the pipeline run view within the RHOAI dashboard. Here you can track in real-time how each pipeline task is processed and whether it fails or resolves successfully.
+. To monitor the pipeline's execution, click on the `Run Details` link, which takes you to the pipeline run view within the RHOAI dashboard. Here you can track in real-time how each pipeline task is processed and whether it fails or resolves successfully, and you can view each task's log output.
 +
 image::pipeline-run.png[]
 
@@ -384,7 +339,7 @@ image::pipeline-run.png[]
 +
 image::fraud-detection-bucket-2.png[]
 
-. Navigate back to the `Runs` overview in the RHOAI dashboard. Click the `Triggered` tab to see the history of all ongoing and previous pipeline executions and compare their run durations and status.
+. Navigate back to the `Experiments > Experiments and runs` overview in the RHOAI dashboard. Select `offline-scoring` to see the history of all ongoing and previous pipeline executions and compare their run durations and status.
 +
 image::pipeline-runs.png[]
 
@@ -392,16 +347,6 @@ image::pipeline-runs.png[]
 +
 image::pipeline-scheduled.png[]
 +
-[WARNING]
-====
-Pipeline versioning is not fully implemented in Data Science Pipelines.
-If you change an Elyra pipeline that you have already submitted before, the initial version might get executed.
-
-To ensure that your latest changes are executed, you have two options:
-
-* Delete the pipeline through the dashboard before running the pipeline again.
-* When you run the pipeline, define a new name for the new pipeline version (e.g `my-pipeline-1`, `my-pipeline-2`).
-====
 
 ==== Tracking the pipeline artifacts
 
@@ -410,17 +355,10 @@ Let's finally peek behind the scenes and inspect the S3 bucket that Elyra and Da
 . View the contents of the `data-science-pipelines` bucket, which we referenced through the `pipelines` data connection. You can see three types of folders:
 +
 --
-* `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in Tekton YAML format.
-* `artifacts`: A folder used by Data Science Pipelines to store the metadata of each pipeline task for each pipeline run.
-* One folder for each pipeline run with name `[pipeline-name]-[timestamp]`. These folders are managed by Elyra and contain all file dependencies, log files, and output files of each task.
+* `pipelines`: A folder used by Data Science Pipelines to store all pipeline definitions in YAML format.
+* One folder for each pipeline run with name `[pipeline-name]-[timestamp]`. These folders are managed by Elyra and contain all file dependencies and output files of each task.
 --
 +
-[NOTE]
-====
-The logs from the Tekton Pipeline submitted from Elyra will show generic task information and logs, including showing the execution of our python files as a subtask.  Log details from our code is not recorded in the pipeline logs.  
-
-To view logs from the execution of our code, you can find the log files from our tasks in the runs in the Data Science Pipelines bucket.
-====
 
 image::pipelines-bucket.png[title=Data Science Pipeline Bucket contents]
 

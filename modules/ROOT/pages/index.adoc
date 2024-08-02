@@ -41,15 +41,14 @@ You are expected to complete the _Red Hat OpenShift AI Administration_ course, w
 * Building and deploying container images
 * User and role administration
 * Configuring cluster storage (PV, PVC)
-* Basic knowledge of using OpenShift Pipelines or Tekton for automating continuous integration and continuous deployment (CI/CD) pipelines
 * Experience with OpenShift is recommended, but not mandatory (in case students have to do troubleshooting)
 
 == Objectives
 
 The overall objectives of this course include:
 
-* Describe KubeFlow and Elyra pipelines
-* Create Data Science pipelines
-* Run Data Science pipelines
-* Manage Data Science pipelines
-* Troubleshoot Data Science pipelines
+* Describe Kubeflow and Elyra Pipelines
+* Create Data Science Pipelines
+* Run Data Science Pipelines
+* Manage Data Science Pipelines
+* Troubleshoot Data Science Pipelines

@@ -8,16 +8,18 @@ image::dspa-pods.png[]
 
 In Red Hat OpenShift AI, the Data Science Pipeline runtime consists of the following components:
 
-* A Data Science Pipeline Server container. 
+* A Data Science Pipeline API server. 
 * A MariaDB database for storing pipeline definitions and results.
 * A Pipeline scheduler for scheduling pipeline runs.
 * A Persistent Agent to record the set of containers that are executed as well as their inputs and outputs.
+* A workflow controller.
+* Two pipeline metadata service pods.
 
-Additionally, the *DataSciencePipelineApplication* requires an S3 compatible storage solution to store artifacts that are generated in the pipeline.
+Additionally, the *DataSciencePipelineApplication* requires an S3-compatible storage solution to store artifacts that are generated in the pipeline.
 
 [NOTE]
 ====
-Any S3 compatible storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as it is a lightweight and easy to deploy S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where security, data resilience, and disaster recovery are important concerns.
+Any S3-compatible storage solution can be used for Data Science Pipelines, including AWS S3, OpenShift Data Foundation, or Minio. In this course we will use Minio as it is a lightweight and easy to deploy S3 storage solution. Red Hat recommends OpenShift Data Foundation in scenarios where security, data resilience, and disaster recovery are important concerns.
 ====
 
 == Multi-Tenancy with Data Science Pipeline Applications
@@ -41,7 +43,7 @@ To begin we will create an S3 instance using *Minio* to act as the artifact stor
 . Run the following yaml to install Minio. Ensure that you are logged in to the OpenShift cluster using the `oc` CLI as the `admin` user before you execute any of the `oc` commands listed below.
 +
 ```bash
-$ curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/4.rhods-deploy/chapter2/minio.yml | \
+$ curl https://raw.githubusercontent.com/RedHatQuickCourses/rhods-qc-apps/main/5.pipelines/minio-fraud-detection.yaml | \
   oc apply -f - -n pipelines-example
 ```
 
@@ -75,47 +77,33 @@ The default username is `minio` and the password is `minio123`.
 
 Next we will create a data connection for the Minio instance, and use that data connection to create a *DataSciencePipelineApplication*.
 
-. From the OpenShift AI Dashboard, navigate to the `pipelines-example` project we previously created.  Click on the option to `Add data connection`.
-+
-image::create-dspa-add-data-connection.png[]
-
-. Enter the following details and click `Add data connection`:
-+
-```
-Name: data-science-pipelines
-Access key: minio
-Secret key: minio123
-Endpoint: http://minio-service.pipelines-example.svc:9000
-Bucket: data-science-pipelines
-```
-+
-image::create-dspa-create-data-connection.png[]
-+
-[NOTE]
-====
-At this point in time, the minio instance does not contain a bucket called `data-science-pipelines`.  Once the *DataSciencePipelineApplication* object is created, it will automatically create the bucket for us if it doesn't exist.
-====
-+
-[TIP]
-====
-A `Data Connection` is simply a standard kubernetes secret object that contains the fields required to connect to an S3 compatible solution.  This secret can be managed via GitOps just like any other standard kubernetes secret object.  However, not all fields in the Data Connection are dynamically consumed by the *DataSciencePipelineApplication* object, so be careful when updating the endpoint url or the bucket values.
-====
-
-. A new Data connection should now be listed in the `Data connections` section.
-+
-image::create-dspa-verify-data-connection.png[] 
+. From the OpenShift AI Dashboard, navigate to the `pipelines-example` project we previously created. 
 
 . Click on the `Configure pipeline server` in the `Pipelines` section of the Data Science Project view.
 +
 image::create-dspa-create-pipeline-server.png[]
 
-. Click the key icon in the right side of the `Access Key` field, and select the `data-science-pipelines` data connection. The fields in the form are automatically populated.
+. Enter the following details:
++
+```
+Access key: minio
+Secret key: minio123
+Endpoint: {MINIO_API_ROUTE_URL}
+Region: none
+Bucket: data-science-pipelines
+```
 +
 image::create-dspa-configure-pipeline-server.png[]
++
+[NOTE]
+====
+At this point in time, the minio instance does not contain a bucket called `data-science-pipelines`.  Once the *DataSciencePipelineApplication* object is created, it will automatically create the bucket for us if it doesn't exist.
+====
 
-. Click `Configure pipeline server`. After several seconds, the loading icon should complete and the `Pipelines` section will now show an option to `Import pipeline` along with a message that says `No pipelines`.
+. Click `Configure pipeline server`. After several seconds, the loading icon should complete and the `Pipelines` section will now show an option to `Import pipeline`.
 +
 image::create-dspa-verify-pipeline-server.png[]
++
 
 The *DataSciencePipelineApplication* has now successfully been configured and is ready for use.
 
